@@ -33,6 +33,16 @@ The roadmap's **Progress** section (per phase, content track, decisions) is a ch
 - Only tick a phase's exit item when its exit check actually holds. A merged PR alone doesn't meet an exit check.
 - A decision is ticked only once its outcome is written into the Decisions due table and, where it applies, the PRD and [Known conflicts](docs/README.md#known-conflicts-between-sources) are updated.
 
+### Doc-sync reminder hook
+
+`.claude/settings.json` runs `.claude/hooks/doc-sync-reminder.mjs` (Node, no dependencies). It only reminds; it never edits docs.
+
+- **Session start:** lists the mirrors and their "Last synced" lines.
+- **After an edit:** one reminder per kind per session. Mirror edited → sync the artifact or revert. PRD docs edited → PRD artifact owns wording. New file under `docs/` → link it and ask if it needs an artifact. Code edited → ask whether a doc needs creating or syncing. Roadmap or design-system artifact changed → copy it into the mirror.
+- **Before finishing:** once per session, if code changed but nothing under `docs/` did, or a mirror changed without its "Last synced" line, Claude stops to ask the user.
+
+When a reminder fires, ask the user; don't create or sync docs without a yes. Keep the hook's rules in step with this file.
+
 ## Known conflicts
 
 Open conflicts between the PRD, ADR and design system are listed in [docs/README.md](docs/README.md#known-conflicts-between-sources). Check that table before any schema, upload, sharing or UI work, and don't silently pick a side.

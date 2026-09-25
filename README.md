@@ -47,6 +47,7 @@ Next.js (App Router, TypeScript) on Vercel `sin1` · Postgres on Neon (Singapore
 ```
 README.md                  you are here
 CLAUDE.md                  project memory for Claude: sources of truth, sync rules
+.claude/                   hook that reminds Claude to create or sync docs
 docs/
   README.md                docs map + known conflicts
   product/
