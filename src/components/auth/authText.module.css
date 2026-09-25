@@ -21,14 +21,39 @@
   color: var(--ink-muted);
 }
 
-.crossLink a {
-  font-weight: 600;
-}
-
 @media (min-width: 1024px) {
   .crossLink {
     margin: 0;
     padding-top: 20px;
     border-top: 1px solid var(--line);
   }
+}
+
+/* Every link in the auth copy (the cross-link, and the two legal links in
+   sign-up's consent line): the boards and the design system make links
+   `cobalt` (`cobalt-deep` on hover), not `ink-muted` — inheriting the
+   surrounding paragraph's colour, as before, made every link read as
+   plain text. The global `:where(a, …):focus-visible` rule in base.css
+   still gives it the `focus` ring. */
+.link {
+  color: var(--cobalt);
+  font-weight: 600;
+}
+
+.link:hover {
+  color: var(--cobalt-deep);
+}
+
+/* The cross-link is bold enough, against `note`'s body-sm ink-muted text,
+   to not need an underline too. "Điều khoản"/"Chính sách riêng tư" sit
+   inline inside a full running sentence (auth.signUp.consent) at the
+   sentence's own weight, so colour would be their only cue — cobalt vs
+   ink-muted is only ~1.7:1 apart, short of WCAG 1.4.1's "not colour
+   alone". Underlined and not bold (a bold word mid-sentence reads as
+   emphasis, not as a link). */
+.legalLink {
+  font-weight: 400;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }

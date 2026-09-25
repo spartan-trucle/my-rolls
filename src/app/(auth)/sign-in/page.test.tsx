@@ -16,10 +16,12 @@ it("renders one Google button labelled for sign-in", () => {
   expect(screen.getByRole("button", { name: "Đăng nhập bằng Google" })).toBeInTheDocument();
 });
 
-it("cross-links to /sign-up", () => {
+it("cross-links to /sign-up, styled as a link (cobalt, not plain text — Stage F review, fix 1)", () => {
   renderWithIntl(<SignInPage />);
 
-  expect(screen.getByRole("link", { name: "Tạo tài khoản" })).toHaveAttribute("href", "/sign-up");
+  const link = screen.getByRole("link", { name: "Tạo tài khoản" });
+  expect(link).toHaveAttribute("href", "/sign-up");
+  expect(link).toHaveClass("link");
 });
 
 it("shows the five sample photos as a film strip, with their alt text from messages", () => {

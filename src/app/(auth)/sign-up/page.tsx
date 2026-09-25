@@ -5,6 +5,7 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { Icon } from "@/design-system";
 import type { IconName } from "@/design-system";
+import { cx } from "@/design-system/cx";
 import authText from "@/components/auth/authText.module.css";
 
 function Perk({ icon, title, body }: { icon: IconName; title: ReactNode; body: ReactNode }) {
@@ -32,12 +33,26 @@ export default function SignUpPage() {
           <GoogleButton label={t("googleButton")} />
           <p className={authText.note}>
             {t.rich("consent", {
-              terms: (chunks) => <Link href="/terms">{chunks}</Link>,
-              privacy: (chunks) => <Link href="/privacy">{chunks}</Link>,
+              terms: (chunks) => (
+                <Link href="/terms" className={cx(authText.link, authText.legalLink)}>
+                  {chunks}
+                </Link>
+              ),
+              privacy: (chunks) => (
+                <Link href="/privacy" className={cx(authText.link, authText.legalLink)}>
+                  {chunks}
+                </Link>
+              ),
             })}
           </p>
           <p className={authText.crossLink}>
-            {t.rich("crossLink", { link: (chunks) => <Link href="/sign-in">{chunks}</Link> })}
+            {t.rich("crossLink", {
+              link: (chunks) => (
+                <Link href="/sign-in" className={authText.link}>
+                  {chunks}
+                </Link>
+              ),
+            })}
           </p>
         </>
       }

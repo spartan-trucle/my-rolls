@@ -16,17 +16,23 @@ it("renders one Google button labelled for sign-up", () => {
   expect(screen.getByRole("button", { name: "Đăng ký bằng Google" })).toBeInTheDocument();
 });
 
-it("cross-links to /sign-in", () => {
+it("cross-links to /sign-in, styled as a link (cobalt, not plain text — Stage F review, fix 1)", () => {
   renderWithIntl(<SignUpPage />);
 
-  expect(screen.getByRole("link", { name: "Đăng nhập" })).toHaveAttribute("href", "/sign-in");
+  const link = screen.getByRole("link", { name: "Đăng nhập" });
+  expect(link).toHaveAttribute("href", "/sign-in");
+  expect(link).toHaveClass("link");
 });
 
-it("links the consent line to /terms and /privacy", () => {
+it("links the consent line to /terms and /privacy, underlined so colour isn't the only cue (WCAG 1.4.1)", () => {
   renderWithIntl(<SignUpPage />);
 
-  expect(screen.getByRole("link", { name: "Điều khoản" })).toHaveAttribute("href", "/terms");
-  expect(screen.getByRole("link", { name: "Chính sách riêng tư" })).toHaveAttribute("href", "/privacy");
+  const terms = screen.getByRole("link", { name: "Điều khoản" });
+  const privacy = screen.getByRole("link", { name: "Chính sách riêng tư" });
+  expect(terms).toHaveAttribute("href", "/terms");
+  expect(terms).toHaveClass("link", "legalLink");
+  expect(privacy).toHaveAttribute("href", "/privacy");
+  expect(privacy).toHaveClass("link", "legalLink");
 });
 
 it("lists the three perks", () => {

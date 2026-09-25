@@ -38,7 +38,13 @@ export default function SignInPage() {
           <GoogleButton label={t("googleButton")} />
           <p className={authText.note}>{t("privacyNote")}</p>
           <p className={authText.crossLink}>
-            {t.rich("crossLink", { link: (chunks) => <Link href="/sign-up">{chunks}</Link> })}
+            {t.rich("crossLink", {
+              link: (chunks) => (
+                <Link href="/sign-up" className={authText.link}>
+                  {chunks}
+                </Link>
+              ),
+            })}
           </p>
         </>
       }
