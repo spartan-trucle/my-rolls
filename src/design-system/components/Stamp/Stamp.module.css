@@ -1,0 +1,28 @@
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 5px 8px;
+  font: 700 11px/1 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ink-muted);
+  background: transparent;
+  border: 1.5px solid currentColor;
+  border-radius: var(--radius-sm);
+}
+
+.neutral {}
+.ink { color: var(--ink); }
+.keeper { color: var(--keeper); }
+.oops { color: var(--pin); }
+
+.solid.oops { background: var(--pin); border-color: var(--pin); color: var(--on-pin); }
+.solid.keeper { background: var(--keeper); border-color: var(--keeper); color: var(--on-keeper); }
+.solid.ink,
+.solid.neutral { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+.tilt { transform: rotate(var(--tilt-left)); }
+
+.hasIcon { padding: 4px 7px 4px 6px; font-size: 12px; letter-spacing: 0.04em; }

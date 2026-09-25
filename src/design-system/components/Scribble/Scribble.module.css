@@ -1,0 +1,17 @@
+.scribble {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-hand);
+  font-size: var(--text-note);
+  line-height: var(--text-note--line-height);
+  color: var(--ink);
+}
+
+.sm { font-size: var(--text-note-sm); line-height: var(--text-note-sm--line-height); }
+.pin { color: var(--pin); }
+
+.arrow { flex: 0 0 auto; width: 44px; height: 32px; }
+.left .arrow { transform: scaleX(-1); }
+.down { flex-direction: column; align-items: flex-start; }
+.down .arrow { transform: rotate(80deg); margin-left: var(--space-6); }

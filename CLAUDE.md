@@ -21,7 +21,7 @@ The roadmap and the design system must always match their artifacts.
    - Design system: `Artifact read` on the URL with `path` `project/README.md`, `project/tokens.json` and any `project/components/<Name>/README.md` in play.
 2. **If the artifact changed** since the "Last synced" line in the mirror, update the mirror first, then continue.
 3. **To change the roadmap or design system**, change the artifact (Claude Docs `update` for the roadmap; a design-system file publish for the design system), then copy the same change into the mirror in the same session.
-4. **After every sync**, update the mirror's "Last synced" line: date (dd.mm.yyyy), artifact revision or version, and who.
+4. **After every sync**, update the mirror's "Last synced" line: date (dd.mm.yyyy), artifact revision or version, and who. Always check the artifact's current version, and bump the line whenever it moved, even when the change was outside the mirrored content (for example, the Design System type's own files).
 5. Never edit a mirror without doing the same to its artifact. If you can't reach the artifact, say so and leave the mirror alone.
 
 ### Roadmap progress checklist

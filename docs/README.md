@@ -14,6 +14,7 @@ Back to: [Project README](../README.md)
 | [roadmap.md](roadmap.md) | Phases, dates, cut line, launch gates, decisions due | [Roadmap artifact](https://claude.ai/artifact/Lsq7MWHNCVanpBWQ2D4XTo) (mirrored) |
 | [design/design-system.md](design/design-system.md) | Principles, voice, tokens, type, components, icons | [Design system artifact](https://claude.ai/artifact/HtsG9sZeNGx19PSvPjW65a) (mirrored) |
 | [design/wireframes.md](design/wireframes.md) | Which screens have wireframes, and which don't yet | [Design canvas](https://claude.ai/artifact/AXpgMvXFo6HL1vrw9RS6gt) (reference only) |
+| [../design-tokens/](../design-tokens/README.md) and `src/design-system/` | The tokens and components in code, and how to update them from the artifact | [Design system artifact](https://claude.ai/artifact/HtsG9sZeNGx19PSvPjW65a) (`tokens.json` copied byte for byte) |
 
 Sync rules for the mirrored docs are in [CLAUDE.md](../CLAUDE.md#sync-rules).
 
@@ -62,3 +63,4 @@ These were found while building these docs from the artifacts on 25.09.2026. Non
 | 6 | **Data model depth:** the ADR MVP tables drop fields that P0 requirements mention: lenses in the bag (BAG-1), box/shot ISO and exposures on the roll (ROLL-1), lab services and address (LAB-2), scanner and process on the scan set (LAB-3), email on the user | [rolls](product/requirements/rolls.md#open-issues), [bag](product/requirements/bag.md#open-issues), [labs](product/requirements/labs.md#open-issues), [auth](product/requirements/auth.md#open-issues) | Before Phase 1 schema | Either add the columns or trim the requirements |
 | 7 | **Upload drag-over state:** `cobalt-soft` + `cobalt` border (design system README) vs `pin-soft` + `pin` border (UploadDrop guideline) | [design system](design/design-system.md#states) | Before Phase 2 UI | `cobalt`: `pin` is reserved for oops and errors |
 | 8 | **Canister presets:** Red, Orange and Cream (PRD) have no design-system token | [canister](product/requirements/canister.md#open-issues) | Before Phase 3 | Add tokens, or limit presets to the `stock-*` families |
+| 9 | **Active tab colour:** the Icon guideline said `pin` for the active tab; the principles and the `cobalt` token say `cobalt` | [design system](design/design-system.md#components) | First nav work | **Resolved 25.09.2026 (Trúc): `cobalt`.** Artifact Icon guideline and mirror updated |

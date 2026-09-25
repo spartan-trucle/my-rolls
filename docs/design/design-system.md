@@ -1,7 +1,7 @@
 # Design system
 
 > **Mirror — the artifact is the source of truth:** [Design system](https://claude.ai/artifact/HtsG9sZeNGx19PSvPjW65a) (namespace `RollCall`)
-> Last synced: 25.09.2026 · artifact version `1790307689-5eeb` · last change 24.09.2026 by Trúc: "Cobalt darkened and desaturated to a deep muted indigo (#2e3a80); stickers recoloured to match."
+> Last synced: 25.09.2026 · artifact version `1790317950-ff46` · by Claude for Trúc · last change 25.09.2026 by Trúc: "README: added an In code section on how the Cuộn app uses the tokens and components."
 > Before editing, re-read the artifact. Make changes in the artifact and copy them here in the same session (see [CLAUDE.md](../../CLAUDE.md#sync-rules)).
 >
 > **Naming:** the design system still calls the product **Roll Call**. The product name is **Cuộn** (see [Known conflicts](../README.md#known-conflicts-between-sources)). Token and component names stay as they are.
@@ -184,7 +184,7 @@ All are on `window.RollCall` (React 18). Props listed are what the consumer prov
 | `RollCard` | One roll in a list, on a torn scrap with a generic canister | `name`, `stock` (`gold` · `green` · `blue` · `mono` · `rose`), `iso`, `film`, `exposures`, `camera`, `date`, `oops`, `keepers`, `href` | Pick `stock` by film family, not brand. No logos. Flat: no tilt, tape or shadow |
 | `Stamp` | Rubber-stamped mono label | `children`, `tone` (`neutral` · `ink` · `keeper` · `oops`), `icon`, `label`, `solid`, `tilt` | `label` required for icon+number stamps. `solid` only on photos. `tilt` once per screen |
 | `Scribble` | Handwritten margin note with optional doodled arrow | `children`, `arrow` (`none` · `left` · `right` · `down`), `tone` (`ink` · `pin`), `size="sm"` | `pin` tone for oops. One per section. Never for required instructions |
-| `Icon` | Functional line icons | `name`, `size` (20), `label` | 20px in buttons/nav, 14px in stamps, 24px standalone. `currentColor` |
+| `Icon` | Functional line icons | `name`, `size` (20), `label` | 20px in buttons/nav, 14px in stamps, 24px standalone. `currentColor`: `ink` by default, `ink-muted` for inactive nav, `cobalt` for the active tab, `pin` for oops, `keeper` for keepers |
 | `UploadDrop` | Drop zone for scans | `onFiles(files)`, `title`, `hint`, `accept` (`image/*`) | Top of an empty roll, or in a mobile bottom sheet. No progress UI yet |
 
 Also in the artifact: `Cover` (the system's cover page) and `RollPage` (the mobile roll page reference layout), preview only.
@@ -199,10 +199,12 @@ Also in the artifact: `Cover` (the system's cover page) and `RollPage` (the mobi
 
 There is no logo. Set the name in Fraunces at weight 600.
 
-## Implementing in the app
+## In code
 
-[ADR-001](../architecture/adr-001-tech-stack.md#decision) maps these tokens to Tailwind. Suggested approach:
+How the app uses the design system ([ADR-001](../architecture/adr-001-tech-stack.md#decision): Tailwind mapped to the tokens):
 
-- Generate CSS custom properties per theme from `tokens.json` (`:root` for Paper, `[data-theme="dark"]` / `prefers-color-scheme` for Darkroom), and point Tailwind's `theme.extend` at the variables.
-- Keep token names as they are (`cobalt`, `ink-muted`, `space-4`), so docs, wireframes and code use the same words.
-- Re-pull `tokens.json` from the artifact whenever this mirror is re-synced.
+- `tokens.json` is copied byte for byte into [`design-tokens/tokens.json`](../../design-tokens/README.md). `pnpm tokens` generates `src/styles/tokens.css` from it: CSS variables for each theme (Paper on `:root`, Darkroom under `prefers-color-scheme: dark` or `data-theme="dark"`) plus Tailwind v4 `@theme` blocks, so utilities like `bg-cobalt`, `text-title`, `font-mono` and `rounded-sm` use the token names directly. Tailwind's own colours, fonts, text sizes, radii and shadows are switched off.
+- Token names stay exactly as they are here (`cobalt`, `ink-muted`, `space-4`), so these docs, the previews and the code use the same words.
+- The components are ported to typed React components with CSS Modules in `src/design-system/`. They contain no UI text: every label and accessible name is passed in as a prop, because the app's UI is in Vietnamese.
+- The four fonts load through `next/font` with the Vietnamese subset instead of the Google Fonts `@import` in `components/bundle.css`.
+- After changing `tokens.json` in the artifact, copy it into the app again and run `pnpm tokens`. One test fails if the generated CSS is out of date, and another checks the colour contrast pairs in both themes.
