@@ -42,12 +42,38 @@ The sync rules are in [CLAUDE.md](CLAUDE.md#sync-rules).
 
 Next.js (App Router, TypeScript) on Vercel `sin1` · Postgres on Neon (Singapore) with Drizzle · Cloudflare R2 for photos, with browser uploads via presigned URLs · Better Auth (Google) · `next-intl` (vi) · Tailwind mapped to design tokens · `next/og` for link previews and story cards · PostHog + Sentry. Details and trade-offs: [ADR-001](docs/architecture/adr-001-tech-stack.md).
 
+## Develop
+
+Needs Node 22 (`.nvmrc`) and pnpm 11.
+
+```bash
+pnpm install
+pnpm dev          # http://localhost:3000
+```
+
+| Command | What it does |
+|---|---|
+| `pnpm dev` | Dev server. `/dev/design-system` shows every token and component in Paper and Darkroom (404 in production) |
+| `pnpm test` | Vitest + Testing Library, once (`pnpm test:watch` to watch) |
+| `pnpm typecheck` | Generates Next's route types, then runs `tsc` |
+| `pnpm lint` | ESLint |
+| `pnpm tokens` | Regenerates `src/styles/tokens.css` from `design-tokens/tokens.json` |
+| `pnpm check` | Lint, typecheck, tests and a production build: run it before every commit |
+
+Design tokens come from the design system artifact. To update them, follow [design-tokens/README.md](design-tokens/README.md). Components live in `src/design-system/` and are imported from `@/design-system`.
+
 ## Repo layout
 
 ```
 README.md                  you are here
 CLAUDE.md                  project memory for Claude: sources of truth, sync rules
 .claude/                   hook that reminds Claude to create or sync docs
+design-tokens/             tokens.json copied from the design system artifact
+scripts/build-tokens.ts    tokens.json → src/styles/tokens.css
+src/
+  app/                     Next.js App Router (layout, fonts, pages, /dev/design-system)
+  design-system/           tokens build, components, public barrel (@/design-system)
+  styles/                  tokens.css (generated) and base.css
 docs/
   README.md                docs map + known conflicts
   product/
