@@ -84,5 +84,135 @@
   },
   "demo": {
     "keeper": "tấm ưng"
+  },
+  "landing": {
+    "metaDescription": "Cuộn là nơi cất cuộn phim của bạn: ảnh scan xếp đúng thứ tự khung hình, ghi rõ loại phim và máy chụp, giữ lại cả những khung lỡ tay, chia sẻ cả cuộn bằng một đường link.",
+    "header": {
+      "navLabel": "Điều hướng chính",
+      "features": "Tính năng",
+      "shelf": "Kệ phim",
+      "share": "Chia sẻ",
+      "signIn": "Đăng nhập",
+      "signUp": "Đăng ký",
+      "menu": "Trình đơn"
+    },
+    "hero": {
+      "eyebrow": "Một mái nhà cho cuộn phim",
+      "titleStart": "Mọi cuộn phim,",
+      "titleEnd": "mọi cú <oops>lỡ tay.</oops>",
+      "lead": "Ảnh scan mắc kẹt trong đường link tiệm rửa sắp hết hạn. Ghi chú thì chỉ có trong đầu. Cuộn phim mùa hè năm ngoái, chìm nghỉm giữa 4.000 tấm screenshot.",
+      "body": "{appName} cho mỗi cuộn phim một mái nhà: ảnh scan xếp đúng thứ tự khung hình, ghi rõ loại phim và máy chụp, giữ lại cả những khung lỡ tay. Chia sẻ nguyên cuộn phim chỉ bằng một đường link.",
+      "start": "Bắt đầu cuộn phim đầu tiên",
+      "sample": "Xem thử một cuộn mẫu",
+      "meta": "ISO 400 · 36 kiểu · 0 filter",
+      "ticketLab": "TIỆM RỬA ẢNH · SỐ 0414",
+      "ticketRoll": "CUỘN 14",
+      "ticketProcess": "C-41 · TRÁNG + SCAN",
+      "ticketDone": "XONG 15.10.25",
+      "scribble": "cuộn 14, vừa lấy từ tiệm về",
+      "stripLabel": "Cuộn 14, những khung đầu",
+      "canisterAlt": "Một cuộn phim màu 35mm, ISO 200, 36 kiểu",
+      "cameraAlt": "Một máy ảnh phim 35mm màu bạc với ống kính 50mm",
+      "printAlt": "Đèn lồng giấy sáng trong đêm, một bóng người in hình",
+      "printCaption": "cùng đêm đó, ảnh lấy liền"
+    },
+    "canister": {
+      "family": "COLOR",
+      "exposures": "36 KIỂU"
+    },
+    "roll": {
+      "label": "Một cuộn, từng khung một",
+      "meta": "CUỘN 14 · ĐÀ LẠT, THÁNG MƯỜI · COLOR 200 · 36 KIỂU",
+      "metaShort": "CUỘN 14 · ĐÀ LẠT · COLOR 200",
+      "scribble": "cả cuộn phim, lăn qua đây",
+      "stripLabel": "Cuộn 14, Đà Lạt",
+      "edge": "COLOR 200 · CUỘN 14"
+    },
+    "frames": {
+      "pineHillDawn": "Đồi thông lúc bình minh",
+      "mistyPines": "Rừng thông sương mù",
+      "lightLeakHillside": "Sườn đồi bị lọt sáng",
+      "lowTideBeach": "Bãi biển lúc triều xuống",
+      "treeGoldenField": "Cái cây giữa cánh đồng vàng",
+      "nightStreet": "Con phố về đêm",
+      "windowPortrait": "Chân dung đen trắng bên cửa sổ",
+      "blurryPortrait": "Chân dung bị nhòe",
+      "paperLanterns": "Đèn lồng về đêm",
+      "blank": "Khung {number}, trống",
+      "keeper": "Tấm ưng",
+      "oops": "Oops"
+    },
+    "story": {
+      "title": "Từ bấm máy đến chia sẻ.",
+      "intro": "Cả đời một cuộn phim, gói trong bốn khung hình. Cuộn xuống, đó là một câu chuyện ngắn.",
+      "start": "mọi thứ bắt đầu từ một cú bấm",
+      "listLabel": "Cách {appName} hoạt động, kể thành một câu chuyện ngắn",
+      "shoot": {
+        "label": "Một chiếc máy ảnh phim, chụp một cuộn vào lúc bình minh",
+        "counter": "KIỂU",
+        "exposure": "f/8 · 1/125",
+        "note": "tách. lên phim. tách.",
+        "caption": "thứ bảy, 5:40 sáng. đồi thông, một cuộn 200 và cái máy ảnh già hơn tuổi mình."
+      },
+      "upload": {
+        "label": "Tạo một cuộn phim mới và tải ảnh scan lên",
+        "newRoll": "Cuộn mới",
+        "rollName": "Đà Lạt, tháng Mười",
+        "stock": "Loại phim",
+        "stockName": "Color 200",
+        "progress": "Đang tải ảnh scan · 36 kiểu",
+        "caption": "một tuần sau, tiệm gửi về 36 tấm scan. mình đặt tên cuộn rồi thả hết vào."
+      },
+      "oops": {
+        "label": "Một khung hình oops được đóng dấu và giữ lại",
+        "printCaption": "mở nắp máy",
+        "stamp": "Oops",
+        "note": "lọt sáng ở khung 3. thôi kệ, giữ luôn.",
+        "caption": "khung 3 bị lọt sáng. tất nhiên rồi. vẫn giữ lại thôi."
+      },
+      "share": {
+        "label": "Chia sẻ cuộn phim với bạn bè",
+        "rollName": "Đà Lạt, tháng Mười",
+        "rollMeta": "Color 200 · 36 kiểu",
+        "button": "Chia sẻ cuộn này",
+        "copied": "Đã copy link",
+        "viewers": "3 người bạn đang xem",
+        "caption": "chỉ một link, và cả cuộn phim đã nằm trong group chat trước giờ trưa."
+      },
+      "outroStart": "...và đó là cả câu chuyện.",
+      "outroEnd": "mọi cuộn phim, mọi cú lỡ tay."
+    },
+    "shelf": {
+      "eyebrow": "Kệ phim của bạn",
+      "title": "Mọi cuộn phim, chung một kệ.",
+      "body": "Mỗi cuộn phim có một hộp màu riêng theo loại phim, để kệ của bạn trông như cánh cửa tủ lạnh dán đầy hộp phim. Số tấm ưng và số lần oops được đếm sẵn bên cạnh. Chạm vào một cuộn để mở dải phim.",
+      "keepers": "{count} tấm ưng",
+      "oops": "{count} oops",
+      "rolls": "{count} cuộn",
+      "rollsLabel": "{count} cuộn phim",
+      "listLabel": "Bốn cuộn phim mẫu trên kệ",
+      "dalat": "Đà Lạt, tháng Mười",
+      "hoian": "Hội An, lúc triều xuống",
+      "kitchen": "Bếp nhà mẹ",
+      "expired": "Cuộn phim hết hạn bí ẩn",
+      "scribble": "hết hạn từ năm 2009. đáng không nhỉ?"
+    },
+    "join": {
+      "eyebrow": "Tham gia cùng {appName}",
+      "title": "Cuộn phim tiếp theo của bạn xứng đáng có một mái nhà.",
+      "body": "Đăng ký, tải lên cuộn phim đầu tiên, rồi gửi cho người bạn đã ở đó cùng bạn.",
+      "signUp": "Đăng ký",
+      "hint": "Miễn phí. Chỉ cần một tài khoản Google.",
+      "haveAccount": "Đã có tài khoản? <signIn>Đăng nhập</signIn>",
+      "printAlt": "Một cái cây đơn độc giữa cánh đồng vàng dưới bầu trời nhạt",
+      "printCaption": "tấm đầu tiên mình ưng"
+    },
+    "footer": {
+      "tagline": "Một mái nhà cho cuộn phim.",
+      "navLabel": "Chân trang",
+      "about": "Giới thiệu",
+      "terms": "Điều khoản",
+      "privacy": "Quyền riêng tư"
+    }
   }
 }

@@ -1,5 +1,6 @@
 .button {
   position: relative;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -11,6 +12,7 @@
   background: transparent;
   border: 1.5px solid var(--ink);
   border-radius: var(--radius-none);
+  text-decoration: none;
   cursor: pointer;
   transition: transform 0.15s ease, background-color 0.15s ease;
   -webkit-tap-highlight-color: transparent;

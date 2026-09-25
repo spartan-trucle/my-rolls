@@ -5,7 +5,7 @@ describe("decideProxyAccess", () => {
   describe("signed out", () => {
     const signedIn = false;
 
-    it.each(["/sign-in", "/sign-up", "/terms", "/privacy"])(
+    it.each(["/", "/sign-in", "/sign-up", "/terms", "/privacy"])(
       "allows the public page %s",
       (pathname) => {
         expect(decideProxyAccess(pathname, signedIn)).toEqual({ type: "allow" });
@@ -25,10 +25,6 @@ describe("decideProxyAccess", () => {
 
     it.each(["/dev/design-system", "/dev/anything/nested"])("allows %s under /dev", (pathname) => {
       expect(decideProxyAccess(pathname, signedIn)).toEqual({ type: "allow" });
-    });
-
-    it("sends / to /sign-in", () => {
-      expect(decideProxyAccess("/", signedIn)).toEqual({ type: "redirect", to: "/sign-in" });
     });
 
     it("sends /sign-up/profile to /sign-in (it's not public)", () => {

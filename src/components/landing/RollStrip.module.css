@@ -1,0 +1,114 @@
+/* "A roll, frame by frame": the whole sample roll rolling past, edge to edge. */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: var(--space-12);
+  scroll-margin-top: var(--space-4);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.meta {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
+  color: var(--ink-muted);
+}
+
+/* Typed out, one character per step, as the line scrolls into view. */
+.type {
+  display: inline-block;
+  vertical-align: bottom;
+  width: calc(var(--n) * 1ch);
+  max-width: 100%;
+  padding-right: 3px;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid transparent;
+}
+
+.marquee {
+  overflow: hidden;
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  animation: marquee var(--duration, 50s) linear infinite;
+}
+
+.marquee:hover .track,
+.marquee:focus-within .track {
+  animation-play-state: paused;
+}
+
+.track > ul,
+.track > div > ul {
+  overflow: visible;
+  border-radius: 0;
+}
+
+.drawArrow svg path {
+  stroke-dasharray: 120;
+  stroke-dashoffset: 120;
+  animation: draw 0.8s ease-out 0.4s forwards;
+}
+
+@media (min-width: 1200px) {
+  .section {
+    gap: 20px;
+    padding-block: var(--space-6) 88px;
+  }
+
+  .head {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+
+@keyframes marquee {
+  to { transform: translateX(-50%); }
+}
+
+@keyframes draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes type {
+  from { width: 0; }
+}
+
+@keyframes caret {
+  0%, 100% { border-right-color: var(--ink-muted); }
+  50% { border-right-color: transparent; }
+}
+
+.type {
+  animation: type 1.8s steps(var(--n)) 0.9s both, caret 0.9s step-end infinite;
+}
+
+@supports (animation-timeline: view()) {
+  .type {
+    animation: type steps(var(--n)) both, caret 0.9s step-end infinite;
+    animation-timeline: view(), auto;
+    animation-range: entry 20% cover 45%, normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .type,
+  .track { animation: none; }
+
+  .drawArrow svg path { animation: none; stroke-dashoffset: 0; }
+
+  /* Nothing moves, so let people scroll the strip themselves. */
+  .marquee { overflow-x: auto; }
+}

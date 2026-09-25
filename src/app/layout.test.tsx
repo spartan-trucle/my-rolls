@@ -29,6 +29,14 @@ describe("RootLayout", () => {
     expect(element.props["data-theme"]).toBeUndefined();
   });
 
+  it("lets Next.js turn off smooth scrolling during route changes", async () => {
+    get.mockReturnValue(undefined);
+
+    const element = await RootLayout({ children: <div />, params: Promise.resolve({}) });
+
+    expect(element.props["data-scroll-behavior"]).toBe("smooth");
+  });
+
   it("sets data-theme=dark on <html> from the theme cookie", async () => {
     get.mockReturnValue({ name: "theme", value: "dark" });
 

@@ -1,7 +1,10 @@
 export type TProxyDecision = { type: "allow" } | { type: "redirect"; to: string };
 
-/** Exact-match public pages — reachable while signed out. */
-const PUBLIC_PATHS = new Set(["/sign-in", "/sign-up", "/terms", "/privacy"]);
+/**
+ * Exact-match public pages — reachable while signed out. `/` is the landing
+ * page for signed-out visitors; `page.tsx` shows signed-in users their home.
+ */
+const PUBLIC_PATHS = new Set(["/", "/sign-in", "/sign-up", "/terms", "/privacy"]);
 
 /** Public path prefixes — Better Auth's own routes, health checks, dev tools. */
 const PUBLIC_PREFIXES = ["/api/auth", "/api/health", "/dev"];

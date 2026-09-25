@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { Button } from "./Button";
+import { Button, ButtonLink } from "./Button";
 import styles from "./Button.module.css";
 
 describe("Button", () => {
@@ -53,5 +53,22 @@ describe("Button", () => {
   it("requires aria-label on icon-only buttons (type check)", () => {
     // @ts-expect-error an icon-only button needs an aria-label
     render(<Button icon="share" />);
+  });
+});
+
+describe("ButtonLink", () => {
+  it("is a link with the button's classes, outline by default", () => {
+    render(<ButtonLink href="/sign-up">Đăng ký</ButtonLink>);
+    const link = screen.getByRole("link", { name: "Đăng ký" });
+    expect(link).toHaveAttribute("href", "/sign-up");
+    expect(link).toHaveClass(styles.button, styles.outline);
+  });
+
+  it("takes a variant, a size and a decorative icon", () => {
+    render(<ButtonLink href="/sign-up" variant="primary" size="sm" icon="upload">Bắt đầu</ButtonLink>);
+    const link = screen.getByRole("link", { name: "Bắt đầu" });
+    expect(link).toHaveClass(styles.primary, styles.sm);
+    expect(link.firstElementChild).toHaveAttribute("aria-hidden", "true");
+    expect(link.firstElementChild).toHaveAttribute("width", "18");
   });
 });

@@ -1,0 +1,63 @@
+/* The full-bleed cobalt band (design system: one full-bleed band doesn't count as a filled control). */
+
+.footer {
+  position: relative;
+  overflow: hidden;
+  background: var(--cobalt);
+  color: var(--on-cobalt);
+}
+
+.inner.inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-block: 40px var(--space-12);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.name { font: 600 26px/1 var(--font-display); }
+
+.tagline {
+  font-size: var(--text-body-sm);
+  line-height: var(--text-body-sm--line-height);
+  opacity: 0.85;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-6);
+}
+
+.link {
+  padding: 12px 0;
+  font-size: var(--text-body-sm);
+  line-height: var(--text-body-sm--line-height);
+  color: var(--on-cobalt);
+  text-decoration: none;
+}
+
+.link:hover { text-decoration: underline; }
+
+.link:focus-visible { outline-color: var(--on-cobalt); }
+
+.reel { right: -14px; top: 18px; width: 110px; height: 110px; }
+
+@media (min-width: 1200px) {
+  .inner.inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 56px;
+  }
+
+  .brand { flex-direction: row; align-items: baseline; gap: var(--space-4); }
+  .name { font-size: 28px; }
+  .link { padding: 0; }
+  .reel { right: auto; left: 54%; top: -18px; width: 150px; height: 150px; }
+}

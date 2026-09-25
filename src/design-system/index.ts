@@ -1,5 +1,5 @@
 export { cx } from "./cx";
-export { Button, type ButtonProps, type ButtonVariant } from "./components/Button/Button";
+export { Button, ButtonLink, type ButtonLinkProps, type ButtonProps, type ButtonVariant } from "./components/Button/Button";
 export { Field, type FieldProps } from "./components/Field/Field";
 export { FilmStrip, type FilmFrame, type FilmStripLabels, type FilmStripProps } from "./components/FilmStrip/FilmStrip";
 export { Icon, type IconProps } from "./components/Icon/Icon";
