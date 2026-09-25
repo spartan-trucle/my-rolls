@@ -1,0 +1,55 @@
+/* Page-level rules from the design system (artifact bundle.css, "page" and "Sticker"). */
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* A themed scope repaints itself; inherited colours were resolved in the outer theme. */
+[data-theme] {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* Paper grain: over the page background only, never over photos. */
+.rc-paper {
+  position: relative;
+  isolation: isolate;
+  background: var(--paper);
+}
+
+.rc-paper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Die-cut stickers from the artifact's assets/Stickers; decorative, alt="". */
+.rc-sticker {
+  display: block;
+  pointer-events: none;
+  transform: rotate(var(--rc-tilt, 0deg));
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
