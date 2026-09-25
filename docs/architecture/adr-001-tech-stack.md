@@ -1,6 +1,6 @@
 # ADR-001: Cuộn tech stack & architecture
 
-> **Status: Proposed** · 24.09.2026 · Trúc
+> **Status: Accepted** · 25.09.2026 · Trúc (proposed 24.09.2026)
 >
 > This file is the source of truth for the stack. It started as a copy of a claude.ai doc; that doc is no longer kept in sync, so edit here.
 
@@ -8,7 +8,7 @@ Related: [PRD overview](../product/prd.md) · [Roadmap](../roadmap.md) · [Desig
 
 ## Status & context
 
-**Proposed.** Cuộn's MVP ships as one TypeScript web app (Next.js) with Postgres for data and Cloudflare R2 for photos. This ADR records why, measured against [PRD v0.4](../product/prd.md).
+**Accepted** on 25.09.2026, when the [Phase 0 plan](../../.planning/plans/phase-0-foundations.md) was approved. Cuộn's MVP ships as one TypeScript web app (Next.js) with Postgres for data and Cloudflare R2 for photos. This ADR records why, measured against [PRD v0.4](../product/prd.md).
 
 What the PRD asks of the stack:
 
@@ -58,16 +58,16 @@ Go with option A: one Next.js app on Vercel, Postgres on Neon in Singapore, phot
 | App | Next.js (App Router), TypeScript, React Server Components + route handlers | Share pages render on the server; one codebase for UI and API |
 | Styling | Tailwind CSS mapped to the Cuộn [design system](../design/design-system.md) tokens | Same tokens on phone and desktop layouts |
 | Language | `next-intl`, Vietnamese as the only locale at launch | Keeps the app's words (cuộn, tấm ưng, túi…) in one file |
-| Auth | Better Auth with the Google provider, sessions in Postgres | Google sign-in is the only MVP method; no extra vendor |
-| Database | Postgres on Neon, region `aws-ap-southeast-1` (Singapore) | Relational model, free tier, branch per preview deploy |
+| Auth | Better Auth with the Google provider, sessions in Postgres, `oAuthProxy` plugin so sign-in works on preview URLs | Google sign-in is the only MVP method; no extra vendor. Neon's managed auth stays off |
+| Database | Postgres on Neon, added through the Vercel Marketplace (Vercel-managed, billed through Vercel), region Singapore (`sin1`, AWS `ap-southeast-1`) | Relational model, free tier, branch per preview deploy |
 | ORM + migrations | Drizzle ORM + drizzle-kit | SQL-first and typed, close to the Exposed + Flyway habits from work |
-| Photo storage | Cloudflare R2: private bucket for originals, public bucket on a custom domain for derivatives | Free egress; Cloudflare CDN has Vietnam points of presence |
+| Photo storage | Cloudflare R2: private bucket for originals, public bucket on a custom domain for derivatives (on `r2.dev` until the domain is chosen) | Free egress; Cloudflare CDN has Vietnam points of presence |
 | Uploads | Browser → R2 with presigned PUT URLs; app only signs and records | Vercel functions cap request bodies at 4.5 MB |
 | Derivatives | Browser makes two WebP sizes per JPEG (480 px grid, 2048 px viewer) and reads EXIF before upload | No server CPU and no per-transform fees; TIFF needs a server path (v1.1) |
 | Share images | `next/og` renders link previews (1200 × 630) and story cards (1080 × 1920), cached in R2 per roll version | One renderer for both; crawlers get a ready PNG |
 | Hosting | Vercel Hobby, functions in `sin1` (Singapore) | Next to the database; preview deploys per branch |
 | Scheduled work | Vercel Cron: clean up abandoned uploads nightly | No queue needed for MVP |
-| Analytics + errors | PostHog (north star: share opens by non-users) and Sentry free tier | Already familiar with PostHog |
+| Analytics + errors | PostHog: product analytics (north star: share opens by non-users) and error tracking | Already familiar with PostHog; one vendor for both on its free tier. Sentry was dropped on 25.09.2026 to keep costs at zero |
 
 ## Architecture
 
@@ -119,7 +119,7 @@ Frames left pending for 24 hours are deleted by the nightly cron, along with the
 
 | Table | Key columns | Notes |
 |---|---|---|
-| `user` | id, google_sub, name, avatar | Owned by Better Auth, plus `session` and `account` |
+| `user` | id, name, email, email_verified, image, created_at | Owned by Better Auth, plus `session`, `account` and `verification`. The Google subject ID lives in `account.account_id`; `name` is the display name the user can change |
 | `stock` | id, owner_id?, brand, name, iso, format, type, canister_photo_key | `owner_id` null = seeded catalogue; set = private custom |
 | `camera` | id, owner_id?, brand, model, format | Same seeded / private split |
 | `bag_item` | user_id, stock_id?, camera_id? | The túi |
