@@ -1,0 +1,167 @@
+/* Phone (default): one column, grid so `.main`'s content row can grow and
+   pin `.actions` to the bottom without a fixed-height hack. */
+.shell {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas:
+    "topRow"
+    "strip"
+    "main";
+  min-height: 100dvh;
+  padding: var(--space-4) var(--space-4) var(--space-6);
+  gap: var(--space-5);
+}
+
+.topRow {
+  grid-area: topRow;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 32px;
+  font-weight: 600;
+}
+
+.strip {
+  grid-area: strip;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  /* Bleeds to the screen edge, like the board's FilmStrip (`.bleed`). */
+  margin: 0 calc(var(--space-4) * -1);
+}
+
+.main {
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+}
+
+/* Desktop-only chrome, hidden on the phone layout. */
+.photoPanel,
+.themeDesktop {
+  display: none;
+}
+
+/* 600–1024px: still the phone layout, just not bled to the edges (design
+   system: "between 600 and 1024 use the phone layout with a centred
+   max-width column"). */
+@media (min-width: 600px) {
+  .shell {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .shell {
+    max-width: none;
+    margin: 0;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: "photo main";
+    gap: 0;
+    padding: 0;
+  }
+
+  .topRow,
+  .strip {
+    display: none;
+  }
+
+  .photoPanel {
+    grid-area: photo;
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    overflow: hidden;
+    padding: 40px 64px 48px;
+    background: var(--paper);
+  }
+
+  .wordmarkDesktop {
+    font-family: var(--font-display);
+    font-size: 28px;
+    line-height: 34px;
+    font-weight: 600;
+  }
+
+  .photoArea {
+    position: relative;
+    flex: 1;
+  }
+
+  .photoOne {
+    position: absolute;
+    left: 60px;
+    top: 60px;
+  }
+
+  .photoTwo {
+    position: absolute;
+    left: 350px;
+    top: 330px;
+  }
+
+  .panelScribble {
+    position: absolute;
+    left: 40px;
+    top: 470px;
+  }
+
+  .panelMeta {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    line-height: var(--text-meta--line-height);
+    color: var(--ink-muted);
+  }
+
+  .main {
+    grid-area: main;
+    position: relative;
+    background: var(--paper-raised);
+    border-left: 1px solid var(--line);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .themeDesktop {
+    display: flex;
+    position: absolute;
+    top: 32px;
+    right: 40px;
+  }
+
+  .content,
+  .actions {
+    flex: none;
+    width: 420px;
+  }
+
+  .actions {
+    padding-top: 0;
+  }
+}

@@ -1,0 +1,34 @@
+/* Shared by /sign-in and /sign-up: the small print under the Google button,
+   and the cross-link to the other auth page. Not design-system primitives
+   (they're one-off paragraphs, not reusable components) — a plain CSS
+   Module imported by both pages, same pattern as any other page style. */
+
+.note {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
+  color: var(--ink-muted);
+}
+
+.crossLink {
+  margin: var(--space-2) 0 0;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: var(--text-body-sm);
+  line-height: var(--text-body-sm--line-height);
+  color: var(--ink-muted);
+}
+
+.crossLink a {
+  font-weight: 600;
+}
+
+@media (min-width: 1024px) {
+  .crossLink {
+    margin: 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+}
