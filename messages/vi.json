@@ -1,0 +1,17 @@
+{
+  "common": {
+    "appName": "Cuộn"
+  },
+  "theme": {
+    "toggleToDark": "Chuyển sang giao diện tối",
+    "toggleToLight": "Chuyển sang giao diện sáng"
+  },
+  "auth": {
+    "signIn": {
+      "googleButton": "Đăng nhập bằng Google"
+    }
+  },
+  "demo": {
+    "keeper": "tấm ưng"
+  }
+}
