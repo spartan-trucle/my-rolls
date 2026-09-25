@@ -60,7 +60,7 @@ describe("getAuth", () => {
     expect(auth.options.trustedOrigins).toEqual([
       "http://localhost:3000",
       "https://my-rolls-weld.vercel.app",
-      "https://*-ngantrucles-projects.vercel.app",
+      "https://my-rolls-*-ngantrucles-projects.vercel.app",
     ]);
   });
 

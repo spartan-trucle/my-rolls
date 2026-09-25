@@ -8,7 +8,7 @@ import { oAuthProxy } from "better-auth/plugins/oauth-proxy";
 import { getDb } from "@/db/client";
 import * as schema from "@/db/schema";
 import { getEnv } from "@/env";
-import { PRODUCTION_URL } from "./auth-shared";
+import { PRODUCTION_URL, TRUSTED_ORIGINS } from "./auth-shared";
 import { resolveBaseUrl } from "./resolve-base-url";
 
 const SESSION_EXPIRES_IN_SECONDS = 60 * 60 * 24 * 30; // 30 days (AUTH-1)
@@ -25,13 +25,11 @@ const SESSION_UPDATE_AGE_SECONDS = 60 * 60 * 24; // 1 day — Better Auth's own 
 function buildAuth() {
   return betterAuth({
     baseURL: resolveBaseUrl(process.env),
-    trustedOrigins: [
-      "http://localhost:3000",
-      PRODUCTION_URL,
-      // This team's Vercel preview/branch domains (D8): every preview
-      // deploy gets its own URL, and Google has no wildcard redirects.
-      "https://*-ngantrucles-projects.vercel.app",
-    ],
+    // This project's own Vercel preview/branch domains, not the whole team
+    // scope (D8, narrowed in the Stage D review — see `TRUSTED_ORIGINS` in
+    // `auth-shared.ts`): every preview deploy gets its own URL, and Google
+    // has no wildcard redirects.
+    trustedOrigins: TRUSTED_ORIGINS,
     database: drizzleAdapter(getDb(), {
       provider: "pg",
       schema,

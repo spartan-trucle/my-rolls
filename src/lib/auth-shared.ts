@@ -22,3 +22,23 @@ export const DIRECT_OAUTH_ORIGINS = [
   "http://localhost:3000",
   "https://my-rolls-git-feature-phase-0-setup-ngantrucles-projects.vercel.app",
 ];
+
+/**
+ * Origins `getAuth()` (`auth.ts`) passes to Better Auth's `trustedOrigins`.
+ * `oAuthProxy` hands the signed-in session back only to a trusted origin
+ * (D8), so this must stay scoped to this project's own preview deployments,
+ * not the team's whole Vercel scope: `*-ngantrucles-projects.vercel.app`
+ * also matches every other project any team member deploys there (Stage D
+ * review, 25.09.2026). Vercel's preview URL shape is
+ * `<project>-<hash-or-branch>-<team-scope>.vercel.app`, so pinning the
+ * `my-rolls-` prefix keeps every preview of this project trusted without
+ * widening to the rest of the scope.
+ *
+ * **Launch gate:** once a public custom domain makes production reachable
+ * without a Vercel login, drop the preview wildcard — see the phase 0 plan.
+ */
+export const TRUSTED_ORIGINS = [
+  "http://localhost:3000",
+  PRODUCTION_URL,
+  "https://my-rolls-*-ngantrucles-projects.vercel.app",
+];
