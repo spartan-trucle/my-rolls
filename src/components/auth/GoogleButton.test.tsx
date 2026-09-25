@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/i18n/test-utils";
@@ -56,6 +56,37 @@ describe("GoogleButton", () => {
     await user.click(screen.getByRole("button", { name: "Đăng nhập bằng Google" }));
 
     expect(await screen.findByText("Không đăng nhập được. Thử lại nhé.")).toBeInTheDocument();
+  });
+
+  it("re-enables after the user comes back from Google via the bfcache (a pageshow with persisted: true)", async () => {
+    const user = userEvent.setup();
+    signInWithGoogle.mockReturnValue(new Promise(() => {})); // never resolves: the browser navigated away
+    renderWithIntl(<GoogleButton label="Đăng nhập bằng Google" />);
+    const button = screen.getByRole("button", { name: "Đăng nhập bằng Google" });
+
+    await user.click(button);
+    expect(button).toBeDisabled();
+
+    act(() => {
+      window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true }));
+    });
+
+    expect(button).toBeEnabled();
+    expect(button).toHaveAttribute("aria-busy", "false");
+  });
+
+  it("does not touch a normal (non-bfcache) pageshow", async () => {
+    const user = userEvent.setup();
+    signInWithGoogle.mockReturnValue(new Promise(() => {}));
+    renderWithIntl(<GoogleButton label="Đăng nhập bằng Google" />);
+    const button = screen.getByRole("button", { name: "Đăng nhập bằng Google" });
+
+    await user.click(button);
+    act(() => {
+      window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: false }));
+    });
+
+    expect(button).toBeDisabled();
   });
 
   it("clears a previous error on a fresh attempt", async () => {

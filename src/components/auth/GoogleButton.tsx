@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { signInWithGoogle } from "@/lib/auth-client";
 import { cx } from "@/design-system/cx";
@@ -48,6 +48,23 @@ export function GoogleButton({ label, className }: GoogleButtonProps) {
   const t = useTranslations("auth.googleButton");
   const [pending, setPending] = useState(false);
   const [hasError, setHasError] = useState(false);
+
+  // On a phone back-gesture from Google's account picker, some browsers
+  // restore this page from the bfcache instead of re-running it: without
+  // this, `pending` (set just before the redirect) is still `true`, so the
+  // button stays permanently disabled. `event.persisted` is exactly the
+  // "this is a bfcache restore" signal (MDN's own `pageshow` example uses
+  // it the same way).
+  useEffect(() => {
+    function handlePageShow(event: PageTransitionEvent) {
+      if (!event.persisted) return;
+      setPending(false);
+      setHasError(false);
+    }
+
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
 
   async function handleClick() {
     setPending(true);
