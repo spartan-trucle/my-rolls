@@ -30,13 +30,13 @@ describe("SAMPLE_PHOTOS", () => {
 
   it("gives the portrait lanterns photo its own aspect ratio", () => {
     const lanterns = SAMPLE_PHOTOS.find((photo) => photo.id === "lanternsAtNight");
-    expect(lanterns).toMatchObject({ width: 800, height: 1200 });
+    expect(lanterns).toMatchObject({ width: 640, height: 960 });
   });
 
-  it("gives every other photo the landscape 1200x800 aspect ratio", () => {
+  it("gives every other photo the landscape 960x640 aspect ratio (960 max on the long edge, fix 4)", () => {
     for (const photo of SAMPLE_PHOTOS) {
       if (photo.id === "lanternsAtNight") continue;
-      expect(photo).toMatchObject({ width: 1200, height: 800 });
+      expect(photo).toMatchObject({ width: 960, height: 640 });
     }
   });
 });
