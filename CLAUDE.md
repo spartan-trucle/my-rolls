@@ -51,5 +51,6 @@ Open conflicts between the PRD, ADR and design system are listed in [docs/README
 
 - Product name in docs and code: **Cuộn**. The design system's `RollCall` namespace and token names stay as they are.
 - Vietnamese is the UI language. Use the glossary in [the PRD overview](docs/product/prd.md#words-we-use) (cuộn, tấm ưng, túi, kệ…).
+- Everything in code is named in English: folders, files, components, route segments (so URLs too: `/sign-in`, not `/dang-nhap`), i18n keys, DB tables and columns, env vars. Vietnamese appears only in UI copy (`messages/vi.json`) and in docs.
 - Every screen needs a phone (390 px) and a desktop (1440 px) design. Screens without an artboard are listed in [wireframes.md](docs/design/wireframes.md#mvp-screens-with-no-artboard-yet).
 - Plans live in `.planning/plans/`, specs in `.planning/specs/`.

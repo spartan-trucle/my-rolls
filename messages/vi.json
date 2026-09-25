@@ -1,0 +1,88 @@
+{
+  "common": {
+    "appName": "Cuộn"
+  },
+  "theme": {
+    "toggleToDark": "Chuyển sang giao diện tối",
+    "toggleToLight": "Chuyển sang giao diện sáng"
+  },
+  "samples": {
+    "pineForestFog": "Rừng thông trong sương",
+    "pineHillSunrise": "Đồi thông lúc bình minh",
+    "hillsideLightLeak": "Sườn đồi bị lọt sáng",
+    "treeGoldenField": "Cây giữa đồng cỏ vàng",
+    "lanternsAtNight": "Đèn lồng ban đêm"
+  },
+  "auth": {
+    "layout": {
+      "photoPanelLabel": "Ảnh từ cộng đồng",
+      "photoPanelMeta": "GOLD 200 · ISO 200 · 36 EXP · Pentax K1000",
+      "photoOneCaption": "đồi thông, 5:40 sáng",
+      "photoOneDate": "12.10.25",
+      "photoTwoCaption": "lọt sáng. lại nữa.",
+      "scribble": "oops cũng là kỷ niệm"
+    },
+    "googleButton": {
+      "error": "Không đăng nhập được. Thử lại nhé."
+    },
+    "signIn": {
+      "googleButton": "Đăng nhập bằng Google",
+      "title": "Chào mừng trở lại",
+      "subtitle": "Đăng nhập để mở lại kệ cuộn của bạn.",
+      "privacyNote": "Cuộn chỉ lấy tên, email và ảnh đại diện từ Google. Không có mật khẩu nào cần nhớ.",
+      "crossLink": "Chưa có tài khoản? <link>Tạo tài khoản</link>",
+      "filmStripLabel": "Vài tấm từ cuộn gần nhất",
+      "filmStripEdgeText": "GOLD 200 · CUỘN 14",
+      "filmStripScribble": "cuộn mới vừa tráng xong",
+      "keeperLabel": "Tấm ưng",
+      "oopsLabel": "Oops"
+    },
+    "signUp": {
+      "googleButton": "Đăng ký bằng Google",
+      "title": "Cất cuộn phim đầu tiên lên kệ",
+      "subtitle": "Mỗi cuộn phim đều xứng đáng có một chỗ để nhớ.",
+      "stepLabel": "Bước 1 / 2",
+      "perkShelfTitle": "Kệ cuộn của riêng bạn",
+      "perkShelfBody": "Mỗi cuộn một chiếc hộp, đủ film, máy và lab.",
+      "perkKeeperTitle": "Tấm ưng và cả oops",
+      "perkKeeperBody": "Đánh dấu tấm đẹp, giữ lại tấm hỏng làm kỷ niệm.",
+      "perkShareTitle": "Chia sẻ lên story",
+      "perkShareBody": "Gửi cả cuộn cho bạn bè bằng một đường link.",
+      "consent": "Khi tiếp tục, bạn đồng ý với <terms>Điều khoản</terms> và <privacy>Chính sách riêng tư</privacy> của Cuộn.",
+      "crossLink": "Đã có tài khoản? <link>Đăng nhập</link>"
+    },
+    "profile": {
+      "stepLabel": "Bước 2 / 2",
+      "title": "Chào bạn mới!",
+      "subtitle": "Hồ sơ lấy từ Google. Sửa tên hiển thị nếu muốn.",
+      "avatarAlt": "Ảnh đại diện từ Google",
+      "nameLabel": "Tên hiển thị",
+      "nameHint": "Bạn bè thấy tên này khi mở cuộn bạn chia sẻ.",
+      "nameErrorEmpty": "Bạn chưa đặt tên. Thử lại nhé.",
+      "nameErrorTooLong": "Tên dài quá, đẩy +3 à? Ngắn lại dưới 50 ký tự nhé.",
+      "emailLabel": "Email",
+      "emailFromGoogle": "từ Google",
+      "continueButton": "Tiếp tục",
+      "switchAccountPhone": "Dùng tài khoản Google khác",
+      "switchAccountDesktop": "Dùng tài khoản khác"
+    }
+  },
+  "legal": {
+    "terms": {
+      "heading": "Điều khoản",
+      "body": "Chúng tôi đang viết điều khoản sử dụng. Quay lại sau nhé."
+    },
+    "privacy": {
+      "heading": "Chính sách riêng tư",
+      "body": "Chúng tôi đang viết chính sách riêng tư. Quay lại sau nhé."
+    }
+  },
+  "home": {
+    "heading": "Kệ của {name}",
+    "body": "Cuộn đầu tiên của bạn sắp có mặt ở đây.",
+    "signOutButton": "Đăng xuất"
+  },
+  "demo": {
+    "keeper": "tấm ưng"
+  }
+}

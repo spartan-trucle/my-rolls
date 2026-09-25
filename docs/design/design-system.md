@@ -1,7 +1,7 @@
 # Design system
 
 > **Mirror — the artifact is the source of truth:** [Design system](https://claude.ai/artifact/HtsG9sZeNGx19PSvPjW65a) (namespace `RollCall`)
-> Last synced: 25.09.2026 · artifact version `1790317950-ff46` · by Claude for Trúc · last change 25.09.2026 by Trúc: "README: added an In code section on how the Cuộn app uses the tokens and components."
+> Last synced: 25.09.2026 · artifact version `1790324661-b252` · by Claude for Trúc · last content change 25.09.2026 by Trúc: "README: added an In code section on how the Cuộn app uses the tokens and components." `b252` changed no mirrored file (README, tokens and component guidelines are identical to `ff46`).
 > Before editing, re-read the artifact. Make changes in the artifact and copy them here in the same session (see [CLAUDE.md](../../CLAUDE.md#sync-rules)).
 >
 > **Naming:** the design system still calls the product **Roll Call**. The product name is **Cuộn** (see [Known conflicts](../README.md#known-conflicts-between-sources)). Token and component names stay as they are.

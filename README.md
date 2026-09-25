@@ -10,7 +10,7 @@ Compare rolls and labs once there is enough data.
 
 > Repo name: `my-rolls`. Product name: **Cuộn** (working name). The design system and wireframes still say "Roll Call"; see [Known conflicts](docs/README.md#known-conflicts-between-sources).
 
-**Status:** pre-build. PRD v0.4 is a draft for review, ADR-001 is proposed, and the build starts 28.09.2026 with soft launch planned for **18.01.2027**.
+**Status:** pre-build. PRD v0.4 is a draft for review, ADR-001 is accepted, Phase 0 setup started 25.09.2026 ([plan](.planning/plans/phase-0-foundations.md)), and the build starts 28.09.2026 with soft launch planned for **18.01.2027**.
 
 ## Start here
 
@@ -40,7 +40,7 @@ The sync rules are in [CLAUDE.md](CLAUDE.md#sync-rules).
 
 ## Stack at a glance
 
-Next.js (App Router, TypeScript) on Vercel `sin1` · Postgres on Neon (Singapore) with Drizzle · Cloudflare R2 for photos, with browser uploads via presigned URLs · Better Auth (Google) · `next-intl` (vi) · Tailwind mapped to design tokens · `next/og` for link previews and story cards · PostHog + Sentry. Details and trade-offs: [ADR-001](docs/architecture/adr-001-tech-stack.md).
+Next.js (App Router, TypeScript) on Vercel `sin1` · Postgres on Neon (Singapore) with Drizzle · Cloudflare R2 for photos, with browser uploads via presigned URLs · Better Auth (Google) · `next-intl` (vi) · Tailwind mapped to design tokens · `next/og` for link previews and story cards · PostHog for analytics and errors. Details and trade-offs: [ADR-001](docs/architecture/adr-001-tech-stack.md).
 
 ## Develop
 

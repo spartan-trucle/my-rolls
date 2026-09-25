@@ -1,0 +1,83 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.button {
+  /* Google's own sign-in button colours (light: #ffffff/#747775/#1f1f1f,
+     dark: #131314/#8e918f/#e3e3e3) — the one allowed raw-hex exception:
+     Google's branding guidelines for "Sign in with Google" require these
+     exact colours, so they aren't part of the Cuộn token palette. Switched
+     the same way tokens.css switches every other colour: an explicit
+     `data-theme="dark"` first, `prefers-color-scheme` as the fallback when
+     no theme cookie is set. */
+  --g-bg: #ffffff;
+  --g-border: #747775;
+  --g-text: #1f1f1f;
+
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 20px;
+  background: var(--g-bg);
+  border: 1px solid var(--g-border);
+  border-radius: var(--radius-none);
+  color: var(--g-text);
+  font: 500 16px/1 var(--font-sans);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+[data-theme="dark"] .button {
+  --g-bg: #131314;
+  --g-border: #8e918f;
+  --g-text: #e3e3e3;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .button {
+    --g-bg: #131314;
+    --g-border: #8e918f;
+    --g-text: #e3e3e3;
+  }
+}
+
+.logo {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+.error {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-body-sm);
+  line-height: var(--text-body-sm--line-height);
+  color: var(--pin);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+}
