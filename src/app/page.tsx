@@ -1,10 +1,18 @@
+import { getSessionCookie } from "better-auth/cookies";
+import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { Landing } from "@/components/landing/Landing";
 import { getAuth } from "@/lib/auth";
 import { signOutAction } from "@/lib/sign-out-action";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/design-system";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("landing");
+  return { description: t("metaDescription") };
+}
 
 /**
  * Split from `Home` below so `useTranslations` only runs once React
@@ -33,17 +41,22 @@ function HomeContent({ name }: { name: string }) {
 }
 
 /**
- * Placeholder home (D17): the real shelf is Phase 1 (`OnboardBag`). This is
- * signed-in only — `proxy.ts`'s cookie check is optimistic (Stage D), so
- * this reads the real session server-side and redirects if it's missing or
- * stale.
+ * `/` is the landing page for visitors and the placeholder home (D17) for
+ * signed-in users; the real shelf is Phase 1 (`OnboardBag`).
+ *
+ * No session cookie at all means a visitor: the landing page renders
+ * without building Better Auth or touching the database. With a cookie,
+ * `proxy.ts`'s check is only optimistic (Stage D), so this reads the real
+ * session server-side; a missing or stale one gets the landing page too.
+ * (Redirecting it to `/sign-in` would loop: the proxy sends a request with
+ * a session cookie from `/sign-in` back to `/`.)
  */
 export default async function Home() {
-  const session = await getAuth().api.getSession({ headers: await headers() });
-  if (!session) {
-    redirect("/sign-in");
-    return null;
-  }
+  const requestHeaders = await headers();
+  if (getSessionCookie(requestHeaders) === null) return <Landing />;
+
+  const session = await getAuth().api.getSession({ headers: requestHeaders });
+  if (!session) return <Landing />;
 
   return <HomeContent name={session.user.name} />;
 }
