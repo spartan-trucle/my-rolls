@@ -5,6 +5,11 @@ import { z } from "zod";
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   BETTER_AUTH_SECRET: z.string().min(1, "BETTER_AUTH_SECRET is required"),
+  GOOGLE_CLIENT_ID: z.string().min(1, "GOOGLE_CLIENT_ID is required"),
+  GOOGLE_CLIENT_SECRET: z.string().min(1, "GOOGLE_CLIENT_SECRET is required"),
+  // Unset on localhost and on preview deployments — src/lib/resolve-base-url.ts
+  // falls back to VERCEL_ENV/VERCEL_BRANCH_URL/localhost when it's absent.
+  BETTER_AUTH_URL: z.string().min(1).optional(),
 });
 
 export type TEnv = z.infer<typeof envSchema>;

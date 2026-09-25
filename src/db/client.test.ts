@@ -24,6 +24,8 @@ describe("getDb", () => {
     vi.resetModules();
     vi.stubEnv("DATABASE_URL", "postgres://pooled/db");
     vi.stubEnv("BETTER_AUTH_SECRET", "test-only-placeholder-secret");
+    vi.stubEnv("GOOGLE_CLIENT_ID", "test-only-google-client-id");
+    vi.stubEnv("GOOGLE_CLIENT_SECRET", "test-only-google-client-secret");
     vi.mocked(Pool).mockClear();
     vi.mocked(attachDatabasePool).mockClear();
     vi.mocked(drizzle).mockClear();

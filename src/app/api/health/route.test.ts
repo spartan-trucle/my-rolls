@@ -40,6 +40,8 @@ describe("GET /api/health", () => {
     // Stub the keys it needs; `route.ts` doesn't read them otherwise.
     vi.stubEnv("DATABASE_URL", "postgres://test:test@localhost:5432/test");
     vi.stubEnv("BETTER_AUTH_SECRET", "test-only-placeholder-secret");
+    vi.stubEnv("GOOGLE_CLIENT_ID", "test-only-google-client-id");
+    vi.stubEnv("GOOGLE_CLIENT_SECRET", "test-only-google-client-secret");
   });
 
   afterEach(() => {
