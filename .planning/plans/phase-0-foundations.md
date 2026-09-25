@@ -16,6 +16,7 @@ Stand up the whole Cuộn stack from [ADR-001](../../docs/architecture/adr-001-t
 - [x] Preview branching on (D24): "Create Database Branch For Deployment → Preview", "Require Active Resource Before Deploy" on. Database env vars now Sensitive and only in Production + Preview, so local dev never gets production credentials (25.09.2026, Trúc)
 - [x] Neon skill files kept and committed (D25, 25.09.2026)
 - [x] R2 checkout done by Trúc (25.09.2026)
+- [x] PostHog project for Cuộn (US Cloud): `NEXT_PUBLIC_POSTHOG_KEY` (public project token, stored as Config on purpose) and `NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com` in all three Vercel environments. The project has exception autocapture off, so Stage G turns it on in code with `posthog-js`' `capture_exceptions` (D22) (25.09.2026)
 - [x] Stage B steps 6–8 + local part of 9: Next.js 16.3.6, React 19.2.8, Tailwind 4.3.3, Vitest 5.0.1, zod env, `/api/health`, `vercel.json` (`nextjs`, `sin1`). 9/9 tests, lint clean, build clean, health 200 (25.09.2026)
 - [x] Branch rebuilt on `main` after PR #1 (25.09.2026): our scaffold and `agentRules` commits dropped, env + `/api/health` + `vercel.json` + docs + Neon skills kept, tests moved next to their code as on `main`. 150 tests pass, typecheck clean
 - [x] Stage C steps 10–11 (tokens, fonts) and Stage E (all nine components) done by PR #1
