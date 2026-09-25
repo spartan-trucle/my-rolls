@@ -16,7 +16,7 @@ vi.mock("next/navigation", () => ({
   redirect: redirectMock,
 }));
 
-import { signOutAction } from "./sign-out-action";
+import { signOutAction, signOutToSignUpAction } from "./sign-out-action";
 
 describe("signOutAction", () => {
   it("clears the session through Better Auth's own sign-out API", async () => {
@@ -29,5 +29,19 @@ describe("signOutAction", () => {
     await signOutAction();
 
     expect(redirectMock).toHaveBeenCalledWith("/sign-in");
+  });
+});
+
+describe("signOutToSignUpAction", () => {
+  it("clears the session through Better Auth's own sign-out API", async () => {
+    await signOutToSignUpAction();
+
+    expect(signOut).toHaveBeenCalledWith({ headers: fakeRequestHeaders });
+  });
+
+  it("redirects to /sign-up instead of /sign-in (step 2's 'dùng tài khoản khác')", async () => {
+    await signOutToSignUpAction();
+
+    expect(redirectMock).toHaveBeenCalledWith("/sign-up");
   });
 });
