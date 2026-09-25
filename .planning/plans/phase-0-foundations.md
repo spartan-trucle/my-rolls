@@ -2,10 +2,10 @@
 
 Stand up the whole Cuộn stack from [ADR-001](../../docs/architecture/adr-001-tech-stack.md): Next.js on Vercel `sin1`, Neon in Singapore, Drizzle, Better Auth (Google), R2, `next-intl` (vi), Tailwind mapped to the design tokens, PostHog for analytics and errors, the sign-in and sign-up screens from the design canvas, and the two spikes. It ends on the roadmap's Phase 0 exit check.
 
-- **Roadmap:** Phase 0, 28 Sep – 11 Oct 2026, 16 h booked; this plan estimates ~22.5 h (see Risks). Roadmap artifact re-read 25.09.2026, rev 13, same as the mirror.
+- **Roadmap:** Phase 0, 28 Sep – 11 Oct 2026, 16 h booked; this plan now estimates ~17.5 h, because PR #1 already delivered tokens, fonts and components (see Risks). Roadmap artifact re-read 25.09.2026, rev 13, same as the mirror.
 - **Design system:** artifact re-read 25.09.2026, version `1790317950-ff46`. The mirror is still on `1790307689-5eeb`: token values match, but the artifact README has a new **"In code"** section that sets how tokens, fonts and components enter the app. Stages C and E follow it.
 - **Design canvas:** re-read 25.09.2026, version `1790318000-c9a4`. Page **"Đăng nhập"** has 12 boards: Login, Signup step 1 (Google), Signup step 2 (profile), each at 390 and 1440 px, in Paper and Darkroom. `docs/design/wireframes.md` still indexes the older `1790307652-d78a` and says sign-in has no artboard.
-- **Status:** approved by Trúc 25.09.2026 (v2). v2 adds English naming (D15) and the canvas auth screens (D7, D16–D19). v3 (25.09.2026, Trúc) drops Sentry for PostHog error tracking (D22) and adds what Stage A turned up (D23–D25).
+- **Status:** approved by Trúc 25.09.2026 (v2). v2 adds English naming (D15) and the canvas auth screens (D7, D16–D19). v3 (25.09.2026, Trúc) drops Sentry for PostHog error tracking (D22) and adds what Stage A turned up (D23–D25). v4 (25.09.2026) rebuilds the branch on `main` after [PR #1](https://github.com/NganTrucLe/my-rolls/pull/1) (design system foundation, plan `.planning/plans/design-system-foundation.md`), which already covers Stage C steps 10–11 and Stage E.
 
 ## Progress
 
@@ -17,13 +17,17 @@ Stand up the whole Cuộn stack from [ADR-001](../../docs/architecture/adr-001-t
 - [x] Neon skill files kept and committed (D25, 25.09.2026)
 - [x] R2 checkout done by Trúc (25.09.2026)
 - [x] Stage B steps 6–8 + local part of 9: Next.js 16.3.6, React 19.2.8, Tailwind 4.3.3, Vitest 5.0.1, zod env, `/api/health`, `vercel.json` (`nextjs`, `sin1`). 9/9 tests, lint clean, build clean, health 200 (25.09.2026)
-- [ ] Stage B step 9 remote: first preview deploy (needs the branch pushed)
+- [x] Branch rebuilt on `main` after PR #1 (25.09.2026): our scaffold and `agentRules` commits dropped, env + `/api/health` + `vercel.json` + docs + Neon skills kept, tests moved next to their code as on `main`. 150 tests pass, typecheck clean
+- [x] Stage C steps 10–11 (tokens, fonts) and Stage E (all nine components) done by PR #1
+- [ ] Stage B step 9 remote: first preview deploy. The first push was **blocked** by Vercel Hobby because commits were authored by `spartan-trucle`; this repo now commits as `Truc Le <97326103+NganTrucLe@users.noreply.github.com>`
 - [ ] `.env.development.local` with the Neon `dev` branch URLs (D23, Trúc)
 
 ### Found during Stages A and B
 
-- `next dev` in Next 16.3.6 appends an agent-rules block to `CLAUDE.md`; switched off with `agentRules: false` in `next.config.ts`.
-- `src/env.ts` validates at import, so a local `next build` fails once `.env.local` no longer carries `DATABASE_URL` (Development lost the database vars on purpose). Fix at the start of Stage C: validate on first use.
+- `next dev` in Next 16.3.6 appends an agent-rules block to `CLAUDE.md`; `main` already switches it off with `agentRules: false`.
+- `src/env.ts` validated at import, which broke local builds once Development lost the database vars. Fixed: `getEnv()` validates on first use.
+- Vercel Hobby only deploys commits whose author is the account's GitHub user (NganTrucLe). Keep the repo-local identity, and merge PRs into `main` so the head commit stays owner-authored (merge commit or rebase-merge from the GitHub UI as NganTrucLe).
+- I didn't fetch `origin` at the start of the session and missed PR #1. Always `git fetch` before planning.
 - `server-only` throws under Vitest, so `src/env.ts` dropped it. Put it back in Stage D with a Vitest alias to an empty module, before auth secrets live in code.
 - `package.json` pins `pnpm@11.8.0`; check the first Vercel build uses a compatible pnpm.
 - The dev branch password was pasted in chat and Neon branches share their parent's passwords, so it likely opens production too. No data yet; reset `neondb_owner` on both branches before the private beta.
@@ -92,13 +96,7 @@ src/styles/tokens.css                    new     generated: Paper on :root, Dark
 src/app/fonts.ts                         new     next/font: Fraunces, Be Vietnam Pro, Space Mono, Patrick Hand, vietnamese subset
 src/i18n/*, messages/vi.json             new     next-intl, vi only; keys in English (auth.signIn.title …)
 
-src/design-system/Button/                new     typed React + CSS Module, no UI text (labels via props)
-src/design-system/Field/                 new     same
-src/design-system/Icon/                  new     roll, keeper, share + the rest of the set
-src/design-system/Print/                 new     desktop auth panel (also needed in Phase 3)
-src/design-system/FilmStrip/             new     phone Login (also needed in Phase 3)
-src/design-system/Scribble/              new     notes on the auth boards
-src/design-system/index.ts               new     exports
+src/design-system/components/*          exists  all nine components from PR #1 (Button, Field, Icon, Print, FilmStrip, Scribble, RollCard, Stamp, UploadDrop)
 
 src/components/auth/GoogleButton.tsx     new     Google-branded button from the boards
 src/components/auth/AuthLayout.tsx       new     phone: single column; desktop: photo panel left, form right
@@ -154,7 +152,7 @@ Each step is at most half a day. A stage ends in a PR that deploys a preview.
 8. `/api/health`, test first: 200 with `{ ok, db }`; DB down → 503.
 9. `vercel.json` with `sin1`; `.env.example`. First preview deploy; check the function region in the deploy output.
 
-### Stage C · Tokens, fonts, language, theme (~3.5 h)
+### Stage C · Tokens, fonts, language, theme (~1.5 h left; steps 10–11 done by PR #1)
 
 10. Copy `tokens.json` byte for byte. Write the two tests first:
     - The generated CSS is out of date → fail.
@@ -175,7 +173,9 @@ Each step is at most half a day. A stage ends in a PR that deploys a preview.
     - A new user is sent to `/sign-up/profile`; a returning user is sent to `/`.
 17. `proxy.ts`: signed-out users hitting a protected route go to `/sign-in`, and signed-in users hitting `/sign-in` or `/sign-up` go home. Tests first. Sign-out action.
 
-### Stage E · Design-system components (~3 h)
+### Stage E · Design-system components (done by PR #1)
+
+PR #1 ported all nine components to `src/design-system/components/` with tests and a showcase at `/dev/design-system`. Steps 18–19 below are kept for the record; Stage F checks the six it needs against the auth boards and fixes gaps there.
 
 18. Claude reads `project/components/<Name>/README.md` from the design-system artifact for Button, Field, Icon, Print, FilmStrip and Scribble, per the sync rule, and hands them to the agent.
 19. Port the six components to `src/design-system/` as typed React with CSS Modules and no UI text. Tests first, per component:
@@ -229,7 +229,7 @@ Each step is at most half a day. A stage ends in a PR that deploys a preview.
 
 | Risk | Mitigation |
 |---|---|
-| ~22.5 h against 16 h booked | The extra is mostly Print, FilmStrip and the other components, which Phase 3 needs anyway. This takes ~6.5 h of the 30 h buffer; Phase 3 should need about 3 h less |
+| ~17.5 h against 16 h booked | PR #1 took tokens, fonts and components off this plan; the rest uses ~1.5 h of the 30 h buffer |
 | Google rejects the dynamic preview URLs | `oAuthProxy` (D8); only the production and localhost callbacks are registered |
 | Preview protection blocks the phone | Sign in to Vercel on the phone (D9) |
 | Neon's free plan caps branches, and preview branches are only deleted when their deployment expires (6 months by default) | Delete stale preview branches by hand; shorten deployment retention if the cap gets close |
