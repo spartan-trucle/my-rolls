@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // CLAUDE.md is curated project memory; don't let `next dev` append its agent-rules block.
+  agentRules: false,
 };
 
 export default nextConfig;
