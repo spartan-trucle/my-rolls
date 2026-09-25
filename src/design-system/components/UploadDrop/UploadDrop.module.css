@@ -1,0 +1,30 @@
+.drop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+  color: var(--ink);
+  background: var(--paper-raised);
+  border: 2px dashed var(--line-strong);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.drop:focus-within { outline: 2px solid var(--focus); outline-offset: 3px; }
+
+/* cobalt, not pin: pin is only for oops and errors (Known conflict 7). */
+.over { background: var(--cobalt-soft); border-color: var(--cobalt); }
+
+.glyph { width: 56px; height: 56px; color: var(--ink); }
+.title { margin: var(--space-2) 0 0; font: 500 24px/30px var(--font-display); }
+.hint { margin: 0; font-family: var(--font-mono); font-size: var(--text-meta); line-height: var(--text-meta--line-height); color: var(--ink-muted); }
+/* No pointer-events: none — userEvent.upload (and real users) must be able to
+   interact with the input directly, not just via the wrapping label. */
+.input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .drop { transition: none; }
+}
