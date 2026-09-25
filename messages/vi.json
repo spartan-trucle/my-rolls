@@ -214,5 +214,12 @@
       "terms": "Điều khoản",
       "privacy": "Quyền riêng tư"
     }
+  },
+  "spike": {
+    "og": {
+      "title": "Cuộn phim đầu tiên",
+      "keeperLabel": "tấm ưng",
+      "toneMarks": "ả ạ ằ ẵ ặ ề ễ ệ ổ ỗ ộ ờ ợ ử ữ ự ỳ ỷ ỹ ỵ"
+    }
   }
 }
