@@ -1,7 +1,7 @@
 # Cuộn roadmap
 
 > **Mirror — the artifact is the source of truth:** [Cuộn roadmap](https://claude.ai/artifact/Lsq7MWHNCVanpBWQ2D4XTo)
-> Last synced: 25.09.2026 · doc revision 15 · by Claude for Trúc (Sentry dropped; PostHog covers errors).
+> Last synced: 25.09.2026 · doc revision 24 · by Claude for Trúc (revisions 16–23 by Trúc: waitlist page in Phase 1, landing page in Phase 5, 139 h build + 21 h buffer; revision 24 ticks "Repo, Next.js + Tailwind mapped to design tokens", landed in PR #1).
 > Before editing, re-read the artifact. Make changes in the artifact and copy them here in the same session (see [CLAUDE.md](../CLAUDE.md#sync-rules)).
 
 Related: [PRD overview](product/prd.md) · [Requirements index](product/requirements/README.md) · [ADR-001](architecture/adr-001-tech-stack.md) · [Design system](design/design-system.md)
@@ -11,7 +11,7 @@ Related: [PRD overview](product/prd.md) · [Requirements index](product/requirem
 Soft launch on **18.01.2027**. That is 16 weeks from now and about three weeks before Tết (6 Feb 2027), when Vietnamese shooters shoot and share the most.
 
 - **Scope:** the 26 P0 requirements in [PRD v0.4](product/prd.md), on the stack in [ADR-001](architecture/adr-001-tech-stack.md), styled with the [design system](design/design-system.md).
-- **Capacity:** one engineer at about 10 h/week, so 160 h. The plan books 130 h of build and keeps 30 h as buffer for day-job crunch weeks.
+- **Capacity:** one engineer at about 10 h/week, so 160 h. The plan books 139 h of build and keeps 21 h as buffer for day-job crunch weeks.
 - **Shape:** six phases, each ending in something deployed and usable. Your own rolls go in from week 8.
 - **After launch:** four weeks of fixing and measuring, then v1.1 in two drops (Feb–May), then Compare once enough lab data exists.
 
@@ -21,7 +21,7 @@ Tick items as they land; a phase is done when its last item (the exit check) is 
 
 ### Phase 0 · Foundations (28 Sep – 11 Oct)
 
-- [ ] Repo, Next.js + Tailwind mapped to design tokens
+- [x] Repo, Next.js + Tailwind mapped to design tokens
 - [ ] `next-intl` with Vietnamese
 - [ ] Neon + Drizzle schema
 - [ ] R2 buckets (private originals, public derivatives)
@@ -41,6 +41,7 @@ Tick items as they land; a phase is done when its last item (the exit check) is 
 - [ ] Past roll ([ROLL-2](product/requirements/rolls.md))
 - [ ] Lab directory ([LAB-1](product/requirements/labs.md))
 - [ ] Custom lab ([LAB-2](product/requirements/labs.md))
+- [ ] Waitlist page on the domain: one screen, phone + desktop, collects beta sign-ups
 - [ ] Exit: a roll is logged from the bag in under 60 s on a phone
 
 ### Phase 2 · Scans & notes (2 – 22 Nov)
@@ -80,6 +81,7 @@ Tick items as they land; a phase is done when its last item (the exit check) is 
 - [ ] Keyboard and alt text
 - [ ] Vietnamese copy pass
 - [ ] Fixes from 10–15 beta shooters
+- [ ] Landing page from the designs, phone + desktop, with real shelf, film strip and story card screenshots
 - [ ] Exit: every launch gate in [Soft launch](#soft-launch) holds on 15 Jan
 
 ### Content track
@@ -113,16 +115,16 @@ Tick items as they land; a phase is done when its last item (the exit check) is 
 
 ## Timeline to soft launch
 
-Six phases, 28 Sep 2026 – 17 Jan 2027. Hours are build estimates; the 30 h buffer sits on top.
+Six phases, 28 Sep 2026 – 17 Jan 2027. Hours are build estimates; the 21 h buffer sits on top.
 
 | Phase | Weeks · dates | Build hours | What ships (PRD IDs) | Done when |
 |---|---|---|---|---|
 | 0. Foundations | W1–2 · 28 Sep – 11 Oct | 16 | Repo, Next.js + Tailwind mapped to design tokens, `next-intl` (vi), Neon + Drizzle schema, R2 buckets, Vercel `sin1`, PostHog for analytics and errors, Google sign-in ([AUTH-1](product/requirements/auth.md)). Spikes: `next/og` with Be Vietnam Pro, Web Share with files | You sign in on a phone on a preview URL, and a test story PNG renders "tấm ưng" correctly |
-| 1. Log a roll | W3–5 · 12 Oct – 1 Nov | 24 | Seeded catalogue + accent-free search ([CAT-1](product/requirements/catalogue.md)), custom stock/camera (CAT-2), bag ([BAG-1](product/requirements/bag.md)), new and past roll ([ROLL-1, ROLL-2](product/requirements/rolls.md)), lab directory + custom lab ([LAB-1, LAB-2](product/requirements/labs.md)) | A roll is logged from the bag in under 60 s on a phone |
+| 1. Log a roll | W3–5 · 12 Oct – 1 Nov | 27 | Seeded catalogue + accent-free search ([CAT-1](product/requirements/catalogue.md)), custom stock/camera (CAT-2), bag ([BAG-1](product/requirements/bag.md)), new and past roll ([ROLL-1, ROLL-2](product/requirements/rolls.md)), lab directory + custom lab ([LAB-1, LAB-2](product/requirements/labs.md)), waitlist page on the domain | A roll is logged from the bag in under 60 s on a phone |
 | 2. Scans & notes | W6–8 · 2 – 22 Nov | 26 | Presigned upload, bulk upload, browser-made WebP copies, nightly cleanup ([SCAN-1–3](product/requirements/scans.md)), scan set with lab + branch (LAB-3), tấm ưng / blank (SCAN-4), notes, memory, mistakes ([NOTE-1, NOTE-2](product/requirements/notes.md)) | **M1 — dogfood:** 5 of your real rolls uploaded, 0 failed files |
 | 3. Shelf & collection | W9–11 · 23 Nov – 13 Dec | 24 | Canister shelf + drawn canister ([CAN-1, CAN-2](product/requirements/canister.md)), film strip / grid switch, filters, lightbox ([COL-1, COL-2](product/requirements/collection.md)), library grid (COL-3), bulk marking (COL-4) | Your shelf shows every roll; marking 36 frames takes under a minute on desktop |
 | 4. Sharing | W12–14 · 14 Dec – 3 Jan | 26 | Share link + revoke ([SHARE-1](product/requirements/sharing.md)), friend view in both views (SHARE-2, COL-5), link preview (SHARE-3), story cards Dải phim + Phiếu cuộn (SHARE-4), north-star events in PostHog | **M2 — feature complete:** a link pasted in Zalo and Messenger shows the cover; a story posts to Instagram from iPhone and Android |
-| 5. Private beta | W15–16 · 4 – 17 Jan | 14 | Speed pass, keyboard and alt text, Vietnamese copy pass, fixes from 10–15 beta shooters | Launch gates met (see [Soft launch](#soft-launch)) |
+| 5. Private beta | W15–16 · 4 – 17 Jan | 20 | Landing page (phone + desktop, real screenshots), speed pass, keyboard and alt text, Vietnamese copy pass, fixes from 10–15 beta shooters | Launch gates met (see [Soft launch](#soft-launch)) |
 
 Phase 4 runs over Christmas and New Year, which is why most of the buffer is expected to go there.
 
@@ -202,7 +204,7 @@ The two biggest risks are your own time and phone share sheets inside in-app bro
 
 | Risk | Likelihood | Mitigation |
 |---|---|---|
-| Day-job crunch takes whole weeks | High | 30 h buffer, the cut line, launch slips by one week at most |
+| Day-job crunch takes whole weeks | High | 21 h buffer, the cut line, launch slips by one week at most |
 | Web Share with files fails inside Zalo, Messenger or Instagram in-app browsers | High | Test in Phase 0; detect it, offer "mở trong trình duyệt", fall back to download |
 | Vietnamese diacritics render wrong in `next/og` images | Medium | Load Be Vietnam Pro font files into the renderer; spike in Phase 0 |
 | Zalo or Facebook keep an old preview image | Medium | Versioned `og:image` URL per roll version; test in Phase 4 |
