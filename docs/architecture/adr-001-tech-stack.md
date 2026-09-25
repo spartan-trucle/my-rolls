@@ -131,6 +131,8 @@ Frames left pending for 24 hours are deleted by the nightly cron, along with the
 
 The library grid is one query over `frame` joined to `roll`, newest first. `user_id` is copied onto `frame` so an index on (`user_id`, `mark`, `created_at`) serves the library-wide tấm ưng view without a join.
 
+**Auth tables are an exception to the house database rules** (decided 25.09.2026, Trúc). Better Auth's `user`, `session`, `account` and `verification` keep the library's own shape: text ids that Better Auth generates, foreign keys to `user` with `ON DELETE CASCADE`, and hard deletes, which AUTH-2 needs to really remove an account. Their timestamps are `timestamptz`, and lookups are indexed (migration `0001`). Every Cuộn table from Phase 1 on (`stock`, `roll`, `frame`…) follows the house rules instead: no foreign keys, `uuid_generate_v4()` ids, soft deletes and partial indexes.
+
 > **Open conflicts with the PRD:** mistake tagging, share-token hashing, TIFF support and GPS on downloads. See [Known conflicts](../README.md#known-conflicts-between-sources).
 
 ## Consequences
