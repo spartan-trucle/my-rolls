@@ -1,7 +1,6 @@
-import { z } from "zod";
+import "server-only";
 
-// Server-only: reads `process.env`, which is undefined in the browser.
-// Never import this module from a Client Component.
+import { z } from "zod";
 
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
