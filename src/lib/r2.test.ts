@@ -69,6 +69,86 @@ describe("createPresignedUploadUrl", () => {
     ).rejects.toThrow(/10485761/);
   });
 
+  it("rejects size 0, naming the value", async () => {
+    stubR2Env();
+    const { createPresignedUploadUrl, UploadValidationError } = await import("./r2");
+
+    await expect(
+      createPresignedUploadUrl({
+        userId: "user-1",
+        contentType: "image/jpeg",
+        size: 0,
+      }),
+    ).rejects.toThrow(UploadValidationError);
+    await expect(
+      createPresignedUploadUrl({
+        userId: "user-1",
+        contentType: "image/jpeg",
+        size: 0,
+      }),
+    ).rejects.toThrow(/0/);
+  });
+
+  it("rejects negative sizes, naming the value", async () => {
+    stubR2Env();
+    const { createPresignedUploadUrl, UploadValidationError } = await import("./r2");
+
+    await expect(
+      createPresignedUploadUrl({
+        userId: "user-1",
+        contentType: "image/jpeg",
+        size: -1024,
+      }),
+    ).rejects.toThrow(UploadValidationError);
+    await expect(
+      createPresignedUploadUrl({
+        userId: "user-1",
+        contentType: "image/jpeg",
+        size: -1024,
+      }),
+    ).rejects.toThrow(/-1024/);
+  });
+
+  it("rejects NaN, naming it", async () => {
+    stubR2Env();
+    const { createPresignedUploadUrl, UploadValidationError } = await import("./r2");
+
+    await expect(
+      createPresignedUploadUrl({
+        userId: "user-1",
+        contentType: "image/jpeg",
+        size: NaN,
+      }),
+    ).rejects.toThrow(UploadValidationError);
+    await expect(
+      createPresignedUploadUrl({
+        userId: "user-1",
+        contentType: "image/jpeg",
+        size: NaN,
+      }),
+    ).rejects.toThrow(/NaN/);
+  });
+
+  it("rejects non-integer sizes, naming the value", async () => {
+    stubR2Env();
+    const { createPresignedUploadUrl, UploadValidationError } = await import("./r2");
+
+    await expect(
+      createPresignedUploadUrl({
+        userId: "user-1",
+        contentType: "image/jpeg",
+        size: 1024.5,
+      }),
+    ).rejects.toThrow(UploadValidationError);
+    await expect(
+      createPresignedUploadUrl({
+        userId: "user-1",
+        contentType: "image/jpeg",
+        size: 1024.5,
+      }),
+    ).rejects.toThrow(/1024.5/);
+  });
+
   it("accepts exactly 10 MB", async () => {
     stubR2Env();
     const { createPresignedUploadUrl } = await import("./r2");

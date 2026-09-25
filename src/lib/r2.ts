@@ -43,6 +43,9 @@ function assertValidUpload(contentType: string, size: number): asserts contentTy
       `Content type "${contentType}" isn't allowed — only ${ALLOWED_UPLOAD_CONTENT_TYPES.join(", ")}`,
     );
   }
+  if (!Number.isInteger(size) || size <= 0) {
+    throw new UploadValidationError(`Upload size must be a positive integer, got ${size}`);
+  }
   if (size > MAX_UPLOAD_BYTES) {
     throw new UploadValidationError(`Upload is ${size} bytes, over the ${MAX_UPLOAD_BYTES} byte (10 MB) cap`);
   }
