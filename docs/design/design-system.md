@@ -1,7 +1,7 @@
 # Design system
 
 > **Mirror — the artifact is the source of truth:** [Design system](https://claude.ai/artifact/HtsG9sZeNGx19PSvPjW65a) (namespace `RollCall`)
-> Last synced: 25.09.2026 · artifact version `1790307689-5eeb` · last change 24.09.2026 by Trúc: "Cobalt darkened and desaturated to a deep muted indigo (#2e3a80); stickers recoloured to match."
+> Last synced: 25.09.2026 · artifact version `1790316098-92bd` · by Claude for Trúc · last change 25.09.2026 by Trúc: "Icon guideline: the active tab is cobalt, not pin (Known conflict 9)."
 > Before editing, re-read the artifact. Make changes in the artifact and copy them here in the same session (see [CLAUDE.md](../../CLAUDE.md#sync-rules)).
 >
 > **Naming:** the design system still calls the product **Roll Call**. The product name is **Cuộn** (see [Known conflicts](../README.md#known-conflicts-between-sources)). Token and component names stay as they are.
@@ -184,7 +184,7 @@ All are on `window.RollCall` (React 18). Props listed are what the consumer prov
 | `RollCard` | One roll in a list, on a torn scrap with a generic canister | `name`, `stock` (`gold` · `green` · `blue` · `mono` · `rose`), `iso`, `film`, `exposures`, `camera`, `date`, `oops`, `keepers`, `href` | Pick `stock` by film family, not brand. No logos. Flat: no tilt, tape or shadow |
 | `Stamp` | Rubber-stamped mono label | `children`, `tone` (`neutral` · `ink` · `keeper` · `oops`), `icon`, `label`, `solid`, `tilt` | `label` required for icon+number stamps. `solid` only on photos. `tilt` once per screen |
 | `Scribble` | Handwritten margin note with optional doodled arrow | `children`, `arrow` (`none` · `left` · `right` · `down`), `tone` (`ink` · `pin`), `size="sm"` | `pin` tone for oops. One per section. Never for required instructions |
-| `Icon` | Functional line icons | `name`, `size` (20), `label` | 20px in buttons/nav, 14px in stamps, 24px standalone. `currentColor` |
+| `Icon` | Functional line icons | `name`, `size` (20), `label` | 20px in buttons/nav, 14px in stamps, 24px standalone. `currentColor`: `ink` by default, `ink-muted` for inactive nav, `cobalt` for the active tab, `pin` for oops, `keeper` for keepers |
 | `UploadDrop` | Drop zone for scans | `onFiles(files)`, `title`, `hint`, `accept` (`image/*`) | Top of an empty roll, or in a mobile bottom sheet. No progress UI yet |
 
 Also in the artifact: `Cover` (the system's cover page) and `RollPage` (the mobile roll page reference layout), preview only.
