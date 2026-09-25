@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
+import { PROXY_MATCHER } from "./proxy-matcher";
 
 const getSessionCookie = vi.hoisted(() => vi.fn());
 
@@ -59,9 +60,7 @@ describe("proxy", () => {
     expect(getSessionCookie).toHaveBeenCalledWith(request);
   });
 
-  it("excludes Next internals and static files from the matcher", () => {
-    expect(config.matcher).toEqual([
-      "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
-    ]);
+  it("excludes Next internals and any file with an extension from the matcher (proxy-matcher.test.ts covers the pattern itself)", () => {
+    expect(config.matcher).toEqual([PROXY_MATCHER]);
   });
 });

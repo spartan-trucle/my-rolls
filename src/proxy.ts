@@ -24,7 +24,14 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Runs on every route except Next's own internals and common static
-  // files — matches Next's documented negative-matching example.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)"],
+  // Runs on every route except Next's own internals and any request for a
+  // file with an extension (public/ assets, fonts, favicon.ico, robots.txt,
+  // sitemap.xml) — see proxy-matcher.ts. /api/* stays gated. This literal
+  // must match `PROXY_MATCHER` there exactly — inlined, not imported,
+  // because Next only statically analyses a literal `matcher` array at
+  // build time (a re-exported variable is silently ignored, which once
+  // broke this build: "Entry matcher[0] need to be static strings").
+  // proxy-matcher.test.ts's "is what proxy.ts's config.matcher exports"
+  // test catches the two ever drifting apart.
+  matcher: ["/((?!_next/static|_next/image|.*\\.[a-zA-Z0-9]+$).*)"],
 };
