@@ -13,7 +13,20 @@ Stand up the whole Cuộn stack from [ADR-001](../../docs/architecture/adr-001-t
 - [x] Stage A step 4: Neon `my-rolls-db` via Marketplace: region `sin1`, plan `free_v3`, Neon Auth off, connected to Production, Preview, Development (25.09.2026)
 - [x] Stage A step 5: `BETTER_AUTH_SECRET` set: one shared value for Production + Preview (sensitive), a separate one for Development (25.09.2026)
 - [x] Stage A step 2: doc sync: design-system mirror → `1790324661-b252`, wireframes re-indexed → canvas `1790318000-c9a4`, ADR-001 Accepted, auth.md email decided, roadmap artifact + mirror → rev 15 without Sentry (25.09.2026)
-- [ ] Preview branching switched on in the dashboard (D24)
+- [x] Preview branching on (D24): "Create Database Branch For Deployment → Preview", "Require Active Resource Before Deploy" on. Database env vars now Sensitive and only in Production + Preview, so local dev never gets production credentials (25.09.2026, Trúc)
+- [x] Neon skill files kept and committed (D25, 25.09.2026)
+- [x] R2 checkout done by Trúc (25.09.2026)
+- [x] Stage B steps 6–8 + local part of 9: Next.js 16.3.6, React 19.2.8, Tailwind 4.3.3, Vitest 5.0.1, zod env, `/api/health`, `vercel.json` (`nextjs`, `sin1`). 9/9 tests, lint clean, build clean, health 200 (25.09.2026)
+- [ ] Stage B step 9 remote: first preview deploy (needs the branch pushed)
+- [ ] `.env.development.local` with the Neon `dev` branch URLs (D23, Trúc)
+
+### Found during Stages A and B
+
+- `next dev` in Next 16.3.6 appends an agent-rules block to `CLAUDE.md`; switched off with `agentRules: false` in `next.config.ts`.
+- `src/env.ts` validates at import, so a local `next build` fails once `.env.local` no longer carries `DATABASE_URL` (Development lost the database vars on purpose). Fix at the start of Stage C: validate on first use.
+- `server-only` throws under Vitest, so `src/env.ts` dropped it. Put it back in Stage D with a Vitest alias to an empty module, before auth secrets live in code.
+- `package.json` pins `pnpm@11.8.0`; check the first Vercel build uses a compatible pnpm.
+- The dev branch password was pasted in chat and Neon branches share their parent's passwords, so it likely opens production too. No data yet; reset `neondb_owner` on both branches before the private beta.
 
 ## Decisions this plan assumes
 
