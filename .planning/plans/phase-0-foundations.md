@@ -225,7 +225,7 @@ Branch `feature/phase-0-storage-observability` off `main` at `689da35` (PRs #1�
 | # | Decision | Default |
 |---|---|---|
 | D26 | PostHog in the browser | `instrumentation-client.ts` (Next 15.3+ convention, no provider component): `posthog.init` with `capture_pageview: "history_change"`, `capture_exceptions: true`, `person_profiles: "identified_only"`, no session recording. No reverse proxy yet (ad blockers will drop some events; fine for soft launch) |
-| D27 | PostHog on the server | `posthog-node` in `src/lib/posthog-server.ts` with `flushAt: 1, flushInterval: 0`; `instrumentation.ts` `onRequestError` calls `captureException` then `await shutdown()` so the function doesn't exit before the send. Same public project token as the browser; no new secret |
+| D27 | PostHog on the server | `posthog-node` in `src/lib/posthog-server.ts`; `instrumentation.ts` `onRequestError` awaits `captureExceptionImmediate` so the event is sent before the function returns (not `shutdown()`, which closes the reused client). Same public project token as the browser; no new secret |
 | D28 | Who PostHog knows | No `identify` in Phase 0. Events stay anonymous; identifying signed-in users (by Better Auth `user.id`, never email) comes with Phase 1 onboarding events |
 | D29 | Test error triggers | Under `/dev` (already public): `/dev/errors` page with a "throw in browser" button and a link to `/api/dev/boom`. Deleted in the last commit of this branch, after the PostHog check |
 | D30 | Spike routes | `/spike/og` (route handler) and `/spike/share` (page), **public** in `proxy-decision.ts` and `noindex`. Deleted in Stage H once the spike note is written. Reason: Zalo, Messenger and Instagram in-app browsers have their own cookie jars, so they can't pass Vercel preview protection **or** Google sign-in (Google blocks OAuth in embedded webviews). The device test therefore runs on **production** `my-rolls-weld.vercel.app` after this PR merges |
@@ -235,7 +235,7 @@ Branch `feature/phase-0-storage-observability` off `main` at `689da35` (PRs #1�
 | D34 | R2 client | `@aws-sdk/client-s3` + `@aws-sdk/s3-request-presigner`, endpoint `https://<account>.r2.cloudflarestorage.com`, region `auto`. PUT URLs expire in 10 min, GET in 5 min. Keys: `originals/<userId>/<uuid>.<ext>`. R2 env keys optional in `src/env.ts`, validated by a separate `getR2Env()` so the app still builds without them |
 
 **G1 · PostHog (~1.5 h)** — step 26
-- Tests first: `posthog-server` returns one memoised client configured with `flushAt: 1`; `onRequestError` captures the error with path + method and awaits shutdown; missing `NEXT_PUBLIC_POSTHOG_KEY` → no-op, no throw (local dev without the key must still run).
+- Tests first: `posthog-server` returns one memoised client; `onRequestError` captures the error with path + method and awaits `captureExceptionImmediate`; missing `NEXT_PUBLIC_POSTHOG_KEY` → no-op, no throw (local dev without the key must still run).
 - `instrumentation-client.ts`, `instrumentation.ts`, `src/lib/posthog-server.ts`; `NEXT_PUBLIC_POSTHOG_*` added to `.env.example`.
 - `/dev/errors` + `/api/dev/boom` (D29).
 - **Check (Claude, with the PostHog MCP):** on the branch preview, one `$pageview`, one browser `$exception`, one server `$exception` land in the Cuộn project. Then delete the error triggers.

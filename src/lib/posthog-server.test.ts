@@ -1,18 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const captureException = vi.fn();
+const captureExceptionImmediate = vi.fn().mockResolvedValue(undefined);
 const shutdown = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("posthog-node", () => ({
   PostHog: vi.fn().mockImplementation(function PostHogMock(this: unknown) {
-    return Object.assign(this as object, { captureException, shutdown });
+    return Object.assign(this as object, { captureExceptionImmediate, shutdown });
   }),
 }));
 
 describe("getPostHogServerClient", () => {
   beforeEach(() => {
     vi.resetModules();
-    captureException.mockClear();
+    captureExceptionImmediate.mockClear();
     shutdown.mockClear();
   });
 
@@ -42,7 +42,7 @@ describe("getPostHogServerClient", () => {
     expect(PostHog).toHaveBeenCalledTimes(1);
   });
 
-  it("configures flushAt: 1 and flushInterval: 0 so an error is sent before the function exits", async () => {
+  it("passes the NEXT_PUBLIC_POSTHOG_HOST config to the client", async () => {
     vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test_key");
     vi.stubEnv("NEXT_PUBLIC_POSTHOG_HOST", "https://us.i.posthog.com");
 
@@ -55,8 +55,6 @@ describe("getPostHogServerClient", () => {
       "phc_test_key",
       expect.objectContaining({
         host: "https://us.i.posthog.com",
-        flushAt: 1,
-        flushInterval: 0,
       }),
     );
   });
@@ -65,7 +63,7 @@ describe("getPostHogServerClient", () => {
 describe("reportServerError", () => {
   beforeEach(() => {
     vi.resetModules();
-    captureException.mockClear();
+    captureExceptionImmediate.mockClear();
     shutdown.mockClear();
   });
 
@@ -81,10 +79,10 @@ describe("reportServerError", () => {
     await expect(
       reportServerError(new Error("boom"), { path: "/api/dev/boom", method: "GET" }),
     ).resolves.toBeUndefined();
-    expect(captureException).not.toHaveBeenCalled();
+    expect(captureExceptionImmediate).not.toHaveBeenCalled();
   });
 
-  it("captures the error with path and method, then awaits shutdown", async () => {
+  it("awaits captureExceptionImmediate with path and method, and does NOT call shutdown", async () => {
     vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test_key");
     vi.stubEnv("NEXT_PUBLIC_POSTHOG_HOST", "https://us.i.posthog.com");
 
@@ -93,11 +91,11 @@ describe("reportServerError", () => {
 
     await reportServerError(error, { path: "/api/dev/boom", method: "GET" });
 
-    expect(captureException).toHaveBeenCalledWith(
+    expect(captureExceptionImmediate).toHaveBeenCalledWith(
       error,
       undefined,
       expect.objectContaining({ path: "/api/dev/boom", method: "GET" }),
     );
-    expect(shutdown).toHaveBeenCalledTimes(1);
+    expect(shutdown).not.toHaveBeenCalled();
   });
 });
