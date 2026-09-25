@@ -24,7 +24,8 @@
 @media (min-width: 1024px) {
   .crossLink {
     margin: 0;
-    padding-top: 20px;
+    /* Board: 20px padding above the divider — nearest token. */
+    padding-top: var(--space-6);
     border-top: 1px solid var(--line);
   }
 }

@@ -57,13 +57,15 @@ export default function SignUpPage() {
         </>
       }
     >
-      <div className="flex flex-col gap-1.5">
+      {/* gap-2 (space-2, 8px): board is 6px on phone, exactly 8px on desktop — 8px is the nearest token either way. */}
+      <div className="flex flex-col gap-2">
         <span className="text-label uppercase text-ink-muted">{t("stepLabel")}</span>
         <h1 className="font-display text-display-l font-semibold tracking-[-0.015em] lg:text-display-xl lg:tracking-[-0.02em]">
           {t("title")}
         </h1>
         <p className="text-body-sm text-ink-muted lg:text-body">{t("subtitle")}</p>
       </div>
+      {/* gap-4 (space-4, 16px): matches the board exactly, both breakpoints. */}
       <div className="flex flex-col gap-4">
         <Perk icon="roll" title={t("perkShelfTitle")} body={t("perkShelfBody")} />
         <Perk icon="keeper" title={t("perkKeeperTitle")} body={t("perkKeeperBody")} />

@@ -49,7 +49,8 @@ export default function SignInPage() {
         </>
       }
     >
-      <div className="flex flex-col gap-1.5">
+      {/* gap-2 (space-2, 8px): board is 6px on phone, exactly 8px on desktop — 8px is the nearest token either way. */}
+      <div className="flex flex-col gap-2">
         <h1 className="font-display text-display-l font-semibold tracking-[-0.015em] lg:text-display-xl lg:tracking-[-0.02em]">
           {t("title")}
         </h1>

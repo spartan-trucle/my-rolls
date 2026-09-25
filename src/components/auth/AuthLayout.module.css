@@ -16,7 +16,12 @@
     "main";
   min-height: 100dvh;
   padding: var(--space-4) var(--space-4) var(--space-6);
-  gap: var(--space-5);
+  /* Board: 20px between the top row, the heading block, the perks and the
+     actions — `--space-6` (24px) is the nearest token. (Was `var(--space-5)`,
+     a token that doesn't exist: an invalid `var()` with no fallback resolves
+     the whole declaration to `gap`'s initial value, i.e. 0 — Stage F
+     review, fix 2.) */
+  gap: var(--space-6);
 }
 
 .topRow {
@@ -56,14 +61,17 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  /* Board: 20px between the heading block and the perks (phone). */
+  gap: var(--space-6);
 }
 
 .actions {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding-top: var(--space-5);
+  /* Board: 14px inside the button block — same phone and desktop. */
+  gap: var(--space-4);
+  /* Board: 20px between the perks/content and the actions (phone). */
+  padding-top: var(--space-6);
 }
 
 /* Desktop-only chrome, hidden on the phone layout. */
@@ -171,7 +179,15 @@
     width: 420px;
   }
 
+  .content {
+    /* Board: 28px between the heading block and the perks (desktop). */
+    gap: var(--space-8);
+  }
+
   .actions {
-    padding-top: 0;
+    /* Board: 28px between the perks and the button block (desktop); the
+       14px inside the button block itself (`.actions`'s own `gap`) is the
+       same as the phone layout, set above. */
+    padding-top: var(--space-8);
   }
 }
