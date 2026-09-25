@@ -61,17 +61,23 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  /* Board: 20px between the heading block and the perks (phone). */
-  gap: var(--space-6);
+  /* Owner ask, more generous than the boards: the heading block to its next
+     block (perks, or straight to the actions below when there's no perks)
+     is space-8 (32px) on the phone layout. */
+  gap: var(--space-8);
 }
 
 .actions {
   display: flex;
   flex-direction: column;
-  /* Board: 14px inside the button block — same phone and desktop. */
+  /* Owner ask: the Google button to the privacy/consent note stays space-4
+     (16px), so the note still reads as part of the button. */
   gap: var(--space-4);
-  /* Board: 20px between the perks/content and the actions (phone). */
-  padding-top: var(--space-6);
+  /* Same space-8 (32px) as `.content`'s own gap above — the heading block
+     to "whatever comes right after" is one consistent rhythm, whether that
+     next block is perks (sign-up) or straight to this actions area
+     (sign-in, sign-up/profile). */
+  padding-top: var(--space-8);
 }
 
 /* Desktop-only chrome, hidden on the phone layout. */
@@ -180,14 +186,14 @@
   }
 
   .content {
-    /* Board: 28px between the heading block and the perks (desktop). */
-    gap: var(--space-8);
+    /* Owner ask: space-12 (48px) on desktop — one step up from the phone
+       layout's space-8, and from the boards' own 28px. */
+    gap: var(--space-12);
   }
 
   .actions {
-    /* Board: 28px between the perks and the button block (desktop); the
-       14px inside the button block itself (`.actions`'s own `gap`) is the
-       same as the phone layout, set above. */
-    padding-top: var(--space-8);
+    /* Same space-12 (48px) as `.content`'s own gap above, for the same
+       reason as the phone layout's `padding-top` comment. */
+    padding-top: var(--space-12);
   }
 }

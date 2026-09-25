@@ -27,7 +27,7 @@
     },
     "signIn": {
       "googleButton": "Đăng nhập bằng Google",
-      "title": "Chào mừng trở lại",
+      "title": "Chào mừng trở lại",
       "subtitle": "Đăng nhập để mở lại kệ cuộn của bạn.",
       "privacyNote": "Cuộn chỉ lấy tên, email và ảnh đại diện từ Google. Không có mật khẩu nào cần nhớ.",
       "crossLink": "Chưa có tài khoản? <link>Tạo tài khoản</link>",
@@ -62,7 +62,6 @@
       "nameErrorTooLong": "Tên dài quá, đẩy +3 à? Ngắn lại dưới 50 ký tự nhé.",
       "emailLabel": "Email",
       "emailFromGoogle": "từ Google",
-      "scribble": "đổi tên lúc nào cũng được",
       "continueButton": "Tiếp tục",
       "switchAccountPhone": "Dùng tài khoản Google khác",
       "switchAccountDesktop": "Dùng tài khoản khác"

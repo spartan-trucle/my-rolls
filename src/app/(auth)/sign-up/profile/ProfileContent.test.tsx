@@ -26,6 +26,20 @@ describe("ProfileContent", () => {
     expect(screen.getByLabelText("Ảnh đại diện từ Google")).toHaveTextContent("T");
   });
 
+  it("carries the display-l class, not display-xl", () => {
+    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} />);
+
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading).toHaveClass("text-display-l");
+    expect(heading).not.toHaveClass("text-display-xl");
+  });
+
+  it("no longer shows the 'đổi tên lúc nào cũng được' scribble (owner request: removed)", () => {
+    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} />);
+
+    expect(screen.queryByText("đổi tên lúc nào cũng được")).not.toBeInTheDocument();
+  });
+
   it("renders the Google avatar image when there is one", () => {
     renderWithIntl(
       <ProfileContent

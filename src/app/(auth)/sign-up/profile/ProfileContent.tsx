@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { AuthLayout } from "@/components/auth/AuthLayout";
-import { Button, Field, Scribble } from "@/design-system";
+import { Button, Field } from "@/design-system";
 import { signOutToSignUpAction } from "@/lib/sign-out-action";
 import { updateDisplayNameAction, type IUpdateDisplayNameState } from "./actions";
 import styles from "./page.module.css";
@@ -65,7 +65,11 @@ export function ProfileContent({ name, email, image }: ProfileContentProps) {
         </div>
       }
     >
-      <div className="flex flex-col gap-4">
+      {/* One wrapper, gap-6 (space-6, 24px, owner ask) between avatar / heading
+          block / form: AuthLayout's own `.content` gap (space-8/space-12) is
+          for the *shared* board-to-board rhythm and doesn't apply here, since
+          this is a single child of it. */}
+      <div className="flex flex-col gap-6">
         {image ? (
           <Image src={image} alt={t("avatarAlt")} width={72} height={72} className={styles.avatarImage} />
         ) : (
@@ -73,33 +77,32 @@ export function ProfileContent({ name, email, image }: ProfileContentProps) {
             {initial}
           </span>
         )}
-        <div className="flex flex-col gap-1">
+        {/* gap-4 (space-4, 16px): owner ask, heading to subtitle (applied to the
+            whole step-label/title/subtitle block uniformly). */}
+        <div className="flex flex-col gap-4">
           <span className="text-label uppercase text-ink-muted">{t("stepLabel")}</span>
-          <h1 className="font-display text-display-l font-semibold tracking-[-0.015em] lg:text-display-xl lg:tracking-[-0.02em]">
-            {t("title")}
-          </h1>
+          {/* display-l at every width, `text-balance`: see the matching comment on /sign-in. */}
+          <h1 className="font-display text-display-l text-balance">{t("title")}</h1>
           <p className="text-body-sm text-ink-muted lg:text-body">{t("subtitle")}</p>
         </div>
-      </div>
 
-      <form id={FORM_ID} action={formAction} className="flex flex-col gap-4">
-        <Field
-          name="name"
-          label={t("nameLabel")}
-          defaultValue={name}
-          hint={errorMessage ? undefined : t("nameHint")}
-          error={errorMessage}
-        />
-        <div className="flex flex-col gap-1.5">
-          <span className={styles.readOnlyLabel}>{t("emailLabel")}</span>
-          <div className={styles.readOnlyRow}>
-            <span>{email}</span>
-            <span className={styles.readOnlyBadge}>{t("emailFromGoogle")}</span>
+        <form id={FORM_ID} action={formAction} className="flex flex-col gap-4">
+          <Field
+            name="name"
+            label={t("nameLabel")}
+            defaultValue={name}
+            hint={errorMessage ? undefined : t("nameHint")}
+            error={errorMessage}
+          />
+          <div className="flex flex-col gap-1.5">
+            <span className={styles.readOnlyLabel}>{t("emailLabel")}</span>
+            <div className={styles.readOnlyRow}>
+              <span>{email}</span>
+              <span className={styles.readOnlyBadge}>{t("emailFromGoogle")}</span>
+            </div>
           </div>
-        </div>
-      </form>
-
-      <Scribble size="sm">{t("scribble")}</Scribble>
+        </form>
+      </div>
     </AuthLayout>
   );
 }

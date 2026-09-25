@@ -10,6 +10,14 @@ it("renders exactly one heading with the sign-up title", () => {
   expect(screen.getByRole("heading", { level: 1, name: "Cất cuộn phim đầu tiên lên kệ" })).toBeInTheDocument();
 });
 
+it("carries the display-l class, not display-xl — expected to wrap to two balanced lines", () => {
+  renderWithIntl(<SignUpPage />);
+
+  const heading = screen.getByRole("heading", { level: 1 });
+  expect(heading).toHaveClass("text-display-l");
+  expect(heading).not.toHaveClass("text-display-xl");
+});
+
 it("renders one Google button labelled for sign-up", () => {
   renderWithIntl(<SignUpPage />);
 

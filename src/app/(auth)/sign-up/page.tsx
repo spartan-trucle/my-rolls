@@ -57,16 +57,16 @@ export default function SignUpPage() {
         </>
       }
     >
-      {/* gap-2 (space-2, 8px): board is 6px on phone, exactly 8px on desktop — 8px is the nearest token either way. */}
-      <div className="flex flex-col gap-2">
+      {/* gap-4 (space-4, 16px): owner ask, heading to subtitle, both layouts. */}
+      <div className="flex flex-col gap-4">
         <span className="text-label uppercase text-ink-muted">{t("stepLabel")}</span>
-        <h1 className="font-display text-display-l font-semibold tracking-[-0.015em] lg:text-display-xl lg:tracking-[-0.02em]">
-          {t("title")}
-        </h1>
+        {/* display-l at every width, `text-balance`: see the matching comment on /sign-in. This
+            title is long enough that it's expected to wrap to two balanced lines. */}
+        <h1 className="font-display text-display-l text-balance">{t("title")}</h1>
         <p className="text-body-sm text-ink-muted lg:text-body">{t("subtitle")}</p>
       </div>
-      {/* gap-4 (space-4, 16px): matches the board exactly, both breakpoints. */}
-      <div className="flex flex-col gap-4">
+      {/* gap-6 (space-6, 24px): owner ask, apart from the board's own 16px. */}
+      <div className="flex flex-col gap-6">
         <Perk icon="roll" title={t("perkShelfTitle")} body={t("perkShelfBody")} />
         <Perk icon="keeper" title={t("perkKeeperTitle")} body={t("perkKeeperBody")} />
         <Perk icon="share" title={t("perkShareTitle")} body={t("perkShareBody")} />

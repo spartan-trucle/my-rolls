@@ -49,11 +49,19 @@ export default function SignInPage() {
         </>
       }
     >
-      {/* gap-2 (space-2, 8px): board is 6px on phone, exactly 8px on desktop — 8px is the nearest token either way. */}
-      <div className="flex flex-col gap-2">
-        <h1 className="font-display text-display-l font-semibold tracking-[-0.015em] lg:text-display-xl lg:tracking-[-0.02em]">
-          {t("title")}
-        </h1>
+      {/* gap-4 (space-4, 16px): owner ask, heading to subtitle, both layouts. */}
+      <div className="flex flex-col gap-4">
+        {/*
+          display-l (40/44, Fraunces 500, -0.015em — all from the token, no
+          extra font-weight/tracking utility needed) at every width: display-xl
+          on desktop wrapped "Chào mừng trở lại" down to a lone "lại" on its
+          own line. `text-balance` only ever kicks in if a very narrow phone
+          forces a wrap — never `white-space: nowrap`, which would overflow
+          instead. `auth.signIn.title` itself pins the one allowed break
+          point with NBSPs (see messages/vi.json), so a forced wrap can only
+          ever land as "Chào mừng" / "trở lại", never mid-pair.
+        */}
+        <h1 className="font-display text-display-l text-balance">{t("title")}</h1>
         <p className="text-body-sm text-ink-muted lg:text-body">{t("subtitle")}</p>
       </div>
     </AuthLayout>
