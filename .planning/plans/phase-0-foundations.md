@@ -1,11 +1,19 @@
 # Plan: Phase 0 · Foundations
 
-Stand up the whole Cuộn stack from [ADR-001](../../docs/architecture/adr-001-tech-stack.md): Next.js on Vercel `sin1`, Neon in Singapore, Drizzle, Better Auth (Google), R2, `next-intl` (vi), Tailwind mapped to the design tokens, PostHog, Sentry, the sign-in and sign-up screens from the design canvas, and the two spikes. It ends on the roadmap's Phase 0 exit check.
+Stand up the whole Cuộn stack from [ADR-001](../../docs/architecture/adr-001-tech-stack.md): Next.js on Vercel `sin1`, Neon in Singapore, Drizzle, Better Auth (Google), R2, `next-intl` (vi), Tailwind mapped to the design tokens, PostHog for analytics and errors, the sign-in and sign-up screens from the design canvas, and the two spikes. It ends on the roadmap's Phase 0 exit check.
 
 - **Roadmap:** Phase 0, 28 Sep – 11 Oct 2026, 16 h booked; this plan estimates ~22.5 h (see Risks). Roadmap artifact re-read 25.09.2026, rev 13, same as the mirror.
 - **Design system:** artifact re-read 25.09.2026, version `1790317950-ff46`. The mirror is still on `1790307689-5eeb`: token values match, but the artifact README has a new **"In code"** section that sets how tokens, fonts and components enter the app. Stages C and E follow it.
 - **Design canvas:** re-read 25.09.2026, version `1790318000-c9a4`. Page **"Đăng nhập"** has 12 boards: Login, Signup step 1 (Google), Signup step 2 (profile), each at 390 and 1440 px, in Paper and Darkroom. `docs/design/wireframes.md` still indexes the older `1790307652-d78a` and says sign-in has no artboard.
-- **Status:** approved by Trúc 25.09.2026 (v2). v2 adds English naming (D15) and the canvas auth screens (D7, D16–D19).
+- **Status:** approved by Trúc 25.09.2026 (v2). v2 adds English naming (D15) and the canvas auth screens (D7, D16–D19). v3 (25.09.2026, Trúc) drops Sentry for PostHog error tracking (D22) and adds what Stage A turned up (D23–D25).
+
+## Progress
+
+- [x] Stage A step 3: Vercel project `ngantrucles-projects/my-rolls` linked, GitHub `NganTrucLe/my-rolls` connected (25.09.2026)
+- [x] Stage A step 4: Neon `my-rolls-db` via Marketplace: region `sin1`, plan `free_v3`, Neon Auth off, connected to Production, Preview, Development (25.09.2026)
+- [x] Stage A step 5: `BETTER_AUTH_SECRET` set: one shared value for Production + Preview (sensitive), a separate one for Development (25.09.2026)
+- [x] Stage A step 2: doc sync: design-system mirror → `1790324661-b252`, wireframes re-indexed → canvas `1790318000-c9a4`, ADR-001 Accepted, auth.md email decided, roadmap artifact + mirror → rev 15 without Sentry (25.09.2026)
+- [ ] Preview branching switched on in the dashboard (D24)
 
 ## Decisions this plan assumes
 
@@ -34,6 +42,10 @@ Change any of these before approving.
 | D19 | "Điều khoản" / "Chính sách riêng tư" links on Signup step 1 | Placeholder pages `/terms` and `/privacy` now; real text added to the content track, due before the private beta (04.01.2027) | The design links them and nothing exists yet. Real users' Google data needs a real privacy notice |
 | D20 | Sample photos on the auth screens | The canvas's own photos (5 scans), exported as WebP into `public/samples/` | The boards show them. Confirmed by Trúc 25.09.2026 |
 | D21 | Theme toggle | Paper / Darkroom toggle as on every auth board; choice stored in a cookie so the server renders the right theme; default follows the system | Avoids a flash of the wrong theme on load |
+| D22 | Error tracking | **No Sentry.** PostHog error tracking: `posthog-js` exception autocapture in the browser, `posthog-node` from `instrumentation.ts` `onRequestError` on the server | Trúc, 25.09.2026: no budget for Sentry. PostHog is already in the stack and has a free error-tracking tier, so one vendor fewer |
+| D23 | Local database | Local dev must not use the production database. Before the first migration (step 14) you create a `dev` branch in the Neon console (Vercel → Storage → my-rolls-db → Open in Neon) and put its URL in `.env.development.local`, which Next.js reads ahead of `.env.local` and `vercel env pull` never overwrites | The integration gives Development the same database as Production |
+| D24 | Preview branching | You switch it on: Vercel → Storage → my-rolls-db → connected project → Advanced Options → Deployments Configuration → Preview | The CLI install connected the database but can't show or set this; preview branch URLs are injected at deploy time, so `vercel env ls` can't confirm it |
+| D25 | Neon Marketplace extras | The install also wrote `.agents/skills/neon*`, `.claude/skills/neon*` and `skills-lock.json`. **Your call:** keep and commit, or delete | Third-party skills that load into every Claude session in this repo; they cover Neon Auth, which we don't use |
 
 ## Who does what
 
@@ -41,9 +53,9 @@ Some steps need your accounts, logins or card. Claude never types passwords, car
 
 | Step | You | Claude (after your yes) | `fe-plan-executor` |
 |---|---|---|---|
-| Accounts | Install Vercel CLI + `vercel login`. Create Cloudflare account and complete R2 checkout. Create Sentry account. Confirm PostHog org | — | — |
+| Accounts | Install Vercel CLI + `vercel login` (done). Create Cloudflare account and complete R2 checkout. Confirm PostHog org | — | — |
 | Vercel + Neon | Accept Neon Marketplace terms if asked | `vercel link`, region `sin1`, Git connect, `vercel integration add neon`, `vercel env pull` | — |
-| Secrets | Paste Google, R2, Sentry secrets with `vercel env add` yourself | Generate `BETTER_AUTH_SECRET` without printing it | — |
+| Secrets | Paste Google and R2 secrets with `vercel env add` yourself; Neon dev branch URL into `.env.development.local` (D23) | Generate `BETTER_AUTH_SECRET` without printing it | — |
 | Design inputs | — | Read each component's README from the design-system artifact; export the sample photos from the canvas | — |
 | Code | Review PRs | Review agent output | Stages B–G code, tests first |
 | Device checks | Sign in on phone; test Web Share in Zalo, Messenger, Instagram | — | — |
@@ -55,7 +67,7 @@ All paths and names in English (D15).
 ```
 .gitignore                               new     node_modules, .next, .env*.local, .vercel, tsbuildinfo
 package.json, pnpm-lock.yaml             new     create-next-app (TS, App Router, src/, Tailwind v4, ESLint), Vitest
-next.config.ts                           new     next-intl + Sentry wrappers
+next.config.ts                           new     next-intl wrapper
 vercel.json                              new     regions ["sin1"], build runs migrations
 .env.example                             new     every required key, no values
 src/env.ts                               new     typed env validation (zod)
@@ -92,8 +104,8 @@ src/lib/auth.ts, auth-client.ts          new     Better Auth: Google, 30-day ses
 src/app/api/auth/[...all]/route.ts       new     Better Auth handler
 src/proxy.ts                             new     session gate (Next 16 name for middleware)
 src/lib/r2.ts                            new     S3 client + presign helpers
-src/app/providers.tsx                    new     PostHog provider
-sentry.*.config.ts, instrumentation.ts   new     Sentry
+src/app/providers.tsx                    new     PostHog provider: pageviews + exception autocapture (D22)
+instrumentation.ts, src/lib/posthog-server.ts new  server errors to PostHog via onRequestError (D22)
 src/app/spike/og/route.tsx               new     1080×1920 story PNG with "tấm ưng" (Spike 1)
 src/app/spike/share/page.tsx             new     Web Share with files (Spike 2)
 tests/**                                 new     see Test strategy
@@ -102,7 +114,7 @@ docs/architecture/adr-001-tech-stack.md  modify  Accepted; user/account shape; e
 docs/design/design-system.md             modify  sync to artifact `1790317950-ff46` ("In code" section)
 docs/design/wireframes.md                modify  re-index canvas `1790318000-c9a4`: pages "Đăng nhập" and "Kệ & hồ sơ"; take Sign-in off the no-artboard list
 docs/product/requirements/auth.md        modify  email decided; link the auth boards
-docs/roadmap.md + roadmap artifact       modify  tick Phase 0 items as they land
+docs/roadmap.md + roadmap artifact       modify  "PostHog + Sentry" → PostHog only (D22, with your OK); tick Phase 0 items as they land
 README.md                                modify  status, how to run locally
 ```
 
@@ -112,7 +124,7 @@ Each step is at most half a day. A stage ends in a PR that deploys a preview.
 
 ### Stage A · Accounts, provisioning, doc sync (~2 h, no code)
 
-1. **You:** install and log in to the Vercel CLI; create the Cloudflare and Sentry accounts; complete R2 checkout; confirm the PostHog org.
+1. **You:** install and log in to the Vercel CLI (done); create the Cloudflare account and complete R2 checkout; confirm the PostHog org.
 2. **Claude:** docs, all in one commit:
    - Sync the design-system mirror to `1790317950-ff46`.
    - Re-index `wireframes.md` to canvas `1790318000-c9a4`.
@@ -124,7 +136,7 @@ Each step is at most half a day. A stage ends in a PR that deploys a preview.
 
 ### Stage B · App skeleton (~3 h)
 
-6. Delete the stray untracked `node_modules/`, `.next/`, `next-env.d.ts`, `tsconfig.tsbuildinfo`. The `.gitignore` is already in place (added 25.09.2026). `create-next-app` refuses a folder that already holds `CLAUDE.md`, `docs/`, `.claude/` and `.planning/`, so scaffold it in the scratchpad (pnpm, TS, App Router, `src/`, Tailwind v4, ESLint) and copy the app files in, **keeping our `.gitignore` and `README.md`**. Add Vitest + Testing Library and the `test`, `lint`, `build` scripts.
+6. Delete the stray untracked `node_modules/`, `.next/`, `next-env.d.ts`, `tsconfig.tsbuildinfo`. The `.gitignore` is already in place (added 25.09.2026); change its `.vercel/` line to `.vercel` and its `.env` + `.env.*` lines to one `.env*` line, keeping `!.env.example` after it, so `vercel env pull` stops appending to it. `create-next-app` refuses a folder that already holds `CLAUDE.md`, `docs/`, `.claude/` and `.planning/`, so scaffold it in the scratchpad (pnpm, TS, App Router, `src/`, Tailwind v4, ESLint) and copy the app files in, **keeping our `.gitignore` and `README.md`**. Add Vitest + Testing Library and the `test`, `lint`, `build` scripts.
 7. `src/env.ts` validation, test first: missing key → clear error naming the key.
 8. `/api/health`, test first: 200 with `{ ok, db }`; DB down → 503.
 9. `vercel.json` with `sin1`; `.env.example`. First preview deploy; check the function region in the deploy output.
@@ -142,7 +154,7 @@ Each step is at most half a day. A stage ends in a PR that deploys a preview.
 
 ### Stage D · Database and Better Auth (~3 h)
 
-14. Drizzle + Neon driver, `drizzle.config.ts`, Better Auth schema, first migration. The build runs `drizzle-kit migrate`. Check: a preview deploy creates its Neon branch, and the tables exist.
+14. **You:** create the Neon `dev` branch and put its URL in `.env.development.local` (D23). Then: Drizzle + Neon driver, `drizzle.config.ts`, Better Auth schema, first migration. The build runs `drizzle-kit migrate`. Check: a preview deploy creates its Neon branch, and the tables exist.
 15. **You:** create the Google OAuth client. Redirect URIs: `http://localhost:3000/api/auth/callback/google` and the production callback URL. Add `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` with `vercel env add`.
 16. Better Auth with Google, 30-day session, `oAuthProxy`, `newUserCallbackURL: /sign-up/profile`. Tests first:
     - The session lasts 30 days.
@@ -176,7 +188,7 @@ Each step is at most half a day. A stage ends in a PR that deploys a preview.
 25. `src/lib/r2.ts` presign helpers, test first: key shape, 10 MB cap, content-type allow-list.
     - Bucket CORS allows PUT from `localhost:3000` and the Vercel URLs.
     - Smoke script: presign → PUT 1 KB → GET from `r2.dev` → delete.
-26. PostHog: provider and pageview on the Cuộn project. Sentry: `@sentry/nextjs` with source maps. Check: one test event reaches each; the test error route is removed after.
+26. PostHog on the Cuộn project: provider with pageviews and exception autocapture in the browser; `posthog-node` capturing server errors from `onRequestError`. Check: one pageview, one browser error and one server error reach PostHog; the test error route is removed after.
 27. Spike 1: `next/og` renders a 1080 × 1920 PNG with Be Vietnam Pro loaded from font files and "tấm ưng" on it. Test: 200, `image/png`, 1080 × 1920. You check the diacritics by eye.
 28. Spike 2: a page that calls `navigator.canShare({ files })` and shares that PNG. You try it in iPhone Safari, Android Chrome, and the Zalo, Messenger and Instagram in-app browsers. Results go in a spike note (new doc; you decide where).
 
@@ -195,7 +207,7 @@ Each step is at most half a day. A stage ends in a PR that deploys a preview.
   - The six design-system components.
   - The auth pages and the display-name form.
   - Presign helpers and the OG route shape.
-- **Integration, run by hand:** a preview deploy creates a Neon branch and migrates it; the R2 smoke script; PostHog and Sentry test events.
+- **Integration, run by hand:** a preview deploy creates a Neon branch and migrates it; the R2 smoke script; PostHog pageview and error test events.
 - **Visual:** screenshots at 390 and 1440 px in both themes, next to the canvas boards.
 - **Every PR:** `pnpm lint`, `pnpm test` and `pnpm build` pass locally, then on the Vercel preview.
 - **On devices, by you:** the full sign-up and sign-in on a phone; Web Share in the five browsers.
@@ -207,7 +219,8 @@ Each step is at most half a day. A stage ends in a PR that deploys a preview.
 | ~22.5 h against 16 h booked | The extra is mostly Print, FilmStrip and the other components, which Phase 3 needs anyway. This takes ~6.5 h of the 30 h buffer; Phase 3 should need about 3 h less |
 | Google rejects the dynamic preview URLs | `oAuthProxy` (D8); only the production and localhost callbacks are registered |
 | Preview protection blocks the phone | Sign in to Vercel on the phone (D9) |
-| Neon's free plan caps branches, and stale preview branches pile up | Check the integration's branch cleanup; delete stale branches by hand if needed |
+| Neon's free plan caps branches, and preview branches are only deleted when their deployment expires (6 months by default) | Delete stale preview branches by hand; shorten deployment retention if the cap gets close |
+| PostHog error tracking is younger than Sentry (weaker source maps, grouping) | Fine for one engineer at soft launch; revisit if errors get hard to read |
 | A migration in the build breaks production | Phase 0 has only additive auth tables; revisit before Phase 1 |
 | Next 16 / Tailwind v4 / Better Auth APIs differ from what the agent remembers | The agent checks current docs (Context7) before each stage |
 | The canvas boards are wireframes, so code may drift from them | The PRD and design system win on conflicts; note any deliberate change in the PR |
