@@ -16,6 +16,18 @@ body {
   color: var(--ink);
 }
 
+/*
+ * In-page links (the landing nav, "Xem thử một cuộn mẫu") glide to their
+ * section. `data-scroll-behavior="smooth"` on <html> (layout.tsx) tells
+ * Next.js to switch this off during route changes, so pages still load at
+ * the top instantly.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 /* Paper grain: over the page background only, never over photos. */
 .rc-paper {
   position: relative;

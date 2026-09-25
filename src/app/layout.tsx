@@ -14,7 +14,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const dataTheme = themeCookieToDataTheme(cookieStore.get("theme")?.value);
 
   return (
-    <html lang="vi" className={fontVariables} data-theme={dataTheme}>
+    <html lang="vi" className={fontVariables} data-theme={dataTheme} data-scroll-behavior="smooth">
       <body className="rc-paper min-h-dvh">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
