@@ -1,7 +1,7 @@
 # Cuộn roadmap
 
 > **Mirror — the artifact is the source of truth:** [Cuộn roadmap](https://claude.ai/artifact/Lsq7MWHNCVanpBWQ2D4XTo)
-> Last synced: 25.09.2026 · doc revision 13 · by Trúc.
+> Last synced: 25.09.2026 · doc revision 15 · by Claude for Trúc (Sentry dropped; PostHog covers errors).
 > Before editing, re-read the artifact. Make changes in the artifact and copy them here in the same session (see [CLAUDE.md](../CLAUDE.md#sync-rules)).
 
 Related: [PRD overview](product/prd.md) · [Requirements index](product/requirements/README.md) · [ADR-001](architecture/adr-001-tech-stack.md) · [Design system](design/design-system.md)
@@ -26,7 +26,7 @@ Tick items as they land; a phase is done when its last item (the exit check) is 
 - [ ] Neon + Drizzle schema
 - [ ] R2 buckets (private originals, public derivatives)
 - [ ] Vercel deploy in `sin1`
-- [ ] PostHog + Sentry
+- [ ] PostHog for analytics and errors
 - [ ] Google sign-in ([AUTH-1](product/requirements/auth.md))
 - [ ] Spike: `next/og` with Be Vietnam Pro
 - [ ] Spike: Web Share with files on iPhone and in Zalo, Messenger, Instagram
@@ -117,7 +117,7 @@ Six phases, 28 Sep 2026 – 17 Jan 2027. Hours are build estimates; the 30 h buf
 
 | Phase | Weeks · dates | Build hours | What ships (PRD IDs) | Done when |
 |---|---|---|---|---|
-| 0. Foundations | W1–2 · 28 Sep – 11 Oct | 16 | Repo, Next.js + Tailwind mapped to design tokens, `next-intl` (vi), Neon + Drizzle schema, R2 buckets, Vercel `sin1`, PostHog + Sentry, Google sign-in ([AUTH-1](product/requirements/auth.md)). Spikes: `next/og` with Be Vietnam Pro, Web Share with files | You sign in on a phone on a preview URL, and a test story PNG renders "tấm ưng" correctly |
+| 0. Foundations | W1–2 · 28 Sep – 11 Oct | 16 | Repo, Next.js + Tailwind mapped to design tokens, `next-intl` (vi), Neon + Drizzle schema, R2 buckets, Vercel `sin1`, PostHog for analytics and errors, Google sign-in ([AUTH-1](product/requirements/auth.md)). Spikes: `next/og` with Be Vietnam Pro, Web Share with files | You sign in on a phone on a preview URL, and a test story PNG renders "tấm ưng" correctly |
 | 1. Log a roll | W3–5 · 12 Oct – 1 Nov | 24 | Seeded catalogue + accent-free search ([CAT-1](product/requirements/catalogue.md)), custom stock/camera (CAT-2), bag ([BAG-1](product/requirements/bag.md)), new and past roll ([ROLL-1, ROLL-2](product/requirements/rolls.md)), lab directory + custom lab ([LAB-1, LAB-2](product/requirements/labs.md)) | A roll is logged from the bag in under 60 s on a phone |
 | 2. Scans & notes | W6–8 · 2 – 22 Nov | 26 | Presigned upload, bulk upload, browser-made WebP copies, nightly cleanup ([SCAN-1–3](product/requirements/scans.md)), scan set with lab + branch (LAB-3), tấm ưng / blank (SCAN-4), notes, memory, mistakes ([NOTE-1, NOTE-2](product/requirements/notes.md)) | **M1 — dogfood:** 5 of your real rolls uploaded, 0 failed files |
 | 3. Shelf & collection | W9–11 · 23 Nov – 13 Dec | 24 | Canister shelf + drawn canister ([CAN-1, CAN-2](product/requirements/canister.md)), film strip / grid switch, filters, lightbox ([COL-1, COL-2](product/requirements/collection.md)), library grid (COL-3), bulk marking (COL-4) | Your shelf shows every roll; marking 36 frames takes under a minute on desktop |
