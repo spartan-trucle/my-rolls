@@ -1,0 +1,66 @@
+/* "Mọi cuộn phim, chung một kệ.": the shelf as a list of RollCards. */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-block: var(--space-12);
+  scroll-margin-top: var(--space-4);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.stamps {
+  display: none;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.shelf {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.rolls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scribble { align-self: flex-end; }
+
+@media (min-width: 1200px) {
+  .section {
+    display: grid;
+    grid-template-columns: 440px minmax(0, 1fr);
+    column-gap: 96px;
+    align-items: start;
+    padding-block: var(--space-16) 96px;
+  }
+
+  .text { gap: 20px; padding-top: var(--space-4); }
+  .stamps { display: flex; }
+  .shelf { display: block; }
+  .rolls { gap: var(--space-4); }
+
+  .scribble {
+    position: absolute;
+    right: 0;
+    bottom: -58px;
+  }
+}
+
+/* The canvas hangs the note off the list's right edge; that only fits at full width. */
+@media (min-width: 1440px) {
+  .scribble { right: -96px; }
+}

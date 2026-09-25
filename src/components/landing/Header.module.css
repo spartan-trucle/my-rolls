@@ -1,0 +1,97 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.inner.inner { padding-right: var(--space-1); }
+
+.logo {
+  font: 600 22px/1 var(--font-display);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.nav {
+  display: none;
+}
+
+.navLink {
+  padding: 14px 4px;
+  font-family: var(--font-sans);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  font-weight: var(--text-label--font-weight);
+  letter-spacing: var(--text-label--letter-spacing);
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.navLink:hover { color: var(--cobalt); }
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.phoneActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.phoneSignUp { padding: 14px 8px; }
+
+/* Phone menu: drops under the header, full width. */
+.menu {
+  position: absolute;
+  top: 64px;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: var(--paper-raised);
+  border-block: 1px solid var(--line);
+}
+
+.menu[hidden] { display: none; }
+
+.menuList {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  list-style: none;
+}
+
+.menuLink {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  font-weight: var(--text-label--font-weight);
+  letter-spacing: var(--text-label--letter-spacing);
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.menuLink:hover { color: var(--cobalt); }
+
+@media (min-width: 1200px) {
+  .header { height: 96px; }
+  .inner.inner { padding-right: clamp(40px, calc((100vw - 1200px) / 2), 120px); }
+  .logo { font-size: 26px; }
+  .nav { display: flex; align-items: center; gap: var(--space-8); }
+  .phoneActions { display: none; }
+}
+
+@media (max-width: 1199.98px) {
+  .actions { display: none; }
+}

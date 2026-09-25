@@ -1,0 +1,147 @@
+/*
+ * Shared landing-page styles. Layout follows the design canvas boards
+ * `Mobile-vi` (390px) and `Main-vi` (1440px): phone first, the desktop
+ * composition from 1200px. Between 600px and 1199px the phone layout widens.
+ */
+
+.page {
+  overflow-x: clip;
+}
+
+/* A section's content box: 1440 wide at most, 120px gutters on the desktop board. */
+.inner {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+@media (min-width: 600px) {
+  .inner { padding-inline: var(--space-6); }
+}
+
+@media (min-width: 1200px) {
+  .inner { padding-inline: clamp(40px, calc((100vw - 1200px) / 2), 120px); }
+}
+
+/* Phone and desktop compositions that differ too much to share markup. */
+@media (max-width: 1199.98px) {
+  .desktopOnly { display: none !important; }
+}
+
+@media (min-width: 1200px) {
+  .mobileOnly { display: none !important; }
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  font-weight: var(--text-label--font-weight);
+  letter-spacing: var(--text-label--letter-spacing);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-display-l);
+  line-height: var(--text-display-l--line-height);
+  font-weight: var(--text-display-l--font-weight);
+  letter-spacing: var(--text-display-l--letter-spacing);
+  text-wrap: balance;
+}
+
+@media (min-width: 1200px) {
+  .title {
+    font-size: var(--text-display-xl);
+    line-height: var(--text-display-xl--line-height);
+    letter-spacing: var(--text-display-xl--letter-spacing);
+  }
+}
+
+.body {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  color: var(--ink-muted);
+}
+
+/* The canvas's cobalt outline link ("Đăng ký" in the header, the story's closing call to action). */
+a.cobaltLink {
+  color: var(--cobalt);
+  border-color: var(--cobalt);
+}
+
+a.cobaltLink:hover {
+  color: var(--cobalt);
+  background: var(--cobalt-soft);
+}
+
+/* Photographed objects (the camera) and the drawn canister lie on the page with a soft shadow. */
+.object {
+  display: block;
+  height: auto;
+  filter: drop-shadow(0 10px 14px rgba(31, 26, 22, 0.28)) drop-shadow(0 1px 2px rgba(31, 26, 22, 0.2));
+}
+
+.canister {
+  display: block;
+  filter: drop-shadow(0 10px 14px rgba(31, 26, 22, 0.28)) drop-shadow(0 1px 2px rgba(31, 26, 22, 0.2));
+}
+
+.canFilm { fill: var(--film); }
+.canBody { fill: var(--stock-gold); }
+.canRib { fill: rgba(31, 26, 22, 0.14); }
+.canLabel { fill: var(--print); }
+
+.canBig {
+  font: 700 30px var(--font-mono);
+  fill: var(--on-print);
+  text-anchor: middle;
+}
+
+.canSmall {
+  font: 700 9px var(--font-mono);
+  letter-spacing: 0.12em;
+  fill: var(--on-print-muted);
+  text-anchor: middle;
+}
+
+/* Stickers bob gently in place; `--r` is the resting tilt, `--dd` the delay. */
+.sticker {
+  position: absolute;
+  z-index: 4;
+  display: block;
+  pointer-events: none;
+  transform: rotate(var(--r, 0deg));
+  animation: bob 3.6s ease-in-out var(--dd, 0s) infinite alternate;
+}
+
+@keyframes bob {
+  from { transform: translateY(0) rotate(var(--r, 0deg)); }
+  to { transform: translateY(-8px) rotate(calc(var(--r, 0deg) + 6deg)); }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Blocks rise into place as they scroll into view, where the browser supports it. */
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 45%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sticker,
+  .reveal { animation: none; }
+}
