@@ -2,7 +2,7 @@
 
 > **Reference only.** The [design canvas](https://claude.ai/artifact/AXpgMvXFo6HL1vrw9RS6gt) ("Roll Call Landing Page") holds wireframes and ideas. Code may change layouts and details. When a wireframe disagrees with the [PRD](../product/prd.md) or the [design system](design-system.md), those two win.
 >
-> Indexed 25.09.2026 from canvas version `1790318000-c9a4` (re-indexed after the "Đăng nhập" and "Kệ & hồ sơ" pages were added). The canvas installs the [design system](design-system.md) as `rollcall`.
+> Indexed 25.09.2026 from canvas version `1790318000-c9a4` (re-indexed after the "Đăng nhập" and "Kệ & hồ sơ" pages were added). Re-checked 25.09.2026 against version `1790325947-074d`: same pages, boards and sizes. The canvas installs the [design system](design-system.md) as `rollcall`.
 
 Every product screen has a phone (390 px) and a desktop (1440 px) version, as the PRD requires. Story cards are fixed 1080 × 1920 images, drawn at half size (540 × 960).
 
@@ -14,6 +14,29 @@ Every product screen has a phone (390 px) and a desktop (1440 px) version, as th
 | `Main-vi.dc.html` | 1440 × 5580 | Landing page, desktop, Vietnamese |
 | `Mobile.dc.html` | 390 × 6100 | Landing page, phone, English |
 | `Mobile-vi.dc.html` | 390 × 6100 | Landing page, phone, Vietnamese |
+
+### Built: the landing page at `/`
+
+Signed-out visitors get the landing page at `/`; signed-in users get home. It's built from `Main-vi` and `Mobile-vi` in `src/components/landing/`, with its copy under `landing` in `messages/vi.json`. The English boards aren't used, because the UI is Vietnamese only. The canvas's photos, camera and stickers are in `public/landing/`.
+
+Layout: the phone board up to 1199 px (widened on tablets), the desktop board from 1200 px. Between 1200 and 1439 px the hero picture shrinks to 80% so the headline keeps its 600 px column.
+
+Where the code differs from the boards:
+
+| On the boards | In the code | Why |
+|---|---|---|
+| "Roll Call" | "Cuộn" (`common.appName`) | Product name in docs and code ([Known conflicts](../README.md#known-conflicts-between-sources) #1) |
+| Email field under "Tham gia cùng Roll Call", then "Bạn đã có tên trong danh sách" | An "Đăng ký" button to `/sign-up`, with the `Signup` board's wording: "Miễn phí. Chỉ cần một tài khoản Google." and "Đã có tài khoản? Đăng nhập" | Sign-up is Google only ([AUTH-1](../product/requirements/auth.md)), and nothing stores a waitlist |
+| Stamps and labels "Lỡ tay", "18 tấm ưng ý", "13 lần lỡ tay" | "Oops", "18 tấm ưng", "13 oops" | The [PRD glossary](../product/prd.md#words-we-use). The headline "mọi cú lỡ tay." stays: it's prose, not a status |
+| A photo of a branded yellow canister | A drawn canister in `stock-gold` with "COLOR · 200 · 36 KIỂU" on its label | The [design system](design-system.md) never shows a manufacturer's logo, box art or trade dress |
+| Footer links "Giới thiệu", "Quyền riêng tư", "Liên hệ" | "Giới thiệu", "Điều khoản" (`/terms`), "Quyền riêng tư" (`/privacy`) | There's no contact page or address yet |
+| Roll cards on the shelf link to the top of the page | Roll cards are not links | There's no sample roll to open |
+| "Xem thử một cuộn mẫu" | Scrolls to the rolling film strip (`#roll`) | There's no sample roll page |
+| Phone menu button with no menu drawn | Opens a panel with Tính năng, Kệ phim, Chia sẻ and Đăng nhập | The board doesn't show the open state |
+| Phone hero print has a date | No date on the phone print | At 140 px the date squeezes the caption to one word per line |
+| English accessible names ("Main", "A roll, frame by frame") | Vietnamese ("Điều hướng chính", "Một cuộn, từng khung một") | The UI language is Vietnamese |
+
+The rolling strip pauses on hover and keyboard focus, and everything stops for people who prefer reduced motion.
 
 ## Page "Chia sẻ & lab" (sharing and labs)
 
