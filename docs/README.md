@@ -14,6 +14,7 @@ Back to: [Project README](../README.md)
 | [roadmap.md](roadmap.md) | Phases, dates, cut line, launch gates, decisions due | [Roadmap artifact](https://claude.ai/artifact/Lsq7MWHNCVanpBWQ2D4XTo) (mirrored) |
 | [design/design-system.md](design/design-system.md) | Principles, voice, tokens, type, components, icons | [Design system artifact](https://claude.ai/artifact/HtsG9sZeNGx19PSvPjW65a) (mirrored) |
 | [design/wireframes.md](design/wireframes.md) | Which screens have wireframes, and which don't yet | [Design canvas](https://claude.ai/artifact/AXpgMvXFo6HL1vrw9RS6gt) (reference only) |
+| [../design-tokens/](../design-tokens/README.md) and `src/design-system/` | The tokens and components in code, and how to update them from the artifact | [Design system artifact](https://claude.ai/artifact/HtsG9sZeNGx19PSvPjW65a) (`tokens.json` copied byte for byte) |
 
 Sync rules for the mirrored docs are in [CLAUDE.md](../CLAUDE.md#sync-rules).
 
