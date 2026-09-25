@@ -25,6 +25,8 @@ Stand up the whole Cuộn stack from [ADR-001](../../docs/architecture/adr-001-t
 - [ ] **PR split (Trúc, 25.09.2026):** this branch (`feature/phase-0-setup`, Stages A–F) goes to `main` as its own PR. Stages G and H follow on a new branch and PR. Roadmap boxes to tick when this PR merges: `next-intl` with Vietnamese, Neon + Drizzle schema, Vercel deploy in `sin1`, Google sign-in (AUTH-1, after the phone sign-in check)
 - [x] Stage C steps 12–13: `next-intl` 4.14.6 with `vi` only and no URL prefix, `messages/vi.json`; `theme` cookie → `data-theme` on `<html>`, `ThemeToggle` on `/dev/design-system`. 165 tests, `pnpm check` clean (25.09.2026)
 - [x] Stage B step 9 remote: first preview deploy of `5e82787` is Ready in `sin1`; `/api/health` returns `{"ok":true,"db":"up"}` and Neon created the preview branch, both checked by Trúc (25.09.2026). The first push had been **blocked** by Vercel Hobby because commits were authored by `spartan-trucle`; this repo now commits as `Truc Le <97326103+NganTrucLe@users.noreply.github.com>`
+- [x] PR split done: Stages A–F merged to `main` as PR #3; landing page as PR #2 (`main` at `689da35`, 25.09.2026)
+- [ ] Stage G on `feature/phase-0-storage-observability`: plan v5 below (G1–G5), approved by Trúc 25.09.2026 (OG font fetched from Google Fonts at render time, no font files, D31). R2 step 24 not done yet (Trúc, 25.09.2026); spike notes go in `docs/spikes/`
 - [x] `.env.development.local` with the Neon `dev` branch URLs (D23, Trúc). `next dev` loads it ahead of `.env.local`; local `/api/health` returns `{"ok":true,"db":"up"}` (25.09.2026)
 
 ### Found during Stages A and B
@@ -215,6 +217,54 @@ PR #1 ported all nine components to `src/design-system/components/` with tests a
 26. PostHog on the Cuộn project: provider with pageviews and exception autocapture in the browser; `posthog-node` capturing server errors from `onRequestError`. Check: one pageview, one browser error and one server error reach PostHog; the test error route is removed after.
 27. Spike 1: `next/og` renders a 1080 × 1920 PNG with Be Vietnam Pro loaded from font files and "tấm ưng" on it. Test: 200, `image/png`, 1080 × 1920. You check the diacritics by eye.
 28. Spike 2: a page that calls `navigator.canShare({ files })` and shares that PNG. You try it in iPhone Safari, Android Chrome, and the Zalo, Messenger and Instagram in-app browsers. Results go in a spike note (new doc; you decide where).
+
+#### Stage G · detailed order (v5, 25.09.2026)
+
+Branch `feature/phase-0-storage-observability` off `main` at `689da35` (PRs #1–#3 merged, Stage F included). R2 isn't provisioned yet (step 24 is yours), so the order is: everything that needs no R2 first, R2 code against unit tests, live R2 checks last.
+
+| # | Decision | Default |
+|---|---|---|
+| D26 | PostHog in the browser | `instrumentation-client.ts` (Next 15.3+ convention, no provider component): `posthog.init` with `capture_pageview: "history_change"`, `capture_exceptions: true`, `person_profiles: "identified_only"`, no session recording. No reverse proxy yet (ad blockers will drop some events; fine for soft launch) |
+| D27 | PostHog on the server | `posthog-node` in `src/lib/posthog-server.ts` with `flushAt: 1, flushInterval: 0`; `instrumentation.ts` `onRequestError` calls `captureException` then `await shutdown()` so the function doesn't exit before the send. Same public project token as the browser; no new secret |
+| D28 | Who PostHog knows | No `identify` in Phase 0. Events stay anonymous; identifying signed-in users (by Better Auth `user.id`, never email) comes with Phase 1 onboarding events |
+| D29 | Test error triggers | Under `/dev` (already public): `/dev/errors` page with a "throw in browser" button and a link to `/api/dev/boom`. Deleted in the last commit of this branch, after the PostHog check |
+| D30 | Spike routes | `/spike/og` (route handler) and `/spike/share` (page), **public** in `proxy-decision.ts` and `noindex`. Deleted in Stage H once the spike note is written. Reason: Zalo, Messenger and Instagram in-app browsers have their own cookie jars, so they can't pass Vercel preview protection **or** Google sign-in (Google blocks OAuth in embedded webviews). The device test therefore runs on **production** `my-rolls-weld.vercel.app` after this PR merges |
+| D31 | OG font | **No font files in the repo** (Trúc, 25.09.2026). Satori needs font bytes, not a CSS `@font-face` link, and can't read WOFF2 (the format `next/font` self-hosts). So the route fetches the Google Fonts CSS API (`css2?family=Be+Vietnam+Pro:wght@400;700&text=<exact text>`) with no browser user agent, which makes Google answer with TTF URLs; it then fetches those bytes and passes them to `ImageResponse`. `text=` subsets to the glyphs on the card. Font bytes memoised per text at module scope; the PNG response gets `Cache-Control: public, max-age=31536000, immutable`. The spike note records fetch time from `sin1` and what happens when Google is unreachable (route returns 503, no fallback font) |
+| D32 | Upload content types | `image/jpeg`, `image/png`, `image/webp` only: the suggested default of roadmap decision 2 / [Known conflict #2](../../docs/README.md#known-conflicts-between-sources), which is still open (due 01.11). It's one constant; TIFF is added there if decision 2 goes the other way |
+| D33 | Enforcing 10 MB on a presigned PUT | R2 has no presigned POST, so no `content-length-range`. The helper rejects `size > 10 MB` before signing **and** signs `ContentLength`, so R2 refuses a body of any other size |
+| D34 | R2 client | `@aws-sdk/client-s3` + `@aws-sdk/s3-request-presigner`, endpoint `https://<account>.r2.cloudflarestorage.com`, region `auto`. PUT URLs expire in 10 min, GET in 5 min. Keys: `originals/<userId>/<uuid>.<ext>`. R2 env keys optional in `src/env.ts`, validated by a separate `getR2Env()` so the app still builds without them |
+
+**G1 · PostHog (~1.5 h)** — step 26
+- Tests first: `posthog-server` returns one memoised client configured with `flushAt: 1`; `onRequestError` captures the error with path + method and awaits shutdown; missing `NEXT_PUBLIC_POSTHOG_KEY` → no-op, no throw (local dev without the key must still run).
+- `instrumentation-client.ts`, `instrumentation.ts`, `src/lib/posthog-server.ts`; `NEXT_PUBLIC_POSTHOG_*` added to `.env.example`.
+- `/dev/errors` + `/api/dev/boom` (D29).
+- **Check (Claude, with the PostHog MCP):** on the branch preview, one `$pageview`, one browser `$exception`, one server `$exception` land in the Cuộn project. Then delete the error triggers.
+
+**G2 · Spike 1, story PNG (~1 h)** — step 27
+- Tests first: `GET /spike/og` → 200, `content-type: image/png`, PNG header says 1080 × 1920 (read from the IHDR bytes, no image library); the font loader parses the TTF URL out of a sample Google CSS response and requests it with `text=`; Google unreachable → 503 (fetch mocked in all tests, no network).
+- `src/app/spike/og/route.tsx` with `ImageResponse`, fonts from `src/lib/google-font.ts` (D31), a sample photo from `public/samples/`, the text "tấm ưng", "Cuộn phim đầu tiên", and a line with every Vietnamese tone mark on a, e, o, u, y (ả ạ ằ ẵ ặ ề ễ ệ ổ ỗ ộ ờ ợ ử ữ ự ỳ ỷ ỹ ỵ) so broken stacking is easy to spot.
+- `/spike/*` public + `noindex` (D30), proxy tests updated first.
+- **Check (you):** diacritics by eye on the preview.
+
+**G3 · Spike 2, Web Share (~1 h)** — step 28
+- Tests first (jsdom, `navigator.share`/`canShare` stubbed): button shows when `canShare({ files })` is true; falls back to a download link + "mở trong trình duyệt" hint when false or missing; an `AbortError` (user cancelled) shows nothing; other errors show the error name.
+- `src/app/spike/share/page.tsx`: fetches `/spike/og` as a `File`, shows `navigator.userAgent`, `canShare` result, and the share outcome on screen so you can screenshot it per browser.
+- `docs/spikes/web-share.md` and `docs/spikes/og-story-image.md` templates with a results table (browser × can share × shared to Instagram story × notes), linked from `docs/README.md`. **You** fill in the device results after merge (D30).
+
+**G4 · R2 code (~1 h)** — step 25, unit-tested part
+- Tests first: key shape `originals/<userId>/<uuid>.<ext>` with ext from content type; 10 MB + 1 byte → error naming the size; `image/tiff`, `image/gif` → rejected; signed URL has `X-Amz-Expires=600` and signs `content-length` (D33); `getR2Env()` names each missing key.
+- `src/lib/r2.ts`, R2 keys in `.env.example`.
+
+**G5 · R2 live (~0.5 h, after your step 24)**
+- **You:** buckets, token, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_ORIGINALS`, `R2_BUCKET_PUBLIC`, `R2_PUBLIC_URL` with `vercel env add` (Production + Preview + Development) and into `.env.development.local`.
+- **Claude:** bucket CORS (`PUT`, `GET` from `http://localhost:3000`, `https://my-rolls-weld.vercel.app`, `https://my-rolls-*-ngantrucles-projects.vercel.app` if R2 takes the wildcard, else the branch alias), then `scripts/r2-smoke.ts`: presign → PUT 1 KB → GET via `r2.dev` (public bucket) and presigned GET (private) → delete.
+- If step 24 isn't done when G1–G4 are reviewed, the PR merges without G5 and G5 goes into Stage H's PR.
+
+**Risks added for Stage G**
+- R2 has **no object versioning**, but [scans.md](../../docs/product/requirements/scans.md) wants originals restorable for 30 days. Not a Stage G problem; flag before Phase 2 (soft-delete + delayed purge instead).
+- The story PNG depends on Google Fonts at render time: a Google outage or slow response breaks or slows the card. Fine for a spike; before Phase 3 sharing, decide whether to cache the rendered PNG in R2 (as the ADR already says) so the font fetch happens once per roll version.
+- PostHog `capture_exceptions` in `posthog-js` needs a recent version; the agent checks current docs (Context7) and the installed version's types.
+- The spike routes are public on production until Stage H deletes them. They show only a sample photo and fixed text.
 
 ### Stage H · Exit (~0.5 h)
 
