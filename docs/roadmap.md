@@ -1,7 +1,7 @@
 # Cuộn roadmap
 
 > **Mirror — the artifact is the source of truth:** [Cuộn roadmap](https://claude.ai/artifact/Lsq7MWHNCVanpBWQ2D4XTo)
-> Last synced: 25.09.2026 · doc revision 12 · by Trúc.
+> Last synced: 25.09.2026 · doc revision 13 · by Trúc.
 > Before editing, re-read the artifact. Make changes in the artifact and copy them here in the same session (see [CLAUDE.md](../CLAUDE.md#sync-rules)).
 
 Related: [PRD overview](product/prd.md) · [Requirements index](product/requirements/README.md) · [ADR-001](architecture/adr-001-tech-stack.md) · [Design system](design/design-system.md)
@@ -14,6 +14,94 @@ Soft launch on **18.01.2027**. That is 16 weeks from now and about three weeks b
 - **Capacity:** one engineer at about 10 h/week, so 160 h. The plan books 130 h of build and keeps 30 h as buffer for day-job crunch weeks.
 - **Shape:** six phases, each ending in something deployed and usable. Your own rolls go in from week 8.
 - **After launch:** four weeks of fixing and measuring, then v1.1 in two drops (Feb–May), then Compare once enough lab data exists.
+
+## Progress
+
+Tick items as they land; a phase is done when its last item (the exit check) is ticked. Dates, hours and details are in the sections below. These boxes mirror the artifact: tick in both places (see [CLAUDE.md](../CLAUDE.md#sync-rules)).
+
+### Phase 0 · Foundations (28 Sep – 11 Oct)
+
+- [ ] Repo, Next.js + Tailwind mapped to design tokens
+- [ ] `next-intl` with Vietnamese
+- [ ] Neon + Drizzle schema
+- [ ] R2 buckets (private originals, public derivatives)
+- [ ] Vercel deploy in `sin1`
+- [ ] PostHog + Sentry
+- [ ] Google sign-in ([AUTH-1](product/requirements/auth.md))
+- [ ] Spike: `next/og` with Be Vietnam Pro
+- [ ] Spike: Web Share with files on iPhone and in Zalo, Messenger, Instagram
+- [ ] Exit: sign in on a phone on a preview URL; a test story PNG renders "tấm ưng" correctly
+
+### Phase 1 · Log a roll (12 Oct – 1 Nov)
+
+- [ ] Seeded catalogue + accent-free search ([CAT-1](product/requirements/catalogue.md))
+- [ ] Custom stock or camera ([CAT-2](product/requirements/catalogue.md))
+- [ ] Bag ([BAG-1](product/requirements/bag.md))
+- [ ] New roll ([ROLL-1](product/requirements/rolls.md))
+- [ ] Past roll ([ROLL-2](product/requirements/rolls.md))
+- [ ] Lab directory ([LAB-1](product/requirements/labs.md))
+- [ ] Custom lab ([LAB-2](product/requirements/labs.md))
+- [ ] Exit: a roll is logged from the bag in under 60 s on a phone
+
+### Phase 2 · Scans & notes (2 – 22 Nov)
+
+- [ ] Presigned upload, 10 MB cap ([SCAN-1](product/requirements/scans.md))
+- [ ] Bulk upload with per-file retry ([SCAN-2](product/requirements/scans.md))
+- [ ] Browser-made WebP copies + nightly cleanup ([SCAN-3](product/requirements/scans.md))
+- [ ] Tấm ưng / blank marks ([SCAN-4](product/requirements/scans.md))
+- [ ] Scan set with lab + branch ([LAB-3](product/requirements/labs.md))
+- [ ] Notes and memory ([NOTE-1](product/requirements/notes.md))
+- [ ] Mistakes ([NOTE-2](product/requirements/notes.md))
+- [ ] M1 dogfood: 5 of your real rolls uploaded, 0 failed files
+
+### Phase 3 · Shelf & collection (23 Nov – 13 Dec)
+
+- [ ] Canister shelf ([CAN-1](product/requirements/canister.md))
+- [ ] Drawn canister ([CAN-2](product/requirements/canister.md))
+- [ ] Film strip / grid switch ([COL-1](product/requirements/collection.md))
+- [ ] Filters + lightbox ([COL-2](product/requirements/collection.md))
+- [ ] Library grid ([COL-3](product/requirements/collection.md))
+- [ ] Bulk marking ([COL-4](product/requirements/collection.md))
+- [ ] Exit: the shelf shows every roll; marking 36 frames takes under a minute on desktop
+
+### Phase 4 · Sharing (14 Dec – 3 Jan)
+
+- [ ] Share link + revoke ([SHARE-1](product/requirements/sharing.md))
+- [ ] Friend view ([SHARE-2](product/requirements/sharing.md))
+- [ ] Friend grid view ([COL-5](product/requirements/collection.md))
+- [ ] Link preview ([SHARE-3](product/requirements/sharing.md))
+- [ ] Story cards Dải phim + Phiếu cuộn ([SHARE-4](product/requirements/sharing.md))
+- [ ] North-star events in PostHog
+- [ ] M2 feature complete: a link pasted in Zalo and Messenger shows the cover; a story posts to Instagram from iPhone and Android
+
+### Phase 5 · Private beta (4 – 17 Jan)
+
+- [ ] Speed pass
+- [ ] Keyboard and alt text
+- [ ] Vietnamese copy pass
+- [ ] Fixes from 10–15 beta shooters
+- [ ] Exit: every launch gate in [Soft launch](#soft-launch) holds on 15 Jan
+
+### Content track
+
+- [ ] Name and domain chosen
+- [ ] Catalogue seeded
+- [ ] Labs checked
+- [ ] Canister and camera photos matched
+- [ ] Beta list of 10–15 shooters
+- [ ] Vietnamese copy reviewed by 2 shooters
+- [ ] Launch posts ready
+
+### Decisions
+
+- [ ] 1. Name and domain
+- [ ] 2. File types and size (edit SCAN-1, SCAN-3)
+- [ ] 3. GPS on downloads
+- [ ] 4. Lab listing accuracy
+- [ ] 5. Brand logos in canister photos
+- [ ] 6. Storage while free
+- [ ] 7. Who reviews submissions
+- [ ] 8. Rolls shot by two people
 
 ## How the order was chosen
 

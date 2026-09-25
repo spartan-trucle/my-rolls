@@ -24,6 +24,15 @@ The roadmap and the design system must always match their artifacts.
 4. **After every sync**, update the mirror's "Last synced" line: date (dd.mm.yyyy), artifact revision or version, and who.
 5. Never edit a mirror without doing the same to its artifact. If you can't reach the artifact, say so and leave the mirror alone.
 
+### Roadmap progress checklist
+
+The roadmap's **Progress** section (per phase, content track, decisions) is a checklist that lives in both places.
+
+- When work lands (a requirement merged, an exit check met, a decision made), tick the box in the artifact and in `docs/roadmap.md` in the same session, and bump "Last synced".
+- Before ticking, re-read the artifact: boxes ticked there by hand (in the Claude Docs viewer) must be copied into the mirror first, never overwritten.
+- Only tick a phase's exit item when its exit check actually holds. A merged PR alone doesn't meet an exit check.
+- A decision is ticked only once its outcome is written into the Decisions due table and, where it applies, the PRD and [Known conflicts](docs/README.md#known-conflicts-between-sources) are updated.
+
 ## Known conflicts
 
 Open conflicts between the PRD, ADR and design system are listed in [docs/README.md](docs/README.md#known-conflicts-between-sources). Check that table before any schema, upload, sharing or UI work, and don't silently pick a side.
