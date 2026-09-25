@@ -19,8 +19,9 @@ Stand up the whole Cuộn stack from [ADR-001](../../docs/architecture/adr-001-t
 - [x] Stage B steps 6–8 + local part of 9: Next.js 16.3.6, React 19.2.8, Tailwind 4.3.3, Vitest 5.0.1, zod env, `/api/health`, `vercel.json` (`nextjs`, `sin1`). 9/9 tests, lint clean, build clean, health 200 (25.09.2026)
 - [x] Branch rebuilt on `main` after PR #1 (25.09.2026): our scaffold and `agentRules` commits dropped, env + `/api/health` + `vercel.json` + docs + Neon skills kept, tests moved next to their code as on `main`. 150 tests pass, typecheck clean
 - [x] Stage C steps 10–11 (tokens, fonts) and Stage E (all nine components) done by PR #1
-- [ ] Stage B step 9 remote: first preview deploy. The first push was **blocked** by Vercel Hobby because commits were authored by `spartan-trucle`; this repo now commits as `Truc Le <97326103+NganTrucLe@users.noreply.github.com>`
-- [ ] `.env.development.local` with the Neon `dev` branch URLs (D23, Trúc)
+- [x] Stage C steps 12–13: `next-intl` 4.14.6 with `vi` only and no URL prefix, `messages/vi.json`; `theme` cookie → `data-theme` on `<html>`, `ThemeToggle` on `/dev/design-system`. 165 tests, `pnpm check` clean (25.09.2026)
+- [x] Stage B step 9 remote: first preview deploy of `5e82787` is Ready in `sin1`; `/api/health` returns `{"ok":true,"db":"up"}` and Neon created the preview branch, both checked by Trúc (25.09.2026). The first push had been **blocked** by Vercel Hobby because commits were authored by `spartan-trucle`; this repo now commits as `Truc Le <97326103+NganTrucLe@users.noreply.github.com>`
+- [x] `.env.development.local` with the Neon `dev` branch URLs (D23, Trúc). `next dev` loads it ahead of `.env.local`; local `/api/health` returns `{"ok":true,"db":"up"}` (25.09.2026)
 
 ### Found during Stages A and B
 
@@ -28,6 +29,9 @@ Stand up the whole Cuộn stack from [ADR-001](../../docs/architecture/adr-001-t
 - `src/env.ts` validated at import, which broke local builds once Development lost the database vars. Fixed: `getEnv()` validates on first use.
 - Vercel Hobby only deploys commits whose author is the account's GitHub user (NganTrucLe). Keep the repo-local identity, and merge PRs into `main` so the head commit stays owner-authored (merge commit or rebase-merge from the GitHub UI as NganTrucLe).
 - I didn't fetch `origin` at the start of the session and missed PR #1. Always `git fetch` before planning.
+- Reading the `theme` cookie in the root layout (D21) makes every route dynamic. Fine while every Phase 0 page needs the session; for the landing page, switch to a small inline script that sets `data-theme` before paint so the page can be static again.
+- `eslint-plugin-react-hooks` 7 (with `eslint-config-next` 16.3.6) errors on `setState` inside an effect. Read browser-owned values (`matchMedia`, cookies, `data-theme`) with `useSyncExternalStore`. jsdom has no `matchMedia`; `vitest.setup.ts` stubs it.
+- The production domain is `my-rolls-weld.vercel.app`. Google redirect URIs: `localhost:3000`, production, and this branch's alias `my-rolls-git-feature-phase-0-setup-ngantrucles-projects.vercel.app`, so sign-in works on the preview before production runs the auth code that `oAuthProxy` relies on.
 - `server-only` throws under Vitest, so `src/env.ts` dropped it. Put it back in Stage D with a Vitest alias to an empty module, before auth secrets live in code.
 - `package.json` pins `pnpm@11.8.0`; check the first Vercel build uses a compatible pnpm.
 - The dev branch password was pasted in chat and Neon branches share their parent's passwords, so it likely opens production too. No data yet; reset `neondb_owner` on both branches before the private beta.
