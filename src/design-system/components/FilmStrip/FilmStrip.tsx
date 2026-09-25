@@ -58,6 +58,11 @@ function FramePicture({ frame }: { frame: FilmFrame }) {
   );
 }
 
+/**
+ * A roll as a strip of negatives that scrolls sideways with snap.
+ * Give it a container with a definite width. Inside a grid track or a flex row, the parent needs
+ * `min-w-0` (or a `minmax(0, 1fr)` track), otherwise the strip widens its parent instead of scrolling.
+ */
 export function FilmStrip({ frames, labels, frameWidth = 200, edgeText = "", className, style }: FilmStripProps) {
   const holeCount = Math.max(4, Math.round(frameWidth / 24));
   const stripStyle = { ...style, "--rc-frame-w": `${frameWidth}px` } as CSSProperties;

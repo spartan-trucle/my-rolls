@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function DesignSystemPage() {
   if (process.env.VERCEL_ENV === "production") notFound();
   return (
-    <main className="grid min-[1200px]:grid-cols-2">
+    <main className="grid grid-cols-1 min-[1200px]:grid-cols-2">
       <div data-theme="light" className="rc-paper px-4 min-[600px]:px-6">
         <Showcase />
       </div>
