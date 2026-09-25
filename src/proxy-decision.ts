@@ -6,8 +6,13 @@ export type TProxyDecision = { type: "allow" } | { type: "redirect"; to: string 
  */
 const PUBLIC_PATHS = new Set(["/", "/sign-in", "/sign-up", "/terms", "/privacy"]);
 
-/** Public path prefixes — Better Auth's own routes, health checks, dev tools. */
-const PUBLIC_PREFIXES = ["/api/auth", "/api/health", "/dev"];
+/**
+ * Public path prefixes — Better Auth's own routes, health checks, dev
+ * tools, and the two Stage G spike routes (D30). `/dev` alone doesn't cover
+ * `/api/dev` (a different first segment), so `/api/dev/boom` (D29) needs
+ * its own entry.
+ */
+const PUBLIC_PREFIXES = ["/api/auth", "/api/health", "/api/dev", "/dev", "/spike"];
 
 function isPublicPath(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) return true;
