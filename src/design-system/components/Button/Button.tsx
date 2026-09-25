@@ -1,4 +1,5 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import Link from "next/link";
+import type { ButtonHTMLAttributes, ComponentProps, ReactNode } from "react";
 import { cx } from "@/design-system/cx";
 import { Icon } from "../Icon/Icon";
 import type { IconName } from "../Icon/icons";
@@ -29,5 +30,23 @@ export function Button({ variant = "outline", size = "md", icon, className, chil
       {icon ? <Icon name={icon} size={size === "sm" ? 18 : 20} /> : null}
       {children}
     </button>
+  );
+}
+
+export type ButtonLinkProps = Omit<ComponentProps<typeof Link>, "children"> & {
+  /** Same variants as `Button`; `primary` still counts toward the one per screen. */
+  variant?: ButtonVariant;
+  size?: "md" | "sm";
+  icon?: IconName;
+  children: ReactNode;
+};
+
+/** A link that looks like a `Button`, for calls to action that navigate. */
+export function ButtonLink({ variant = "outline", size = "md", icon, className, children, ...rest }: ButtonLinkProps) {
+  return (
+    <Link className={cx(styles.button, styles[variant], size === "sm" && styles.sm, className)} {...rest}>
+      {icon ? <Icon name={icon} size={size === "sm" ? 18 : 20} /> : null}
+      {children}
+    </Link>
   );
 }
