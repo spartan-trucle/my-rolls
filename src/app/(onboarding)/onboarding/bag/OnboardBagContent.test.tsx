@@ -5,13 +5,13 @@ import { renderWithIntl } from "@/i18n/test-utils";
 
 const addToBag = vi.hoisted(() => vi.fn());
 const removeFromBag = vi.hoisted(() => vi.fn());
-const getBag = vi.hoisted(() => vi.fn());
+const listBag = vi.hoisted(() => vi.fn());
 const searchCatalogue = vi.hoisted(() => vi.fn());
 const addCustomStock = vi.hoisted(() => vi.fn());
 const addCustomCamera = vi.hoisted(() => vi.fn());
 const addCustomLens = vi.hoisted(() => vi.fn());
 
-vi.mock("@/features/bag/actions", () => ({ addToBag, removeFromBag, getBag }));
+vi.mock("@/features/bag/actions", () => ({ addToBag, removeFromBag, listBag }));
 vi.mock("@/features/catalogue/actions", () => ({
   searchCatalogue,
   addCustomStock,
@@ -42,7 +42,7 @@ describe("OnboardBagContent", () => {
   afterEach(() => {
     addToBag.mockReset();
     removeFromBag.mockReset();
-    getBag.mockReset();
+    listBag.mockReset();
     searchCatalogue.mockReset();
     addCustomStock.mockReset();
     addCustomCamera.mockReset();
@@ -140,18 +140,15 @@ describe("OnboardBagContent", () => {
 
   it("opens the custom entry dialog for the right kind and adds a checked chip", async () => {
     addCustomCamera.mockResolvedValue({ ok: true, refId: "cam-9", bagItemId: "bag-item-9" });
-    getBag.mockResolvedValue({
-      ok: true,
-      entries: [
-        {
-          bagItemId: "bag-item-9",
-          kind: "camera",
-          createdAt: new Date(),
-          camera: { id: "cam-9", brand: "Zenit", model: "12XP" },
-          fixedStock: null,
-        },
-      ],
-    });
+    listBag.mockResolvedValue([
+      {
+        bagItemId: "bag-item-9",
+        kind: "camera",
+        createdAt: new Date(),
+        camera: { id: "cam-9", brand: "Zenit", model: "12XP" },
+        fixedStock: null,
+      },
+    ]);
     const { user } = setup();
 
     await user.click(screen.getByRole("button", { name: "+ Máy khác" }));

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { ButtonLink, Field, Icon } from "@/design-system";
 import { OnboardingFrame } from "@/components/onboarding/OnboardingFrame";
 import { ResponsiveDialog } from "@/components/overlay/ResponsiveDialog";
-import { addToBag, getBag, removeFromBag } from "@/features/bag/actions";
+import { addToBag, listBag, removeFromBag } from "@/features/bag/actions";
 import { searchCatalogue } from "@/features/catalogue/actions";
 import {
   CustomEntryForm,
@@ -220,14 +220,12 @@ export function OnboardBagContent({ initialCameraChips, initialStockChips, initi
       if (result.ok) {
         setCheckedKeys((prev) => new Map(prev).set(key, result.bagItemId));
       } else if (result.error === "duplicate") {
-        const bag = await getBag();
-        const match = bag.ok
-          ? bag.entries.find(
-              (entry) =>
-                (entry.kind === "stock" && chip.kind === "stock" && entry.stock.id === chip.id) ||
-                (entry.kind === "camera" && chip.kind === "camera" && entry.camera.id === chip.id),
-            )
-          : undefined;
+        const bag = await listBag();
+        const match = bag.find(
+          (entry) =>
+            (entry.kind === "stock" && chip.kind === "stock" && entry.stock.id === chip.id) ||
+            (entry.kind === "camera" && chip.kind === "camera" && entry.camera.id === chip.id),
+        );
         setCheckedKeys((prev) => new Map(prev).set(key, match?.bagItemId ?? ""));
       } else {
         setCheckedKeys((prev) => {
@@ -252,10 +250,8 @@ export function OnboardBagContent({ initialCameraChips, initialStockChips, initi
     const key = chipKey(entry.kind, entry.refId);
     setCheckedKeys((prev) => new Map(prev).set(key, entry.bagItemId));
 
-    const bag = await getBag();
-    if (!bag.ok) return;
-
-    const match = bag.entries.find((item) => item.bagItemId === entry.bagItemId);
+    const bag = await listBag();
+    const match = bag.find((item) => item.bagItemId === entry.bagItemId);
     if (!match) return;
 
     if (match.kind === "stock") {
