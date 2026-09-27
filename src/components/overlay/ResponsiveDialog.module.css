@@ -58,8 +58,19 @@
     transform: translate(-50%, -50%);
     width: 840px;
     max-width: calc(100vw - var(--space-12));
-    max-height: calc(100vh - var(--space-16) * 2);
+    /* CatalogueSearchWeb.dc.html's `.dlg`: a constant 772px box, only
+       shrinking on a shorter viewport — never grown or shrunk to fit
+       whatever's inside, so the picker's list scrolls in place instead
+       of the whole dialog resizing per query (fix 2). */
+    height: min(772px, calc(100dvh - var(--space-16) * 2));
+    max-height: calc(100dvh - var(--space-16) * 2);
     border-radius: var(--radius-lg);
+  }
+
+  .compact {
+    width: 480px;
+    height: auto;
+    max-height: calc(100dvh - var(--space-16) * 2);
   }
 }
 

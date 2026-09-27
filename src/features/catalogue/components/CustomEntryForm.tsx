@@ -3,6 +3,8 @@
 import { useId, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Field, Icon } from "@/design-system";
+import { cx } from "@/design-system/cx";
+import { DialogCloseButton } from "@/components/overlay/DialogCloseButton";
 import { addCustomCamera, addCustomLens, addCustomStock } from "@/features/catalogue/actions";
 import styles from "./CustomEntryForm.module.css";
 
@@ -35,6 +37,8 @@ export interface CustomEntryFormProps {
   /** Prefills the name/model/lens-model field with what was typed in CataloguePicker's search box. */
   initialQuery?: string;
   onCreated: (entry: ICustomEntryCreated) => void;
+  /** The heading row's close button (the board's `.xbtn`) — omitted when there's nothing for it to call. */
+  onClose?: () => void;
   /** Same id as the host `ResponsiveDialog`'s `labelledBy`. Falls back to a generated id when rendered standalone. */
   titleId?: string;
   className?: string;
@@ -48,7 +52,14 @@ export interface CustomEntryFormProps {
  * generic message rather than guessing which field the server rejected,
  * since `addCustom*`'s result carries no per-field detail.
  */
-export function CustomEntryForm({ initialKind = "stock", initialQuery, onCreated, titleId, className }: CustomEntryFormProps) {
+export function CustomEntryForm({
+  initialKind = "stock",
+  initialQuery,
+  onCreated,
+  onClose,
+  titleId,
+  className,
+}: CustomEntryFormProps) {
   const t = useTranslations("catalogue.customEntry");
   const generatedTitleId = useId();
   const headingId = titleId ?? generatedTitleId;
@@ -115,13 +126,16 @@ export function CustomEntryForm({ initialKind = "stock", initialQuery, onCreated
   const saveLabel = t(kind === "stock" ? "saveStock" : kind === "camera" ? "saveCamera" : "saveLens");
 
   return (
-    <form className={className} onSubmit={handleSubmit}>
+    <form className={cx(styles.root, className)} onSubmit={handleSubmit}>
       <div className={styles.scroll}>
-        <div className={styles.headingBlock}>
-          <h2 id={headingId} className={styles.heading}>
-            {heading}
-          </h2>
-          <p className={styles.lead}>{lead}</p>
+        <div className={styles.headingRow}>
+          <div className={styles.headingBlock}>
+            <h2 id={headingId} className={styles.heading}>
+              {heading}
+            </h2>
+            <p className={styles.lead}>{lead}</p>
+          </div>
+          {onClose ? <DialogCloseButton onClose={onClose} /> : null}
         </div>
 
         <div className={styles.seg} role="group" aria-label={t("segmentLabel")}>

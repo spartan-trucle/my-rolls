@@ -329,6 +329,7 @@ export function BagList({ initialEntries }: BagListProps) {
             bagRefIds={bagRefIds}
             onPicked={handlePicked}
             onAddCustom={(kind, query) => setDialog({ view: "custom", kind, query })}
+            onClose={closeDialog}
           />
         ) : dialog.view === "custom" ? (
           <CustomEntryForm
@@ -336,6 +337,7 @@ export function BagList({ initialEntries }: BagListProps) {
             initialKind={dialog.kind}
             initialQuery={dialog.query}
             onCreated={handleCreated}
+            onClose={closeDialog}
           />
         ) : null}
       </ResponsiveDialog>

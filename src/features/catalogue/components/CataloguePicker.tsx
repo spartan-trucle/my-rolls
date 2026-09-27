@@ -3,6 +3,8 @@
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { useTranslations } from "next-intl";
 import { Field, Icon, Stamp } from "@/design-system";
+import { cx } from "@/design-system/cx";
+import { DialogCloseButton } from "@/components/overlay/DialogCloseButton";
 import { addToBag } from "@/features/bag/actions";
 import { searchCatalogue } from "@/features/catalogue/actions";
 import { cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
@@ -20,6 +22,8 @@ export interface CataloguePickerProps {
   onPicked: (entry: TCatalogueEntry) => void;
   /** The no-match state's action, and the results list's "không thấy?" link — opens `CustomEntryForm` prefilled with what was typed. */
   onAddCustom: (kind: TCatalogueKind, query: string) => void;
+  /** The heading row's close button (the board's `.xbtn`) — omitted when there's nothing for it to call, e.g. the dev preview's own close. */
+  onClose?: () => void;
   /** id put on the `<h2>` title — pass the same id as the host `ResponsiveDialog`'s `labelledBy`. Falls back to a generated id when rendered standalone. */
   titleId?: string;
   className?: string;
@@ -50,6 +54,7 @@ export function CataloguePicker({
   bagRefIds,
   onPicked,
   onAddCustom,
+  onClose,
   titleId,
   className,
 }: CataloguePickerProps) {
@@ -111,11 +116,15 @@ export function CataloguePicker({
   const notFoundPrompt = t(kind === "stock" ? "notFoundPromptStock" : "notFoundPromptCamera");
 
   return (
-    <div className={className}>
+    <div className={cx(styles.root, className)}>
       <div className={styles.header}>
-        <h2 id={headingId} className={styles.title}>
-          {t("title")}
-        </h2>
+        <div className={styles.headingText}>
+          <h2 id={headingId} className={styles.title}>
+            {t("title")}
+          </h2>
+          <p className={styles.lead}>{t("lead")}</p>
+        </div>
+        {onClose ? <DialogCloseButton onClose={onClose} /> : null}
       </div>
 
       <div className={styles.controls}>

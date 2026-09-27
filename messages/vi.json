@@ -1,6 +1,7 @@
 {
   "common": {
-    "appName": "Cuộn"
+    "appName": "Cuộn",
+    "close": "Đóng"
   },
   "theme": {
     "toggleToDark": "Chuyển sang giao diện tối",
@@ -297,6 +298,7 @@
   "catalogue": {
     "picker": {
       "title": "Danh mục",
+      "lead": "Mọi film bán ở Việt Nam và những máy hay gặp. Chọn xong, nó vào túi và vào cuộn này.",
       "close": "Đóng",
       "kindGroupLabel": "Loại",
       "kindStock": "Film",

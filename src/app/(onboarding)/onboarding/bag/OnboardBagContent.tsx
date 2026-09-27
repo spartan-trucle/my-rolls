@@ -319,7 +319,12 @@ export function OnboardBagContent({ initialCameraChips, initialStockChips, initi
 
       <ResponsiveDialog open={customKind !== null} onClose={() => setCustomKind(null)} labelledBy={dialogTitleId}>
         {customKind ? (
-          <CustomEntryForm titleId={dialogTitleId} initialKind={customKind} onCreated={handleCustomCreated} />
+          <CustomEntryForm
+            titleId={dialogTitleId}
+            initialKind={customKind}
+            onCreated={handleCustomCreated}
+            onClose={() => setCustomKind(null)}
+          />
         ) : null}
       </ResponsiveDialog>
     </OnboardingFrame>
