@@ -160,7 +160,7 @@ describe("RollForm", () => {
     listBag.mockResolvedValue([GOLD, HP5, K1000]);
     setup();
 
-    await findFilmChip("Kodak Gold 200");
+    await findFilmChip("Gold 200");
 
     expect(screen.getByText(/Màu âm/)).toBeInTheDocument();
     expect(screen.getByText(/Đen trắng/)).toBeInTheDocument();
@@ -173,7 +173,7 @@ describe("RollForm", () => {
     listBag.mockResolvedValue([GOLD, HP5, K1000]);
     setup();
 
-    const goldRadio = await findFilmChip("Kodak Gold 200");
+    const goldRadio = await findFilmChip("Gold 200");
     const camRadio = await findCameraChip("Pentax K1000");
 
     expect(goldRadio).toBeChecked();
@@ -184,7 +184,7 @@ describe("RollForm", () => {
     listBag.mockResolvedValue([GOLD, { ...HP5, qty: 0 }, K1000]);
     setup();
 
-    await findFilmChip("Kodak Gold 200");
+    await findFilmChip("Gold 200");
     expect(screen.getByText("×3")).toBeInTheDocument();
     expect(screen.getByText("hết")).toBeInTheDocument();
   });
@@ -194,7 +194,7 @@ describe("RollForm", () => {
     getNextRollNumber.mockResolvedValue(16);
     const { user } = setup();
 
-    await findFilmChip("Kodak Gold 200");
+    await findFilmChip("Gold 200");
     expect((await screen.findAllByText("CUỘN #16")).length).toBeGreaterThan(0);
 
     await user.click(screen.getByRole("button", { name: /^Thêm chi tiết/ }));
@@ -205,7 +205,7 @@ describe("RollForm", () => {
     listBag.mockResolvedValue([GOLD, K1000]);
     setup();
 
-    await findFilmChip("Kodak Gold 200");
+    await findFilmChip("Gold 200");
     expect(screen.getByLabelText("Đóng, về kệ")).toHaveAttribute("href", "/");
   });
 
@@ -213,7 +213,7 @@ describe("RollForm", () => {
     listBag.mockResolvedValue([GOLD, K1000]);
     setup();
 
-    await findFilmChip("Kodak Gold 200");
+    await findFilmChip("Gold 200");
     expect(screen.getByRole("button", { name: "Lưu cuộn" })).toBeEnabled();
   });
 
@@ -221,12 +221,12 @@ describe("RollForm", () => {
     listBag.mockResolvedValue([GOLD, HP5, K1000, FUNSAVER]);
     const { user } = setup();
 
-    await findFilmChip("Kodak Gold 200");
+    await findFilmChip("Gold 200");
     await user.click(screen.getByText("Kodak FunSaver", { exact: false }));
 
     expect(await screen.findByText("Máy dùng 1 lần, film cố định là Ilford HP5 Plus 400.")).toBeInTheDocument();
-    const goldRadio = filmChip("Kodak Gold 200");
-    const hp5Radio = screen.getByRole("radio", { name: /Ilford HP5 Plus 400/ });
+    const goldRadio = filmChip("Gold 200");
+    const hp5Radio = screen.getByRole("radio", { name: /HP5 Plus 400/ });
     expect(goldRadio).toBeDisabled();
     expect(hp5Radio).toBeChecked();
     expect(hp5Radio).toBeDisabled();
@@ -246,7 +246,7 @@ describe("RollForm", () => {
     await user.click(pickButton);
 
     await waitFor(() => {
-      const goldRadio = filmChip("Kodak Gold 200");
+      const goldRadio = filmChip("Gold 200");
       expect(goldRadio).toBeChecked();
     });
     expect(screen.queryByText(/Thêm.*vào túi cho lần sau/)).not.toBeInTheDocument();
@@ -281,7 +281,7 @@ describe("RollForm", () => {
     listBag.mockResolvedValue([GOLD, K1000]);
     const { user } = setup();
 
-    await findFilmChip("Kodak Gold 200");
+    await findFilmChip("Gold 200");
     await user.click(screen.getByRole("button", { name: /^Thêm chi tiết/ }));
 
     expect(screen.getByText("Điền ISO chụp để tính")).toBeInTheDocument();
@@ -300,7 +300,7 @@ describe("RollForm", () => {
     setup("past");
 
     await screen.findByText("Film bạn từng dùng");
-    expect(filmChip("Kodak Gold 200")).toBeInTheDocument();
+    expect(filmChip("Gold 200")).toBeInTheDocument();
     expect(screen.getByLabelText("Tìm trong danh mục")).toBeInTheDocument();
   });
 
@@ -310,7 +310,7 @@ describe("RollForm", () => {
     createRoll.mockResolvedValue({ ok: true, rollId: "roll-past", number: 1, remainingQty: null });
     const { user } = setup("past");
 
-    await findFilmChip("Kodak Gold 200");
+    await findFilmChip("Gold 200");
     await user.selectOptions(screen.getByLabelText("Tháng"), "0");
     await user.click(screen.getByRole("button", { name: "Lưu, rồi tải scan lên" }));
 
@@ -328,7 +328,7 @@ describe("RollForm", () => {
     createRoll.mockResolvedValue({ ok: true, rollId: "roll-past", number: 1, remainingQty: null });
     const { user } = setup("past");
 
-    await findFilmChip("Kodak Gold 200");
+    await findFilmChip("Gold 200");
     await user.selectOptions(screen.getByLabelText("Tháng"), "10");
     await user.selectOptions(screen.getByLabelText("Năm"), "2025");
     await user.click(screen.getByRole("button", { name: "Lưu, rồi tải scan lên" }));
@@ -346,7 +346,7 @@ describe("RollForm", () => {
     createRoll.mockResolvedValue({ ok: true, rollId: "roll-1", number: 1, remainingQty: null });
     const { user } = setup();
 
-    await findFilmChip("Kodak Gold 200");
+    await findFilmChip("Gold 200");
     await user.click(screen.getByRole("button", { name: "Lưu cuộn" }));
 
     await waitFor(() => expect(createRoll).toHaveBeenCalledTimes(1));
@@ -360,7 +360,7 @@ describe("RollForm", () => {
     listBag.mockResolvedValue([GOLD, K1000]);
     setup();
 
-    await findFilmChip("Kodak Gold 200");
+    await findFilmChip("Gold 200");
     expect(screen.getAllByText("KODAK GOLD 200 · PENTAX K1000 · ISO 200").length).toBeGreaterThan(0);
   });
 
@@ -369,7 +369,7 @@ describe("RollForm", () => {
     createRoll.mockResolvedValue({ ok: true, rollId: "roll-2", number: 1, remainingQty: null });
     const { user } = setup();
 
-    await findFilmChip("Kodak Gold 200");
+    await findFilmChip("Gold 200");
     await user.click(screen.getByRole("button", { name: /^Thêm chi tiết/ }));
 
     const format35 = screen.getByRole("button", { name: "35mm" });
@@ -391,7 +391,7 @@ describe("RollForm", () => {
     createRoll.mockResolvedValue({ ok: true, rollId: "roll-3", number: 1, remainingQty: null });
     const { user } = setup();
 
-    await findFilmChip("Kodak Portra 400");
+    await findFilmChip("Portra 400");
     await user.click(screen.getByRole("button", { name: /^Thêm chi tiết/ }));
 
     expect(screen.getByRole("button", { name: "120" })).toHaveAttribute("aria-pressed", "true");
@@ -410,7 +410,7 @@ describe("RollForm", () => {
     createRoll.mockResolvedValue({ ok: true, rollId: "roll-4", number: 1, remainingQty: null });
     const { user } = setup();
 
-    await findFilmChip("Kodak Gold 200");
+    await findFilmChip("Gold 200");
     await user.click(screen.getByRole("button", { name: /^Thêm chi tiết/ }));
 
     expect(screen.getByLabelText("Ngày nạp")).toHaveTextContent("25/09/2026");

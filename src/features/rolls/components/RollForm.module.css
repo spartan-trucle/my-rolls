@@ -81,15 +81,8 @@
   color: var(--ink-muted);
 }
 
-.previewSummary {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  line-height: 18px;
-}
-
-.previewPushPull {
-  font: 700 16px/1 var(--font-mono);
+.previewCard {
+  width: 100%;
 }
 
 @media (min-width: 1024px) {

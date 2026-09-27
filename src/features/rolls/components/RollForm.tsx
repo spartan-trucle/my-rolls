@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
-import { Field, Icon, Scribble } from "@/design-system";
+import { Field, Icon, RollCard, Scribble } from "@/design-system";
 import { ResponsiveDialog } from "@/components/overlay/ResponsiveDialog";
 import { DatePicker } from "@/components/ui/date-picker";
 import { listBag } from "@/features/bag/actions";
@@ -17,8 +17,9 @@ import { searchCatalogue } from "@/features/catalogue/actions";
 import type { TCatalogueEntry, TCatalogueKind } from "@/features/catalogue/queries";
 import { createRoll, getNextRollNumber, updateRoll } from "@/features/rolls/actions";
 import type { IRollEntry } from "@/features/rolls/core";
-import { toVnDateString } from "@/features/rolls/date-utils";
+import { toVnDateString, vnMonthEnd, vnMonthStart } from "@/features/rolls/date-utils";
 import { formatPushPull, pushPullStops } from "@/features/rolls/push-pull";
+import { toRollCardProps } from "@/features/rolls/roll-card-mapper";
 import styles from "./RollForm.module.css";
 
 export interface RollFormProps {
@@ -89,6 +90,7 @@ export function RollForm({ mode, roll }: RollFormProps) {
   const t = useTranslations("rolls.form");
   const tTypes = useTranslations("catalogue.types");
   const tPicker = useTranslations("catalogue.picker");
+  const tPage = useTranslations("rolls.page");
   const router = useRouter();
   const titleId = useId();
   const isEdit = roll !== undefined;
@@ -427,6 +429,55 @@ export function RollForm({ mode, roll }: RollFormProps) {
     .join(" · ")
     .toUpperCase();
 
+  // N12 (desktop): the same `IRollEntry` → `RollCardProps` mapping Home
+  // uses (`roll-card-mapper.ts`), fed with the form's own live values —
+  // "Sẽ lên kệ thế này" is a preview of exactly what `RollCard` will show
+  // once this roll is actually on the shelf, "Cuộn #N" and all.
+  const previewMonthYear = mode === "past" ? resolvePastMonthYear() : null;
+  const previewShotFrom =
+    mode === "past"
+      ? (previewMonthYear ? vnMonthStart(previewMonthYear.month, previewMonthYear.year) : null)
+      : (() => {
+          const ms = parseVnDateInput(loadDateInput);
+          return ms !== undefined ? new Date(ms) : null;
+        })();
+  const previewShotTo =
+    mode === "past"
+      ? (previewMonthYear ? vnMonthEnd(previewMonthYear.month, previewMonthYear.year) : null)
+      : (() => {
+          const ms = parseVnDateInput(finishDateInput);
+          return ms !== undefined ? new Date(ms) : null;
+        })();
+  const previewDatePrecision: "day" | "month" | null = mode === "past" ? (previewMonthYear ? "month" : null) : previewShotFrom ? "day" : null;
+
+  const previewRoll: IRollEntry = {
+    id: "preview",
+    number: kickerNumber,
+    name: name.trim() || null,
+    canisterColor: selectedStock?.canisterColor ?? null,
+    boxIso: boxIsoNumber,
+    shotIso: shotIsoNumber,
+    exposures: exposures.trim() ? Number(exposures) : null,
+    format: effectiveFormat,
+    locations: locations.length > 0 ? locations : null,
+    shotFrom: previewShotFrom,
+    shotTo: previewShotTo,
+    datePrecision: previewDatePrecision,
+    notes: null,
+    memory: null,
+    version: 1,
+    createdAt: new Date(),
+    pushPull,
+    stock: selectedStock
+      ? { id: selectedStock.id, brand: selectedStock.brand, name: selectedStock.name, iso: selectedStock.iso, canisterColor: selectedStock.canisterColor, type: selectedStock.type }
+      : null,
+    camera: selectedCamera ? { brand: selectedCamera.camera.brand, model: selectedCamera.camera.model, type: selectedCamera.camera.type } : null,
+    lens: null,
+  };
+  const previewCardProps = toRollCardProps(previewRoll, {
+    unnamedRollLabel: kickerNumber !== null ? tPage("titleFallback", { number: kickerNumber }) : undefined,
+  });
+
   const now = vnNowMonthYear();
   const yearOptions = Array.from({ length: YEAR_WINDOW + 1 }, (_, i) => now.year - i);
 
@@ -557,8 +608,9 @@ export function RollForm({ mode, roll }: RollFormProps) {
                             />
                             <CanisterChipSwatch color={stockRow.canisterColor} />
                             <span>
-                              {stockRow.brand} {stockRow.name}
-                              {typeKey ? <span className={styles.chipMeta}> · {tTypes(typeKey)}</span> : null}
+                              {stockRow.name}
+                              {/* C3: the stock name alone, brand moved into the meta — same convention as `CataloguePicker`'s rows. */}
+                              <span className={styles.chipMeta}> · {[stockRow.brand, typeKey ? tTypes(typeKey) : null].filter(Boolean).join(" · ")}</span>
                             </span>
                             {isNew ? <span className={styles.newtag}>{t("quickAddNewTag")}</span> : null}
                           </label>
@@ -599,8 +651,8 @@ export function RollForm({ mode, roll }: RollFormProps) {
                             />
                             <CanisterChipSwatch color={stockRow.canisterColor} />
                             <span>
-                              {stockRow.brand} {stockRow.name}
-                              {typeKey ? <span className={styles.chipMeta}> · {tTypes(typeKey)}</span> : null}
+                              {stockRow.name}
+                              <span className={styles.chipMeta}> · {[stockRow.brand, typeKey ? tTypes(typeKey) : null].filter(Boolean).join(" · ")}</span>
                             </span>
                             {qtyTxt ? <span className={styles.qty}>{qtyTxt}</span> : null}
                             {isNew ? <span className={styles.newtag}>{t("quickAddNewTag")}</span> : null}
@@ -893,16 +945,10 @@ export function RollForm({ mode, roll }: RollFormProps) {
         <div className={styles.footerSpacer} />
       </div>
 
-      {/*
-        N12 (desktop only): a simplified stand-in for the `NewRollWeb`
-        board's live `RollCard` preview aside — the summary line, not the
-        full canister/print artwork, to keep this pass's scope in check.
-      */}
+      {/* N12 (desktop only): the real `RollCard`, live from the form's own values. */}
       <aside className={styles.preview} aria-hidden="true">
         <span className={styles.previewHeading}>{kickerNumber !== null ? t("kicker", { number: kickerNumber }) : t("previewHeading")}</span>
-        <CanisterChipSwatch color={selectedStock?.canisterColor ?? null} />
-        {summary ? <p className={styles.previewSummary}>{summary}</p> : null}
-        {pushPull ? <span className={styles.previewPushPull}>{pushPull}</span> : null}
+        <RollCard {...previewCardProps} href={undefined} className={styles.previewCard} />
         <Scribble arrow="left" size="sm">
           {t("previewScribble")}
         </Scribble>
