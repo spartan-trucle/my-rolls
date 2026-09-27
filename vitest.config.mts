@@ -8,6 +8,7 @@ import { defineConfig } from "vitest/config";
 const PGLITE_TEST_GLOBS = [
   "src/db/test-db.test.ts",
   "src/**/core.test.ts",
+  "src/**/queries.test.ts",
   "src/lib/search-text.integration.test.ts",
   "scripts/seed-catalogue.test.ts",
 ];
