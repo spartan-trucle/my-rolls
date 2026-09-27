@@ -16,9 +16,11 @@ export interface IUpdateDisplayNameState {
  * Step 2's "Tiếp tục" (D18): trims the name, rejects empty or over 50
  * characters with a code the client component (`ProfileForm`) turns into
  * copy from `messages/vi.json`, otherwise saves it through Better Auth and
- * sends the new user home. `useActionState` in `ProfileForm` supplies
- * `prevState` — unused here, there's nothing to carry over between
- * attempts.
+ * sends the new user to `/onboarding/bag` (Phase 0 D17, F1) rather than
+ * home — only a first-time Google sign-in reaches this page at all
+ * (`newUserCallbackURL`), so a returning user is never redirected here.
+ * `useActionState` in `ProfileForm` supplies `prevState` — unused here,
+ * there's nothing to carry over between attempts.
  */
 export async function updateDisplayNameAction(
   _prevState: IUpdateDisplayNameState,
@@ -31,5 +33,5 @@ export async function updateDisplayNameAction(
   if (name.length > MAX_NAME_LENGTH) return { errorCode: "tooLong" };
 
   await getAuth().api.updateUser({ body: { name }, headers: await headers() });
-  redirect("/");
+  redirect("/onboarding/bag");
 }
