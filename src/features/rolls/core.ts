@@ -5,12 +5,11 @@ import { and, desc, eq, inArray, isNull, or } from "drizzle-orm";
 import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { bagItem, camera, lens, roll, stock } from "@/db/schema";
 import type { TDb } from "@/features/shared/db";
+import { isFutureVnDay } from "@/features/rolls/date-utils";
 import { formatPushPull, pushPullStops } from "@/features/rolls/push-pull";
 
 /** Same two formats CAT-2's custom stock entries know about (D4). */
 const FORMATS = ["35mm", "120"] as const;
-
-const VN_TIME_ZONE = "Asia/Ho_Chi_Minh";
 
 export const createRollInputSchema = z
   .object({
@@ -57,16 +56,6 @@ export type TCreateRollErrorCode =
 export type TCreateRollResult =
   | { ok: true; rollId: string }
   | { ok: false; error: TCreateRollErrorCode };
-
-/** `YYYY-MM-DD` in `Asia/Ho_Chi_Minh`, so two epoch timestamps can be compared by calendar day there, not the server's own time zone. */
-function toVnDateString(epochMs: number): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: VN_TIME_ZONE }).format(new Date(epochMs));
-}
-
-/** Whether `epochMs` falls on a later calendar day, in `Asia/Ho_Chi_Minh`, than `nowMs` (D14). */
-function isFutureVnDay(epochMs: number, nowMs: number): boolean {
-  return toVnDateString(epochMs) > toVnDateString(nowMs);
-}
 
 /**
  * D9: `stockId` must be a live stock that's seeded (`owner_id IS NULL`)
