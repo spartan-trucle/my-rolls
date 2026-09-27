@@ -7,8 +7,12 @@ import {
   createRollInputSchema,
   getRollCore,
   listRollsCore,
+  peekNextRollNumberCore,
+  updateRollCore,
+  updateRollInputSchema,
   type IRollEntry,
   type TCreateRollResult,
+  type TUpdateRollResult,
 } from "@/features/rolls/core";
 import { getAuth } from "@/lib/auth";
 import { captureServerEvent } from "@/lib/posthog-server";
@@ -101,4 +105,27 @@ export async function getRoll(rollId: string): Promise<IRollEntry | null> {
   if (!userId) return null;
 
   return getRollCore(getDb(), userId, rollId);
+}
+
+/** N1: the "Cuộn #N" the form's header/name hint would use if saved right now — `null` when signed out. */
+export async function getNextRollNumber(): Promise<number | null> {
+  const userId = await requireUserId();
+  if (!userId) return null;
+
+  return peekNextRollNumberCore(getDb(), userId);
+}
+
+/**
+ * R4: the `"use server"` wrapper (D19) around `updateRollCore` — same
+ * shape as `createRoll`: session, zod, delegate, typed error instead of a
+ * throw.
+ */
+export async function updateRoll(input: unknown): Promise<TUpdateRollResult> {
+  const userId = await requireUserId();
+  if (!userId) return { ok: false, error: "unauthenticated" };
+
+  const parsed = updateRollInputSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "validation" };
+
+  return updateRollCore(getDb(), userId, parsed.data);
 }
