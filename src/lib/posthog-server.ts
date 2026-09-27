@@ -51,3 +51,35 @@ export async function reportServerError(error: unknown, context: IServerErrorCon
 
   await client.captureExceptionImmediate(error, undefined, context);
 }
+
+export interface IServerEvent {
+  /** The identified user's id (Better Auth `user.id`) — never anonymous, unlike `reportServerError`'s exceptions. */
+  distinctId: string;
+  event: string;
+  properties?: Record<string, unknown>;
+}
+
+/**
+ * Captures a server-side product event (D16: `roll_created`) and waits
+ * for it to send, same reasoning as `reportServerError` — a serverless
+ * function can exit right after the Server Action returns, so this must
+ * be awaited by the caller rather than fired and forgotten.
+ *
+ * Never throws: a capture failure (network, PostHog outage, missing key)
+ * must never fail the action it's attached to, so any error here is
+ * swallowed after the attempt.
+ */
+export async function captureServerEvent(input: IServerEvent): Promise<void> {
+  const client = getPostHogServerClient();
+  if (!client) return;
+
+  try {
+    await client.captureImmediate({
+      distinctId: input.distinctId,
+      event: input.event,
+      properties: input.properties,
+    });
+  } catch {
+    // Swallowed on purpose (D16): analytics must never fail the caller.
+  }
+}
