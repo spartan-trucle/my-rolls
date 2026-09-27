@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Icon } from "@/design-system";
 import { cx } from "@/design-system/cx";
+import { shouldHideShellChrome } from "./hidden-routes";
 import styles from "./BottomTabs.module.css";
 
 export interface BottomTabsProps {
@@ -20,10 +21,15 @@ export interface BottomTabsProps {
  * Tấm ưng has no screen until Phase 3 (D15's F3 scope): it renders as a
  * disabled `<span>`, never a link, so it can't be tapped or focused into
  * a route that doesn't exist yet.
+ *
+ * G4/N2: renders nothing on the routes `shouldHideShellChrome` lists —
+ * their page builds its own close header instead (W2).
  */
 export function BottomTabs({ userInitial, className }: BottomTabsProps) {
   const pathname = usePathname();
   const t = useTranslations("appShell");
+
+  if (shouldHideShellChrome(pathname)) return null;
 
   const current = (href: string) => (pathname === href ? ("page" as const) : undefined);
 

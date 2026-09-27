@@ -21,12 +21,6 @@ describe("BottomTabs", () => {
     expect(screen.getByRole("link", { name: /Túi/ })).toHaveAttribute("aria-current", "page");
   });
 
-  it("marks Cuộn mới current on /rolls/new", () => {
-    usePathname.mockReturnValue("/rolls/new");
-    render(<BottomTabs userInitial="T" />);
-    expect(screen.getByRole("link", { name: /Cuộn mới/ })).toHaveAttribute("aria-current", "page");
-  });
-
   it("marks Tôi current on /profile", () => {
     usePathname.mockReturnValue("/profile");
     render(<BottomTabs userInitial="T" />);
@@ -53,5 +47,17 @@ describe("BottomTabs", () => {
     usePathname.mockReturnValue("/");
     render(<BottomTabs userInitial="X" />);
     expect(screen.getByText("X")).toBeInTheDocument();
+  });
+
+  it("renders nothing on /rolls/new (G4/N2: the page builds its own close header)", () => {
+    usePathname.mockReturnValue("/rolls/new");
+    const { container } = render(<BottomTabs userInitial="T" />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("renders nothing on a roll page (/rolls/[id])", () => {
+    usePathname.mockReturnValue("/rolls/abc-123");
+    const { container } = render(<BottomTabs userInitial="T" />);
+    expect(container).toBeEmptyDOMElement();
   });
 });

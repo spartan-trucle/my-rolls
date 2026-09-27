@@ -36,4 +36,22 @@ describe("TopNav", () => {
     expect(screen.getByRole("button", { name: /Chuyển sang giao diện/ })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Hồ sơ/ })).toHaveAttribute("href", "/profile");
   });
+
+  it("never shows a Lab nav item (R2-6: hidden until Phase 2's scan-set flow)", () => {
+    usePathname.mockReturnValue("/");
+    render(<TopNav userInitial="T" />);
+    expect(screen.queryByText("Lab")).not.toBeInTheDocument();
+  });
+
+  it("marks Kệ current on a roll page (G5: /rolls/* has no nav item of its own)", () => {
+    usePathname.mockReturnValue("/rolls/abc-123");
+    render(<TopNav userInitial="T" />);
+    expect(screen.getByRole("link", { name: "Kệ" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("hides the Cuộn mới button on /rolls/new (G5: NewRollWeb hides its own button)", () => {
+    usePathname.mockReturnValue("/rolls/new");
+    render(<TopNav userInitial="T" />);
+    expect(screen.queryByRole("link", { name: /Cuộn mới/ })).not.toBeInTheDocument();
+  });
 });

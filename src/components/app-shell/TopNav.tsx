@@ -21,12 +21,19 @@ export interface TopNavProps {
  * every other screen's chrome carries one, so it's kept here too.
  *
  * Tấm ưng has no screen until Phase 3: a disabled `<span>`, never a link.
+ *
+ * G5: "Kệ" also reads as current under `/rolls/*` — the roll form and roll
+ * page are reached from the shelf and have no nav item of their own — and
+ * the "Cuộn mới" button hides on `/rolls/new` itself (`NewRollWeb`: no
+ * point linking to the page you're already on).
  */
 export function TopNav({ userInitial, className }: TopNavProps) {
   const pathname = usePathname();
   const t = useTranslations("appShell");
 
   const current = (href: string) => (pathname === href ? ("page" as const) : undefined);
+  const shelfCurrent = pathname === "/" || pathname.startsWith("/rolls/") ? ("page" as const) : undefined;
+  const showNewRollButton = pathname !== "/rolls/new";
 
   return (
     <header className={cx(styles.header, className)}>
@@ -35,7 +42,7 @@ export function TopNav({ userInitial, className }: TopNavProps) {
           {t("wordmark")}
         </Link>
         <nav className={styles.nav} aria-label={t("navLabel")}>
-          <Link href="/" aria-current={current("/")} className={styles.link}>
+          <Link href="/" aria-current={shelfCurrent} className={styles.link}>
             {t("nav.shelf")}
           </Link>
           <Link href="/bag" aria-current={current("/bag")} className={styles.link}>
@@ -47,9 +54,11 @@ export function TopNav({ userInitial, className }: TopNavProps) {
         </nav>
       </div>
       <div className={styles.trailing}>
-        <Link href="/rolls/new" className={styles.newRollButton}>
-          {t("nav.newRoll")}
-        </Link>
+        {showNewRollButton ? (
+          <Link href="/rolls/new" className={styles.newRollButton}>
+            {t("nav.newRoll")}
+          </Link>
+        ) : null}
         <ThemeToggle />
         <Link href="/profile" aria-current={current("/profile")} aria-label={t("avatarAlt")} className={styles.avatar}>
           {userInitial}

@@ -11,9 +11,13 @@
   padding: var(--space-4) var(--space-4) var(--space-8);
 }
 
-/* Phone: BottomTabs, no TopNav. */
+/* Phone: PhoneTopBar + BottomTabs, no TopNav. */
 .topNav {
   display: none;
+}
+
+.phoneTopBar {
+  padding: var(--space-4) var(--space-4) 0;
 }
 
 .bottomTabs {
@@ -22,10 +26,14 @@
   bottom: 0;
 }
 
-/* Desktop: TopNav, no BottomTabs. */
+/* Desktop: TopNav, no PhoneTopBar or BottomTabs. */
 @media (min-width: 1024px) {
   .topNav {
     display: flex;
+  }
+
+  .phoneTopBar {
+    display: none;
   }
 
   .bottomTabs {
