@@ -49,7 +49,11 @@ export const createRollInputSchema = z
 
 export type TCreateRollInput = z.infer<typeof createRollInputSchema>;
 
-export type TCreateRollErrorCode = "validation" | "not_found" | "fixed_stock_mismatch";
+export type TCreateRollErrorCode =
+  | "unauthenticated"
+  | "validation"
+  | "not_found"
+  | "fixed_stock_mismatch";
 export type TCreateRollResult =
   | { ok: true; rollId: string }
   | { ok: false; error: TCreateRollErrorCode };
