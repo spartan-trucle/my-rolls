@@ -2,7 +2,10 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { loadEnvConfig } from "@next/env";
 import { and, eq, isNull, type ExtractTablesWithRelations } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/node-postgres";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
+import { Pool } from "pg";
+import { resolveMigrationDatabaseUrl } from "../src/db/migration-env";
 import * as schema from "../src/db/schema";
 import { camera, stock } from "../src/db/schema";
 import { toSearchText } from "../src/lib/search-text";
@@ -52,13 +55,37 @@ type TDbOrTx<TQueryResult extends PgQueryResultHKT> = PgDatabase<
 >;
 
 /**
+ * Whether any of `values`' keys differ from the same column on the
+ * existing row — arrays (`formats`, `services`…) compare by content, not
+ * identity. Backs the "a second run changes nothing" guarantee (B3): a
+ * row that would be written back unchanged is skipped entirely, so
+ * `updated_at` stays put too, not just the visible columns.
+ */
+function hasChanges<T extends Record<string, unknown>>(
+  existingRow: T,
+  values: Partial<T>,
+): boolean {
+  return (Object.keys(values) as (keyof T)[]).some((key) => {
+    const before = existingRow[key] ?? null;
+    const after = values[key] ?? null;
+
+    if (Array.isArray(before) || Array.isArray(after)) {
+      return JSON.stringify(before) !== JSON.stringify(after);
+    }
+
+    return before !== after;
+  });
+}
+
+/**
  * Upserts on `slug`, scoped to seeded rows (`owner_id IS NULL`, D9/D10) —
  * a plain select-then-insert-or-update rather than `ON CONFLICT`, since the
  * unique index this natural key backs is partial (`stock_slug_idx`,
  * `camera_slug_idx`) and Postgres requires the same partial predicate on
  * the conflict target, which drizzle's `onConflictDoUpdate` can express
  * but a plain read-then-write is simpler to reason about for ~150 rows
- * run once per build.
+ * run once per build. `updated_at` is only bumped when a value actually
+ * changed, so re-running the seed with the same data is a true no-op.
  */
 async function upsertStocks<TQueryResult extends PgQueryResultHKT>(
   db: TDbOrTx<TQueryResult>,
@@ -78,13 +105,18 @@ async function upsertStocks<TQueryResult extends PgQueryResultHKT>(
     };
 
     const existing = await db
-      .select({ id: stock.id })
+      .select()
       .from(stock)
       .where(and(eq(stock.slug, row.slug), isNull(stock.ownerId)))
       .limit(1);
 
     if (existing[0]) {
-      await db.update(stock).set(values).where(eq(stock.id, existing[0].id));
+      if (hasChanges(existing[0], values)) {
+        await db
+          .update(stock)
+          .set({ ...values, updatedAt: new Date() })
+          .where(eq(stock.id, existing[0].id));
+      }
     } else {
       await db.insert(stock).values(values);
     }
@@ -126,13 +158,18 @@ async function upsertCameras<TQueryResult extends PgQueryResultHKT>(
     };
 
     const existing = await db
-      .select({ id: camera.id })
+      .select()
       .from(camera)
       .where(and(eq(camera.slug, row.slug), isNull(camera.ownerId)))
       .limit(1);
 
     if (existing[0]) {
-      await db.update(camera).set(values).where(eq(camera.id, existing[0].id));
+      if (hasChanges(existing[0], values)) {
+        await db
+          .update(camera)
+          .set({ ...values, updatedAt: new Date() })
+          .where(eq(camera.id, existing[0].id));
+      }
     } else {
       await db.insert(camera).values(values);
     }
@@ -165,21 +202,33 @@ function readJson<T>(relativePath: string): T {
  * CLI entry point (`pnpm db:seed`, and `vercel-build` after `db:migrate`).
  * Only runs when this file is executed directly — importing it for tests
  * (`seed-catalogue.test.ts`) must not touch the real database or `@/env`.
+ *
+ * Its own short-lived `Pool` over `DATABASE_URL_UNPOOLED` (D10's "always
+ * the direct connection for migrate-time work", same as
+ * `drizzle.config.ts`), not `src/db/client.ts`'s cached, pooled `getDb()` —
+ * that pool is meant to live for the app's lifetime and is never told to
+ * end, so a one-shot CLI using it would hang on `pg`'s ~10 s idle timeout
+ * instead of exiting. `pool.end()` in `finally` closes it whether the seed
+ * succeeds or throws.
  */
 async function main() {
   loadEnvConfig(process.cwd(), true);
-  // Imported lazily: `src/db/client` reads `@/env` at call time, which
-  // must not happen just by importing this module for tests.
-  const { getDb } = await import("../src/db/client");
 
-  const stockRows = readJson<TStockSeed[]>("../data/catalogue/stocks.json");
-  const cameraRows = readJson<TCameraSeed[]>("../data/catalogue/cameras.json");
+  const pool = new Pool({ connectionString: resolveMigrationDatabaseUrl(process.env) });
+  const db = drizzle(pool, { schema });
 
-  await seedCatalogue(getDb(), stockRows, cameraRows);
+  try {
+    const stockRows = readJson<TStockSeed[]>("../data/catalogue/stocks.json");
+    const cameraRows = readJson<TCameraSeed[]>("../data/catalogue/cameras.json");
 
-  process.stdout.write(
-    `Seeded ${stockRows.length} stocks and ${cameraRows.length} cameras.\n`,
-  );
+    await seedCatalogue(db, stockRows, cameraRows);
+
+    process.stdout.write(
+      `Seeded ${stockRows.length} stocks and ${cameraRows.length} cameras.\n`,
+    );
+  } finally {
+    await pool.end();
+  }
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

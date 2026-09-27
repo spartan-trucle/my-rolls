@@ -88,6 +88,37 @@ describe("seedCatalogue", () => {
     expect(camerasAfter.map((c) => c.id)).toEqual(camerasBefore.map((c) => c.id));
     expect(stocksAfter).toEqual(stocksBefore);
     expect(camerasAfter).toEqual(camerasBefore);
+    // updated_at specifically, not only folded into the deep-equal checks
+    // above: a real no-op must not touch it either.
+    expect(stocksAfter.map((s) => s.updatedAt)).toEqual(stocksBefore.map((s) => s.updatedAt));
+    expect(camerasAfter.map((c) => c.updatedAt)).toEqual(
+      camerasBefore.map((c) => c.updatedAt),
+    );
+  });
+
+  it("bumps updated_at only on the row whose data actually changed", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+
+    await seedCatalogue(db, FIXTURE_STOCKS, []);
+    const before = await db.select().from(stock).orderBy(stock.slug);
+
+    const changedStocks: TStockSeed[] = FIXTURE_STOCKS.map((row) =>
+      row.slug === "ilford-hp5-plus-400" ? { ...row, iso: 401 } : row,
+    );
+    await seedCatalogue(db, changedStocks, []);
+    const after = await db.select().from(stock).orderBy(stock.slug);
+
+    const beforeBySlug = new Map(before.map((row) => [row.slug, row]));
+    for (const row of after) {
+      const previous = beforeBySlug.get(row.slug);
+      if (row.slug === "ilford-hp5-plus-400") {
+        expect(row.iso).toBe(401);
+        expect(row.updatedAt).not.toEqual(previous?.updatedAt);
+      } else {
+        expect(row.updatedAt).toEqual(previous?.updatedAt);
+      }
+    }
   });
 
   it("never touches a user's private custom stock with the same slug (owner scoping)", async () => {
