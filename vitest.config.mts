@@ -15,7 +15,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
-    include: ["src/**/*.test.{ts,tsx}"],
+    include: ["src/**/*.test.{ts,tsx}", "scripts/**/*.test.{ts,tsx}"],
     // CSS Modules resolve to their plain class names (styles.primary === "primary").
     css: { include: [/\.module\.css$/], modules: { classNameStrategy: "non-scoped" } },
   },
