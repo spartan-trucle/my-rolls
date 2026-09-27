@@ -7,7 +7,8 @@ import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { Pool } from "pg";
 import { resolveMigrationDatabaseUrl } from "../src/db/migration-env";
 import * as schema from "../src/db/schema";
-import { camera, stock } from "../src/db/schema";
+import { camera, lab, stock } from "../src/db/schema";
+import { HOME_DEVELOPMENT_SLUG } from "../src/features/labs/constants";
 import { toSearchText } from "../src/lib/search-text";
 
 /**
@@ -193,6 +194,51 @@ export async function seedCatalogue<TQueryResult extends PgQueryResultHKT>(
   });
 }
 
+const HOME_DEVELOPMENT_NAME = "Tự tráng ở nhà";
+
+/**
+ * B5 task 4: the labs data layer (`src/features/labs/core.ts`) always
+ * pins the built-in home-development lab first, and its tests need the
+ * row to exist without depending on B3b's full `labs.json` seed, which
+ * lands later on its own branch. Seeded here, on its own — not folded
+ * into `seedCatalogue`'s stock/camera transaction, since it's an
+ * unrelated table — with the same upsert-on-slug, no-op-if-unchanged
+ * shape as `upsertStocks`/`upsertCameras` above. B3b's own seed can
+ * still include this slug in `labs.json` later: the upsert is
+ * idempotent either way, so the two don't fight over the row.
+ *
+ * A migration (`0003`) that inserts this one row was the other option
+ * (see the plan) — skipped because every migration so far
+ * (`drizzle/000*.sql`) is schema-only (D9/D10: seed data belongs in this
+ * script, reviewable in PRs, not hand-written into a migration).
+ */
+export async function seedHomeDevelopmentLab<
+  TQueryResult extends PgQueryResultHKT,
+>(db: TDbOrTx<TQueryResult>): Promise<void> {
+  const values = {
+    slug: HOME_DEVELOPMENT_SLUG,
+    name: HOME_DEVELOPMENT_NAME,
+    searchText: toSearchText(HOME_DEVELOPMENT_NAME),
+  };
+
+  const existing = await db
+    .select()
+    .from(lab)
+    .where(and(eq(lab.slug, HOME_DEVELOPMENT_SLUG), isNull(lab.ownerId)))
+    .limit(1);
+
+  if (existing[0]) {
+    if (hasChanges(existing[0], values)) {
+      await db
+        .update(lab)
+        .set({ ...values, updatedAt: new Date() })
+        .where(eq(lab.id, existing[0].id));
+    }
+  } else {
+    await db.insert(lab).values(values);
+  }
+}
+
 function readJson<T>(relativePath: string): T {
   const fullPath = path.join(import.meta.dirname, relativePath);
   return JSON.parse(readFileSync(fullPath, "utf8")) as T;
@@ -214,17 +260,22 @@ function readJson<T>(relativePath: string): T {
 async function main() {
   loadEnvConfig(process.cwd(), true);
 
-  const pool = new Pool({ connectionString: resolveMigrationDatabaseUrl(process.env) });
+  const pool = new Pool({
+    connectionString: resolveMigrationDatabaseUrl(process.env),
+  });
   const db = drizzle(pool, { schema });
 
   try {
     const stockRows = readJson<TStockSeed[]>("../data/catalogue/stocks.json");
-    const cameraRows = readJson<TCameraSeed[]>("../data/catalogue/cameras.json");
+    const cameraRows = readJson<TCameraSeed[]>(
+      "../data/catalogue/cameras.json",
+    );
 
     await seedCatalogue(db, stockRows, cameraRows);
+    await seedHomeDevelopmentLab(db);
 
     process.stdout.write(
-      `Seeded ${stockRows.length} stocks and ${cameraRows.length} cameras.\n`,
+      `Seeded ${stockRows.length} stocks, ${cameraRows.length} cameras and the home-development lab.\n`,
     );
   } finally {
     await pool.end();
@@ -233,7 +284,9 @@ async function main() {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch((err) => {
-    process.stderr.write(`Seed failed: ${err instanceof Error ? err.stack : err}\n`);
+    process.stderr.write(
+      `Seed failed: ${err instanceof Error ? err.stack : err}\n`,
+    );
     process.exitCode = 1;
   });
 }
