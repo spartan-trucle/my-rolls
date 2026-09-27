@@ -1,8 +1,9 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/i18n/test-utils";
 import type { TBagEntry, TCameraRow, TStockRow } from "@/features/bag/queries";
+import type { IRollEntry } from "@/features/rolls/core";
 
 const listBag = vi.hoisted(() => vi.fn());
 const addToBag = vi.hoisted(() => vi.fn());
@@ -12,12 +13,14 @@ const addCustomStock = vi.hoisted(() => vi.fn());
 const addCustomCamera = vi.hoisted(() => vi.fn());
 const addCustomLens = vi.hoisted(() => vi.fn());
 const createRoll = vi.hoisted(() => vi.fn());
+const updateRoll = vi.hoisted(() => vi.fn());
+const getNextRollNumber = vi.hoisted(() => vi.fn().mockResolvedValue(16));
 const push = vi.hoisted(() => vi.fn());
 const posthogCapture = vi.hoisted(() => vi.fn());
 
 vi.mock("@/features/bag/actions", () => ({ listBag, addToBag }));
 vi.mock("@/features/catalogue/actions", () => ({ listCatalogue, searchCatalogue, addCustomStock, addCustomCamera, addCustomLens }));
-vi.mock("@/features/rolls/actions", () => ({ createRoll }));
+vi.mock("@/features/rolls/actions", () => ({ createRoll, updateRoll, getNextRollNumber }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("posthog-js", () => ({ default: { capture: posthogCapture } }));
 
@@ -82,7 +85,7 @@ const portra120Stock = makeStock({
   type: "color-negative",
 });
 
-const GOLD: TBagEntry = { bagItemId: "bag-stock-gold", kind: "stock", createdAt: new Date("2026-09-01"), stock: goldStock };
+const GOLD: TBagEntry = { bagItemId: "bag-stock-gold", kind: "stock", createdAt: new Date("2026-09-01"), stock: goldStock, qty: 3 };
 
 const HP5: TBagEntry = { bagItemId: "bag-stock-hp5", kind: "stock", createdAt: new Date("2026-09-02"), stock: hp5Stock };
 
@@ -106,10 +109,26 @@ const FUNSAVER: TBagEntry = {
   fixedStock: hp5Stock,
 };
 
-function setup(mode: "new" | "past" = "new") {
+function setup(mode: "new" | "past" = "new", roll?: IRollEntry) {
   const user = userEvent.setup();
-  renderWithIntl(<RollForm mode={mode} />);
+  renderWithIntl(<RollForm mode={mode} roll={roll} />);
   return { user };
+}
+
+// N11's sticky-bar summary repeats the selected film/camera names as
+// plain text too, so an unscoped `getByText(..., { exact: false })`
+// (case-insensitive substring) matches both it and the film/camera chip
+// — querying the chip's own `role="radio"` input instead (by its
+// label's accessible name) never has that ambiguity, since the summary
+// is a plain `<span>`, not a radio.
+function findFilmChip(name: string) {
+  return screen.findByRole("radio", { name: new RegExp(name) });
+}
+function findCameraChip(name: string) {
+  return screen.findByRole("radio", { name: new RegExp(name) });
+}
+function filmChip(name: string) {
+  return screen.getByRole("radio", { name: new RegExp(name) });
 }
 
 describe("RollForm", () => {
@@ -121,6 +140,8 @@ describe("RollForm", () => {
     addCustomCamera.mockReset();
     addCustomLens.mockReset();
     createRoll.mockReset();
+    updateRoll.mockReset();
+    getNextRollNumber.mockReset().mockResolvedValue(16);
     push.mockReset();
     posthogCapture.mockReset();
     vi.useRealTimers();
@@ -139,7 +160,7 @@ describe("RollForm", () => {
     listBag.mockResolvedValue([GOLD, HP5, K1000]);
     setup();
 
-    await screen.findByText("Kodak Gold 200", { exact: false });
+    await findFilmChip("Kodak Gold 200");
 
     expect(screen.getByText(/Màu âm/)).toBeInTheDocument();
     expect(screen.getByText(/Đen trắng/)).toBeInTheDocument();
@@ -152,19 +173,47 @@ describe("RollForm", () => {
     listBag.mockResolvedValue([GOLD, HP5, K1000]);
     setup();
 
-    const goldChip = await screen.findByText("Kodak Gold 200", { exact: false });
-    const goldRadio = goldChip.closest("label")?.querySelector("input");
-    const camRadio = (await screen.findByText("Pentax K1000", { exact: false })).closest("label")?.querySelector("input");
+    const goldRadio = await findFilmChip("Kodak Gold 200");
+    const camRadio = await findCameraChip("Pentax K1000");
 
     expect(goldRadio).toBeChecked();
     expect(camRadio).toBeChecked();
+  });
+
+  it("shows the bag stock's qty as a ×N chip badge, or 'hết' at zero (N6)", async () => {
+    listBag.mockResolvedValue([GOLD, { ...HP5, qty: 0 }, K1000]);
+    setup();
+
+    await findFilmChip("Kodak Gold 200");
+    expect(screen.getByText("×3")).toBeInTheDocument();
+    expect(screen.getByText("hết")).toBeInTheDocument();
+  });
+
+  it("shows the header kicker and name hint from the next roll number (N1)", async () => {
+    listBag.mockResolvedValue([GOLD, K1000]);
+    getNextRollNumber.mockResolvedValue(16);
+    const { user } = setup();
+
+    await findFilmChip("Kodak Gold 200");
+    expect(await screen.findByText("CUỘN #16")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^Thêm chi tiết/ }));
+    expect(screen.getByText("Để trống thì gọi là Cuộn #16.")).toBeInTheDocument();
+  });
+
+  it("shows a close link back to the shelf (G4/N2)", async () => {
+    listBag.mockResolvedValue([GOLD, K1000]);
+    setup();
+
+    await findFilmChip("Kodak Gold 200");
+    expect(screen.getByLabelText("Đóng, về kệ")).toHaveAttribute("href", "/");
   });
 
   it("disables Save until film and camera are available, and enables it once the bag loads", async () => {
     listBag.mockResolvedValue([GOLD, K1000]);
     setup();
 
-    await screen.findByText("Kodak Gold 200", { exact: false });
+    await findFilmChip("Kodak Gold 200");
     expect(screen.getByRole("button", { name: "Lưu cuộn" })).toBeEnabled();
   });
 
@@ -172,145 +221,155 @@ describe("RollForm", () => {
     listBag.mockResolvedValue([GOLD, HP5, K1000, FUNSAVER]);
     const { user } = setup();
 
-    await screen.findByText("Kodak Gold 200", { exact: false });
+    await findFilmChip("Kodak Gold 200");
     await user.click(screen.getByText("Kodak FunSaver", { exact: false }));
 
     expect(await screen.findByText("Máy dùng 1 lần, film cố định là Ilford HP5 Plus 400.")).toBeInTheDocument();
-    const goldRadio = screen.getByText("Kodak Gold 200", { exact: false }).closest("label")?.querySelector("input");
-    const hp5Chip = screen.getAllByText(/Ilford HP5 Plus 400/).find((el) => el.closest("label"));
-    const hp5Radio = hp5Chip?.closest("label")?.querySelector("input");
+    const goldRadio = filmChip("Kodak Gold 200");
+    const hp5Radio = screen.getByRole("radio", { name: /Ilford HP5 Plus 400/ });
     expect(goldRadio).toBeDisabled();
     expect(hp5Radio).toBeChecked();
     expect(hp5Radio).toBeDisabled();
   });
 
-  it("picking from the catalogue adds it to the bag and selects it", async () => {
-    listBag.mockResolvedValueOnce([K1000]).mockResolvedValueOnce([GOLD, K1000]);
-    searchCatalogue.mockResolvedValue({
-      ok: true,
-      entries: [{ kind: "stock" as const, ...goldStock }],
-    });
-    addToBag.mockResolvedValue({ ok: true, bagItemId: "bag-stock-gold" });
+  it("N3/N4: picking an in-bag film from the inline search selects it, no bag checkbox", async () => {
+    listBag.mockResolvedValue([K1000, GOLD]);
+    searchCatalogue.mockResolvedValue({ ok: true, entries: [{ kind: "stock" as const, ...goldStock }] });
     const { user } = setup();
 
-    await screen.findByText("Pentax K1000", { exact: false });
+    await findCameraChip("Pentax K1000");
     await user.click(screen.getByRole("button", { name: "+ Film khác" }));
-
     await user.type(screen.getByLabelText("Tìm trong danh mục"), "gold");
     await waitFor(() => expect(searchCatalogue).toHaveBeenCalled());
 
-    const pickButton = await screen.findByRole("button", { name: /Kodak Gold 200/ });
+    const pickButton = await screen.findByRole("button", { name: /Gold 200/ });
     await user.click(pickButton);
 
-    expect(addToBag).toHaveBeenCalledWith({ kind: "stock", refId: "stock-gold" });
-    await waitFor(() => expect(listBag).toHaveBeenCalledTimes(2));
     await waitFor(() => {
-      const goldRadio = screen.getByText("Kodak Gold 200", { exact: false }).closest("label")?.querySelector("input");
+      const goldRadio = filmChip("Kodak Gold 200");
       expect(goldRadio).toBeChecked();
     });
+    expect(screen.queryByText(/Thêm.*vào túi cho lần sau/)).not.toBeInTheDocument();
   });
 
-  it("updates the push/pull badge live as shot ISO changes", async () => {
+  it("N3/N4: picking a film not in the bag shows a 'mới' chip and the add-to-bag checkbox, wired to addStockToBag", async () => {
+    listBag.mockResolvedValue([K1000]);
+    searchCatalogue.mockResolvedValue({ ok: true, entries: [{ kind: "stock" as const, ...goldStock }] });
+    createRoll.mockResolvedValue({ ok: true, rollId: "roll-1", number: 1, remainingQty: null });
+    const { user } = setup();
+
+    await findCameraChip("Pentax K1000");
+    await user.click(screen.getByRole("button", { name: "+ Film khác" }));
+    await user.type(screen.getByLabelText("Tìm trong danh mục"), "gold");
+    await waitFor(() => expect(searchCatalogue).toHaveBeenCalled());
+    await user.click(await screen.findByRole("button", { name: /Gold 200/ }));
+
+    expect(screen.getByText("mới")).toBeInTheDocument();
+    const checkbox = screen.getByRole("checkbox", { name: /Thêm Gold 200 vào túi cho lần sau/ });
+    expect(checkbox).toBeChecked();
+
+    await user.click(checkbox);
+    await user.click(screen.getByRole("button", { name: "Lưu cuộn" }));
+
+    await waitFor(() => expect(createRoll).toHaveBeenCalledTimes(1));
+    const [input] = createRoll.mock.calls[0];
+    expect(input).toMatchObject({ stockId: "stock-gold", addStockToBag: false });
+    expect(addToBag).not.toHaveBeenCalled();
+  });
+
+  it("updates the push/pull badge live as shot ISO changes, with words and a warning at ≥3 stops", async () => {
     listBag.mockResolvedValue([GOLD, K1000]);
     const { user } = setup();
 
-    await screen.findByText("Kodak Gold 200", { exact: false });
+    await findFilmChip("Kodak Gold 200");
     await user.click(screen.getByRole("button", { name: /^Thêm chi tiết/ }));
+
+    expect(screen.getByText("Điền ISO chụp để tính")).toBeInTheDocument();
+
     await user.type(screen.getByLabelText("ISO chụp"), "400");
-
     expect(await screen.findByText("+1")).toBeInTheDocument();
+    expect(screen.getByText("stop · đẩy khi tráng")).toBeInTheDocument();
+
+    await user.clear(screen.getByLabelText("ISO chụp"));
+    await user.type(screen.getByLabelText("ISO chụp"), "3200");
+    expect(await screen.findByText("Nhiều đấy. Đẩy +4 thật à?")).toBeInTheDocument();
   });
 
-  it("requires both past dates before saving, with a human-voice error, and never calls createRoll", async () => {
+  it("P2/P3: past mode is catalogue-first, with bag films as 'Film bạn từng dùng' quick picks", async () => {
     listBag.mockResolvedValue([GOLD, K1000]);
-    const { user } = setup("past");
+    setup("past");
 
-    await screen.findByText("Kodak Gold 200", { exact: false });
-    await user.click(screen.getByRole("button", { name: "Lưu, rồi tải scan lên" }));
-
-    expect(await screen.findAllByText("Điền cái này với bạn nhé.")).toHaveLength(2);
-    expect(createRoll).not.toHaveBeenCalled();
+    await screen.findByText("Film bạn từng dùng");
+    expect(filmChip("Kodak Gold 200")).toBeInTheDocument();
+    expect(screen.getByLabelText("Tìm trong danh mục")).toBeInTheDocument();
   });
 
-  it("disables a future day in the shotFrom calendar (Vietnam day, D14)", async () => {
-    vi.setSystemTime(new Date("2026-09-15T04:00:00Z")); // ~11:00 in Asia/Ho_Chi_Minh
-    listBag.mockResolvedValue([GOLD, K1000]);
-    const { user } = setup("past");
-
-    await screen.findByText("Kodak Gold 200", { exact: false });
-    await user.click(screen.getByLabelText("Ngày bắt đầu"));
-    const grid = await screen.findByRole("grid");
-
-    expect(within(grid).getByRole("button", { name: /ngày 20 tháng 09/ })).toBeDisabled();
-    expect(within(grid).getByRole("button", { name: /ngày 10 tháng 09/ })).toBeEnabled();
-
-    vi.useRealTimers();
-  });
-
-  it("in shotTo's calendar, disables a day before the picked shotFrom", async () => {
+  it("R2-4: past mode's month/year pick defaults to now, and 'Không nhớ' sends null month/year", async () => {
     vi.setSystemTime(new Date("2026-09-25T04:00:00Z"));
     listBag.mockResolvedValue([GOLD, K1000]);
+    createRoll.mockResolvedValue({ ok: true, rollId: "roll-past", number: 1, remainingQty: null });
     const { user } = setup("past");
 
-    await screen.findByText("Kodak Gold 200", { exact: false });
-    await user.click(screen.getByLabelText("Ngày bắt đầu"));
-    await user.click(within(await screen.findByRole("grid")).getByRole("button", { name: /ngày 10 tháng 09/ }));
-
-    await user.click(screen.getByLabelText("Ngày chụp xong"));
-    const toGrid = await screen.findByRole("grid");
-    expect(within(toGrid).getByRole("button", { name: /ngày 5 tháng 09/ })).toBeDisabled();
-    expect(within(toGrid).getByRole("button", { name: /ngày 12 tháng 09/ })).toBeEnabled();
-
-    vi.useRealTimers();
-  });
-
-  it("picking dates in the calendar shows them as dd/mm/yyyy and saves shotFrom/shotTo", async () => {
-    vi.setSystemTime(new Date("2026-09-25T04:00:00Z"));
-    listBag.mockResolvedValue([GOLD, K1000]);
-    createRoll.mockResolvedValue({ ok: true, rollId: "roll-past" });
-    const { user } = setup("past");
-
-    await screen.findByText("Kodak Gold 200", { exact: false });
-    await user.click(screen.getByLabelText("Ngày bắt đầu"));
-    await user.click(within(await screen.findByRole("grid")).getByRole("button", { name: /ngày 10 tháng 09/ }));
-    expect(screen.getByLabelText("Ngày bắt đầu")).toHaveTextContent("10/09/2026");
-
-    await user.click(screen.getByLabelText("Ngày chụp xong"));
-    await user.click(within(await screen.findByRole("grid")).getByRole("button", { name: /ngày 12 tháng 09/ }));
-    expect(screen.getByLabelText("Ngày chụp xong")).toHaveTextContent("12/09/2026");
-
+    await findFilmChip("Kodak Gold 200");
+    await user.selectOptions(screen.getByLabelText("Tháng"), "0");
     await user.click(screen.getByRole("button", { name: "Lưu, rồi tải scan lên" }));
 
     await waitFor(() => expect(createRoll).toHaveBeenCalledTimes(1));
     const [input] = createRoll.mock.calls[0];
-    expect(typeof input.shotFrom).toBe("number");
-    expect(typeof input.shotTo).toBe("number");
-    expect(push).toHaveBeenCalledWith("/rolls/roll-past");
+    expect(input.shotFromMonth).toBeNull();
+    expect(input.shotToMonth).toBeNull();
 
     vi.useRealTimers();
   });
 
-  it("saves with formOpenedAt and routes to the new roll's page", async () => {
+  it("R2-4: picking a month/year sends the same shotFromMonth/shotToMonth pair", async () => {
+    vi.setSystemTime(new Date("2026-09-25T04:00:00Z"));
     listBag.mockResolvedValue([GOLD, K1000]);
-    createRoll.mockResolvedValue({ ok: true, rollId: "roll-1" });
+    createRoll.mockResolvedValue({ ok: true, rollId: "roll-past", number: 1, remainingQty: null });
+    const { user } = setup("past");
+
+    await findFilmChip("Kodak Gold 200");
+    await user.selectOptions(screen.getByLabelText("Tháng"), "10");
+    await user.selectOptions(screen.getByLabelText("Năm"), "2025");
+    await user.click(screen.getByRole("button", { name: "Lưu, rồi tải scan lên" }));
+
+    await waitFor(() => expect(createRoll).toHaveBeenCalledTimes(1));
+    const [input] = createRoll.mock.calls[0];
+    expect(input.shotFromMonth).toEqual({ month: 10, year: 2025 });
+    expect(input.shotToMonth).toEqual({ month: 10, year: 2025 });
+
+    vi.useRealTimers();
+  });
+
+  it("saves with formOpenedAt and routes to the new roll's page, marked just-saved", async () => {
+    listBag.mockResolvedValue([GOLD, K1000]);
+    createRoll.mockResolvedValue({ ok: true, rollId: "roll-1", number: 1, remainingQty: null });
     const { user } = setup();
 
-    await screen.findByText("Kodak Gold 200", { exact: false });
+    await findFilmChip("Kodak Gold 200");
     await user.click(screen.getByRole("button", { name: "Lưu cuộn" }));
 
     await waitFor(() => expect(createRoll).toHaveBeenCalledTimes(1));
     const [input] = createRoll.mock.calls[0];
     expect(input).toMatchObject({ mode: "new", stockId: "stock-gold", cameraBagItemId: "bag-cam-k1000" });
     expect(typeof input.formOpenedAt).toBe("number");
-    expect(push).toHaveBeenCalledWith("/rolls/roll-1");
+    expect(push).toHaveBeenCalledWith("/rolls/roll-1?saved=1");
+  });
+
+  it("N11: shows a sticky summary line of film · camera · ISO", async () => {
+    listBag.mockResolvedValue([GOLD, K1000]);
+    setup();
+
+    await findFilmChip("Kodak Gold 200");
+    expect(screen.getByText("KODAK GOLD 200 · PENTAX K1000 · ISO 200")).toBeInTheDocument();
   });
 
   it("prefills format 35mm and exposures 36, still editable, and submits them uncut when left alone", async () => {
     listBag.mockResolvedValue([GOLD, K1000]);
-    createRoll.mockResolvedValue({ ok: true, rollId: "roll-2" });
+    createRoll.mockResolvedValue({ ok: true, rollId: "roll-2", number: 1, remainingQty: null });
     const { user } = setup();
 
-    await screen.findByText("Kodak Gold 200", { exact: false });
+    await findFilmChip("Kodak Gold 200");
     await user.click(screen.getByRole("button", { name: /^Thêm chi tiết/ }));
 
     const format35 = screen.getByRole("button", { name: "35mm" });
@@ -327,22 +386,98 @@ describe("RollForm", () => {
     expect(input).toMatchObject({ format: "35mm", exposures: 24 });
   });
 
-  it("defaults format to 120 and leaves exposures empty for a 120-only stock", async () => {
-    listBag.mockResolvedValue([PORTRA_120, K1000]);
-    createRoll.mockResolvedValue({ ok: true, rollId: "roll-3" });
+  it("N10: defaults format to 120 and exposures to 12 for a 120-only stock, and resets exposures to 12 on toggling to 120", async () => {
+    listBag.mockResolvedValue([PORTRA_120, GOLD, K1000]);
+    createRoll.mockResolvedValue({ ok: true, rollId: "roll-3", number: 1, remainingQty: null });
     const { user } = setup();
 
-    await screen.findByText("Kodak Portra 400", { exact: false });
+    await findFilmChip("Kodak Portra 400");
     await user.click(screen.getByRole("button", { name: /^Thêm chi tiết/ }));
 
     expect(screen.getByRole("button", { name: "120" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByLabelText("Số kiểu")).toHaveValue("");
+    expect(screen.getByLabelText("Số kiểu")).toHaveValue("12");
 
     await user.click(screen.getByRole("button", { name: "Lưu cuộn" }));
 
     await waitFor(() => expect(createRoll).toHaveBeenCalledTimes(1));
     const [input] = createRoll.mock.calls[0];
-    expect(input).toMatchObject({ format: "120" });
-    expect(input.exposures).toBeUndefined();
+    expect(input).toMatchObject({ format: "120", exposures: 12 });
+  });
+
+  it("N7: new mode's optional load date is prefilled to today and stays editable", async () => {
+    vi.setSystemTime(new Date("2026-09-25T04:00:00Z"));
+    listBag.mockResolvedValue([GOLD, K1000]);
+    createRoll.mockResolvedValue({ ok: true, rollId: "roll-4", number: 1, remainingQty: null });
+    const { user } = setup();
+
+    await findFilmChip("Kodak Gold 200");
+    await user.click(screen.getByRole("button", { name: /^Thêm chi tiết/ }));
+
+    expect(screen.getByLabelText("Ngày nạp")).toHaveTextContent("25/09/2026");
+
+    await user.click(screen.getByRole("button", { name: "Lưu cuộn" }));
+    await waitFor(() => expect(createRoll).toHaveBeenCalledTimes(1));
+    const [input] = createRoll.mock.calls[0];
+    expect(typeof input.shotFrom).toBe("number");
+
+    vi.useRealTimers();
+  });
+
+  describe("edit mode (R4)", () => {
+    const existingRoll: IRollEntry = {
+      id: "roll-edit",
+      number: 5,
+      stockId: "stock-gold",
+      cameraBagItemId: "bag-cam-k1000",
+      lensId: null,
+      name: "Đà Lạt",
+      canisterColor: "gold",
+      boxIso: 200,
+      shotIso: 400,
+      exposures: 36,
+      format: "35mm",
+      locations: ["Đà Lạt"],
+      shotFrom: null,
+      shotTo: null,
+      datePrecision: null,
+      notes: null,
+      memory: null,
+      version: 2,
+      createdAt: new Date("2026-09-01"),
+      pushPull: "+1",
+      stock: { id: "stock-gold", brand: "Kodak", name: "Gold 200", iso: 200, canisterColor: "gold", type: "color-negative" },
+      camera: { brand: "Pentax", model: "K1000", type: "slr" },
+      lens: null,
+    };
+
+    it("prefills from the roll, hides the mode toggle, and calls updateRoll with the expected version", async () => {
+      listBag.mockResolvedValue([GOLD, K1000]);
+      updateRoll.mockResolvedValue({ ok: true });
+      const { user } = setup("new", existingRoll);
+
+      expect(await screen.findByText("CUỘN #5")).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: "Đang trong máy" })).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Lưu thay đổi" })).toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: "Lưu thay đổi" }));
+
+      await waitFor(() => expect(updateRoll).toHaveBeenCalledTimes(1));
+      const [input] = updateRoll.mock.calls[0];
+      expect(input).toMatchObject({ rollId: "roll-edit", expectedVersion: 2, stockId: "stock-gold" });
+      expect(getNextRollNumber).not.toHaveBeenCalled();
+      expect(push).toHaveBeenCalledWith("/rolls/roll-edit");
+    });
+
+    it("shows a human-voice error on a stale version conflict", async () => {
+      listBag.mockResolvedValue([GOLD, K1000]);
+      updateRoll.mockResolvedValue({ ok: false, error: "stale_version" });
+      const { user } = setup("new", existingRoll);
+
+      await screen.findByText("CUỘN #5");
+      await user.click(screen.getByRole("button", { name: "Lưu thay đổi" }));
+
+      expect(await screen.findByText("Cuộn này vừa được sửa ở nơi khác. Tải lại rồi thử lại nhé.")).toBeInTheDocument();
+      expect(push).not.toHaveBeenCalled();
+    });
   });
 });

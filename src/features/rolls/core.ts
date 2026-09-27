@@ -440,6 +440,16 @@ export interface IRollEntry {
   stock: IRollStockSummary | null;
   camera: IRollCameraSummary | null;
   lens: IRollLensSummary | null;
+  /**
+   * R4: raw referenced ids, so `RollForm`'s edit mode can preselect the
+   * same bag entries `attemptCreateRoll` stored — `IRollStockSummary` /
+   * `IRollCameraSummary` / `IRollLensSummary` above are display-only and
+   * don't carry these. Optional for the same "old fixture" reason as
+   * `number` above.
+   */
+  stockId?: string;
+  cameraBagItemId?: string;
+  lensId?: string | null;
 }
 
 type TRollRow = typeof roll.$inferSelect;
@@ -488,6 +498,9 @@ async function hydrateRolls<TQueryResult extends PgQueryResultHKT>(
     return {
       id: row.id,
       number: row.number,
+      stockId: row.stockId,
+      cameraBagItemId: row.cameraBagItemId,
+      lensId: row.lensId,
       name: row.name,
       canisterColor: row.canisterColor,
       boxIso: row.boxIso,
