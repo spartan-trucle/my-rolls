@@ -6,6 +6,18 @@
     "toggleToDark": "Chuyển sang giao diện tối",
     "toggleToLight": "Chuyển sang giao diện sáng"
   },
+  "appShell": {
+    "navLabel": "Điều hướng chính",
+    "wordmark": "Cuộn",
+    "nav": {
+      "shelf": "Kệ",
+      "bag": "Túi",
+      "newRoll": "Cuộn mới",
+      "keepers": "Tấm ưng",
+      "profile": "Tôi"
+    },
+    "avatarAlt": "Hồ sơ của tôi"
+  },
   "samples": {
     "pineForestFog": "Rừng thông trong sương",
     "pineHillSunrise": "Đồi thông lúc bình minh",
@@ -79,8 +91,13 @@
   },
   "home": {
     "heading": "Kệ của {name}",
-    "body": "Cuộn đầu tiên của bạn sắp có mặt ở đây.",
-    "signOutButton": "Đăng xuất"
+    "countLine": "{count} CUỘN",
+    "viewLabel": "Kiểu xem",
+    "viewShelf": "Kệ",
+    "viewGrid": "Lưới",
+    "emptyTitle": "Kệ của bạn còn trống",
+    "emptyBody": "Cuộn đầu tiên của bạn sắp có mặt ở đây.",
+    "emptyCta": "Cất cuộn đầu tiên"
   },
   "demo": {
     "keeper": "tấm ưng"
