@@ -63,4 +63,23 @@ describe("createTestDb (D21)", () => {
       ]),
     );
   });
+
+  // Perf fix (test stability): the PGlite instance is now reused across
+  // calls within a worker (migrated once, not once per test) — this pins
+  // down that reuse doesn't leak rows from one test into the next.
+  it("does not leak rows from one createTestDb() call into the next", async () => {
+    const first = await createTestDb();
+    cleanup = () => first.client.close();
+    await first.db.execute(sql`INSERT INTO stock (brand, name) VALUES ('Kodak', 'Gold 200')`);
+    const seeded = await first.db.execute(sql`SELECT id FROM stock`);
+    expect(seeded.rows).toHaveLength(1);
+
+    await cleanup();
+    cleanup = undefined;
+
+    const second = await createTestDb();
+    cleanup = () => second.client.close();
+    const rows = await second.db.execute(sql`SELECT id FROM stock`);
+    expect(rows.rows).toHaveLength(0);
+  });
 });
