@@ -14,6 +14,7 @@ Back to: [Project README](../README.md)
 | [roadmap.md](roadmap.md) | Phases, dates, cut line, launch gates, decisions due | [Roadmap artifact](https://claude.ai/artifact/Lsq7MWHNCVanpBWQ2D4XTo) (mirrored) |
 | [design/design-system.md](design/design-system.md) | Principles, voice, tokens, type, components, icons | [Design system artifact](https://claude.ai/artifact/HtsG9sZeNGx19PSvPjW65a) (mirrored) |
 | [design/wireframes.md](design/wireframes.md) | Which screens have wireframes, and which don't yet | [Design canvas](https://claude.ai/artifact/AXpgMvXFo6HL1vrw9RS6gt) (reference only) |
+| [design/missing-screens.md](design/missing-screens.md) | MVP screens with no board on the canvas yet, by phase, as a checklist | **This repo** (checked against the design canvas) |
 | [../design-tokens/](../design-tokens/README.md) and `src/design-system/` | The tokens and components in code, and how to update them from the artifact | [Design system artifact](https://claude.ai/artifact/HtsG9sZeNGx19PSvPjW65a) (`tokens.json` copied byte for byte) |
 | [spikes/og-story-image.md](spikes/og-story-image.md) | Stage G Spike 1: `next/og` story PNG, Google Fonts fetched at render time | **This repo** |
 | [spikes/web-share.md](spikes/web-share.md) | Stage G Spike 2: `navigator.share` to Instagram/Messenger/Zalo story, by device | **This repo** |
