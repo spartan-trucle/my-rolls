@@ -8,8 +8,7 @@ import { ProfileContent } from "./ProfileContent";
  * `proxy.ts`'s cookie check is only optimistic, and `/profile` isn't in
  * its public paths, so a signed-out request is already redirected there
  * before this ever runs. This second check is defensive (matches
- * `/sign-up/profile`'s own page) and gives a real name/email/image to
- * pass down instead of an assumed one.
+ * `/sign-up/profile`'s own page).
  */
 export default async function ProfilePage() {
   const session = await getAuth().api.getSession({ headers: await headers() });
@@ -18,5 +17,12 @@ export default async function ProfilePage() {
     return null;
   }
 
-  return <ProfileContent name={session.user.name} email={session.user.email} image={session.user.image} />;
+  return (
+    <ProfileContent
+      name={session.user.name}
+      email={session.user.email}
+      image={session.user.image}
+      createdAt={session.user.createdAt}
+    />
+  );
 }

@@ -1,0 +1,17 @@
+.back {
+  align-self: flex-start;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--cobalt);
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--cobalt-deep);
+}
+
+.saveButton {
+  align-self: flex-start;
+}

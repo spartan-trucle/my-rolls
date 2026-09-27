@@ -19,7 +19,6 @@ vi.mock("next/navigation", () => ({
   redirect: redirectMock,
 }));
 
-vi.mock("./actions", () => ({ updateNameAction: vi.fn() }));
 vi.mock("@/lib/sign-out-action", () => ({ signOutAction: vi.fn() }));
 
 import ProfilePage from "./page";
@@ -31,6 +30,14 @@ function renderPage(ui: Awaited<ReturnType<typeof ProfilePage>>) {
     </NextIntlClientProvider>,
   );
 }
+
+const SESSION_USER = {
+  id: "u1",
+  name: "Trúc Lê",
+  email: "truc@gmail.com",
+  image: null,
+  createdAt: new Date(2026, 8, 25),
+};
 
 describe("ProfilePage", () => {
   afterEach(() => {
@@ -46,24 +53,28 @@ describe("ProfilePage", () => {
     expect(redirectMock).toHaveBeenCalledWith("/sign-in");
   });
 
-  it("renders the signed-in user's name and read-only email", async () => {
-    getSession.mockResolvedValue({
-      session: { id: "s1" },
-      user: { id: "u1", name: "Trúc Lê", email: "truc@gmail.com", image: null },
-    });
+  it("renders the signed-in user's name, email and join date", async () => {
+    getSession.mockResolvedValue({ session: { id: "s1" }, user: SESSION_USER });
 
     const ui = await ProfilePage();
     renderPage(ui);
 
-    expect(screen.getByLabelText("Tên hiển thị")).toHaveValue("Trúc Lê");
+    expect(screen.getByRole("heading", { level: 1, name: "Trúc Lê" })).toBeInTheDocument();
     expect(screen.getByText("truc@gmail.com")).toBeInTheDocument();
+    expect(screen.getByText("Vào Cuộn từ 25.09.26")).toBeInTheDocument();
+  });
+
+  it("links to /profile/name to edit the display name (no inline form)", async () => {
+    getSession.mockResolvedValue({ session: { id: "s1" }, user: SESSION_USER });
+
+    const ui = await ProfilePage();
+    renderPage(ui);
+
+    expect(screen.getByRole("link", { name: /Sửa tên hiển thị/ })).toHaveAttribute("href", "/profile/name");
   });
 
   it("renders the sign-out button", async () => {
-    getSession.mockResolvedValue({
-      session: { id: "s1" },
-      user: { id: "u1", name: "Trúc Lê", email: "truc@gmail.com", image: null },
-    });
+    getSession.mockResolvedValue({ session: { id: "s1" }, user: SESSION_USER });
 
     const ui = await ProfilePage();
     renderPage(ui);

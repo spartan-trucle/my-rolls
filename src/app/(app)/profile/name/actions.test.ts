@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const updateUser = vi.hoisted(() => vi.fn().mockResolvedValue({ status: true }));
-const revalidatePathMock = vi.hoisted(() => vi.fn());
+const redirectMock = vi.hoisted(() => vi.fn());
 const fakeRequestHeaders = vi.hoisted(() => ({ __brand: "fake-headers" }));
 
 vi.mock("@/lib/auth", () => ({
@@ -12,8 +12,8 @@ vi.mock("next/headers", () => ({
   headers: vi.fn().mockResolvedValue(fakeRequestHeaders),
 }));
 
-vi.mock("next/cache", () => ({
-  revalidatePath: revalidatePathMock,
+vi.mock("next/navigation", () => ({
+  redirect: redirectMock,
 }));
 
 import { updateNameAction } from "./actions";
@@ -27,7 +27,7 @@ function formDataWithName(name: string | null) {
 describe("updateNameAction", () => {
   afterEach(() => {
     updateUser.mockClear();
-    revalidatePathMock.mockClear();
+    redirectMock.mockClear();
   });
 
   it("rejects an empty name without calling Better Auth", async () => {
@@ -35,6 +35,7 @@ describe("updateNameAction", () => {
 
     expect(result).toEqual({ errorCode: "empty" });
     expect(updateUser).not.toHaveBeenCalled();
+    expect(redirectMock).not.toHaveBeenCalled();
   });
 
   it("rejects a whitespace-only name as empty", async () => {
@@ -58,10 +59,9 @@ describe("updateNameAction", () => {
   });
 
   it("accepts a name exactly 50 characters long", async () => {
-    const result = await updateNameAction({}, formDataWithName("a".repeat(50)));
+    await updateNameAction({}, formDataWithName("a".repeat(50)));
 
     expect(updateUser).toHaveBeenCalledWith({ body: { name: "a".repeat(50) }, headers: fakeRequestHeaders });
-    expect(result).toEqual({ savedName: "a".repeat(50) });
   });
 
   it("trims the name before saving it", async () => {
@@ -70,10 +70,10 @@ describe("updateNameAction", () => {
     expect(updateUser).toHaveBeenCalledWith({ body: { name: "Trúc Lê" }, headers: fakeRequestHeaders });
   });
 
-  it("revalidates /profile after a successful save, and never redirects away", async () => {
+  it("redirects to /profile after a successful save", async () => {
     await updateNameAction({}, formDataWithName("Trúc Lê"));
 
-    expect(revalidatePathMock).toHaveBeenCalledWith("/profile");
+    expect(redirectMock).toHaveBeenCalledWith("/profile");
   });
 
   /**

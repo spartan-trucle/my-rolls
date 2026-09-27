@@ -1,105 +1,106 @@
 import { screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/i18n/test-utils";
 
-const updateNameAction = vi.hoisted(() => vi.fn());
 const signOutAction = vi.hoisted(() => vi.fn());
 
-vi.mock("./actions", () => ({ updateNameAction }));
 vi.mock("@/lib/sign-out-action", () => ({ signOutAction }));
 
 import { ProfileContent } from "./ProfileContent";
 
+const CREATED_AT = new Date(2026, 8, 25);
+
 describe("ProfileContent", () => {
   afterEach(() => {
-    updateNameAction.mockReset();
     signOutAction.mockReset();
   });
 
-  it("renders one heading titled 'Hồ sơ'", () => {
-    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} />);
+  it("renders the uppercase 'Hồ sơ' header label (not a heading)", () => {
+    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} createdAt={CREATED_AT} />);
+
+    expect(screen.getByText("Hồ sơ")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Hồ sơ" })).not.toBeInTheDocument();
+  });
+
+  it("renders the display name as the one h1", () => {
+    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} createdAt={CREATED_AT} />);
 
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
-    expect(screen.getByRole("heading", { level: 1, name: "Hồ sơ" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Trúc Lê" })).toBeInTheDocument();
   });
 
   it("shows a Fraunces-initial avatar fallback when there is no Google image", () => {
-    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} />);
+    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} createdAt={CREATED_AT} />);
 
     expect(screen.getByLabelText("Ảnh đại diện từ Google")).toHaveTextContent("T");
   });
 
-  it("renders the Google avatar image when the session has one", () => {
+  it("renders the Google avatar image when there is one", () => {
     renderWithIntl(
       <ProfileContent
         name="Trúc Lê"
         email="truc@gmail.com"
         image="https://lh3.googleusercontent.com/a/avatar.jpg"
+        createdAt={CREATED_AT}
       />,
     );
 
     expect(screen.getByAltText("Ảnh đại diện từ Google")).toBeInTheDocument();
   });
 
-  it("prefills the name field with the current name and shows the hint", () => {
-    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} />);
-
-    expect(screen.getByLabelText("Tên hiển thị")).toHaveValue("Trúc Lê");
-    expect(screen.getByText("Bạn bè thấy tên này khi mở cuộn bạn chia sẻ.")).toBeInTheDocument();
-  });
-
-  it("shows the email read-only, marked from Google", () => {
-    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} />);
+  it("shows the email next to the Google 'G' mark", () => {
+    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} createdAt={CREATED_AT} />);
 
     expect(screen.getByText("truc@gmail.com")).toBeInTheDocument();
-    expect(screen.getByText("từ Google")).toBeInTheDocument();
-    expect(screen.queryByLabelText("Email")).toBeNull();
   });
 
-  it("shows the empty-name error under the field instead of the hint", async () => {
-    const user = userEvent.setup();
-    updateNameAction.mockResolvedValue({ errorCode: "empty" });
-    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} />);
+  it("shows the join date formatted dd.mm.yy", () => {
+    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} createdAt={CREATED_AT} />);
 
-    await user.click(screen.getByRole("button", { name: "Lưu" }));
-
-    expect(await screen.findByText("Bạn chưa đặt tên. Thử lại nhé.")).toBeInTheDocument();
-    expect(screen.queryByText("Bạn bè thấy tên này khi mở cuộn bạn chia sẻ.")).not.toBeInTheDocument();
+    expect(screen.getByText("Vào Cuộn từ 25.09.26")).toBeInTheDocument();
   });
 
-  it("shows the too-long error under the field", async () => {
-    const user = userEvent.setup();
-    updateNameAction.mockResolvedValue({ errorCode: "tooLong" });
-    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} />);
+  it("renders the 'Cài đặt' settings heading", () => {
+    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} createdAt={CREATED_AT} />);
 
-    await user.click(screen.getByRole("button", { name: "Lưu" }));
-
-    expect(
-      await screen.findByText("Tên dài quá, đẩy +3 à? Ngắn lại dưới 50 ký tự nhé."),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Cài đặt" })).toBeInTheDocument();
   });
 
-  it("shows a saved confirmation instead of the hint after a successful save", async () => {
-    const user = userEvent.setup();
-    updateNameAction.mockResolvedValue({ savedName: "Trúc Lê" });
-    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} />);
+  it("renders the Sáng / Tối theme segmented control", () => {
+    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} createdAt={CREATED_AT} />);
 
-    await user.click(screen.getByRole("button", { name: "Lưu" }));
-
-    expect(await screen.findByText("Đã lưu.")).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Giao diện" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sáng" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tối" })).toBeInTheDocument();
   });
 
-  it("renders the theme toggle", () => {
-    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} />);
+  it("links 'Sửa tên hiển thị' to /profile/name instead of an inline form", () => {
+    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} createdAt={CREATED_AT} />);
 
-    expect(screen.getByRole("button", { name: "Chuyển sang giao diện tối" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Sửa tên hiển thị/ })).toHaveAttribute("href", "/profile/name");
+    expect(screen.queryByLabelText("Tên hiển thị")).not.toBeInTheDocument();
   });
 
-  it("renders a sign-out button inside its own form", () => {
-    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} />);
+  it("renders a full-width, outline sign-out button inside its own form", () => {
+    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} createdAt={CREATED_AT} />);
 
     const button = screen.getByRole("button", { name: "Đăng xuất" });
     expect(button.closest("form")).not.toBeNull();
+  });
+
+  it("does not render stats, bag, keepers, language or delete-account rows", () => {
+    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} createdAt={CREATED_AT} />);
+
+    expect(screen.queryByText("Túi của tôi")).not.toBeInTheDocument();
+    expect(screen.queryByText("Tấm ưng gần đây")).not.toBeInTheDocument();
+    expect(screen.queryByText("Ngôn ngữ")).not.toBeInTheDocument();
+    expect(screen.queryByText("Xoá tài khoản")).not.toBeInTheDocument();
+    expect(screen.queryByText("cuộn")).not.toBeInTheDocument();
+  });
+
+  it("does not render a bottom tab bar", () => {
+    renderWithIntl(<ProfileContent name="Trúc Lê" email="truc@gmail.com" image={null} createdAt={CREATED_AT} />);
+
+    expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
   });
 });
