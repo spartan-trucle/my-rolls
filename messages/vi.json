@@ -99,6 +99,27 @@
     "emptyBody": "Cuộn đầu tiên của bạn sắp có mặt ở đây.",
     "emptyCta": "Cất cuộn đầu tiên"
   },
+  "profile": {
+    "title": "Hồ sơ",
+    "avatarAlt": "Ảnh đại diện từ Google",
+    "googleEmailIconAlt": "Email từ Google",
+    "joined": "Vào Cuộn từ {date}",
+    "settingsHeading": "Cài đặt",
+    "themeLabel": "Giao diện",
+    "themeLight": "Sáng",
+    "themeDark": "Tối",
+    "editNameRow": "Sửa tên hiển thị",
+    "signOutButton": "Đăng xuất",
+    "editName": {
+      "title": "Sửa tên hiển thị",
+      "back": "‹ Hồ sơ",
+      "nameLabel": "Tên hiển thị",
+      "nameHint": "Bạn bè thấy tên này khi mở cuộn bạn chia sẻ.",
+      "nameErrorEmpty": "Bạn chưa đặt tên. Thử lại nhé.",
+      "nameErrorTooLong": "Tên dài quá, đẩy +3 à? Ngắn lại dưới 50 ký tự nhé.",
+      "saveButton": "Lưu"
+    }
+  },
   "demo": {
     "keeper": "tấm ưng"
   },

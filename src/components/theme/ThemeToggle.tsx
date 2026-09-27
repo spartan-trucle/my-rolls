@@ -3,44 +3,8 @@
 import { useTranslations } from "next-intl";
 import { useSyncExternalStore } from "react";
 import { cx } from "@/design-system/cx";
+import { getIsDarkTheme, getServerIsDarkTheme, setTheme, subscribeToTheme } from "./theme-store";
 import styles from "./ThemeToggle.module.css";
-
-const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365; // ~1 year
-
-/**
- * `data-theme` on `<html>` and the OS `prefers-color-scheme` are state owned
- * outside React, so the toggle reads them with `useSyncExternalStore`
- * instead of copying them into local state inside an effect: the server
- * snapshot ("not dark") is what SSR renders, and the real value lands as
- * soon as the client can read the DOM/`matchMedia`, without a cascading
- * render or a hydration mismatch.
- */
-const listeners = new Set<() => void>();
-
-function notifyThemeChanged() {
-  for (const listener of listeners) listener();
-}
-
-function subscribe(onStoreChange: () => void) {
-  listeners.add(onStoreChange);
-  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-  mediaQuery.addEventListener("change", onStoreChange);
-  return () => {
-    listeners.delete(onStoreChange);
-    mediaQuery.removeEventListener("change", onStoreChange);
-  };
-}
-
-function getSnapshot(): boolean {
-  const attr = document.documentElement.getAttribute("data-theme");
-  if (attr === "dark") return true;
-  if (attr === "light") return false;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches;
-}
-
-function getServerSnapshot(): boolean {
-  return false;
-}
 
 /** Sun and moon, drawn like the design system's Icon: 24 viewBox, currentColor, round caps. */
 function SunIcon() {
@@ -92,13 +56,10 @@ export interface ThemeToggleProps {
  */
 export function ThemeToggle({ className }: ThemeToggleProps) {
   const t = useTranslations("theme");
-  const dark = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const dark = useSyncExternalStore(subscribeToTheme, getIsDarkTheme, getServerIsDarkTheme);
 
   function handleClick() {
-    const next = dark ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    document.cookie = `theme=${next}; max-age=${COOKIE_MAX_AGE_SECONDS}; path=/; SameSite=Lax`;
-    notifyThemeChanged();
+    setTheme(dark ? "light" : "dark");
   }
 
   return (
