@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/i18n/test-utils";
@@ -47,6 +47,32 @@ describe("LabAddForm", () => {
         screen.getByText("Link này chưa đúng định dạng — thử dán lại xem sao."),
       ).toBeInTheDocument(),
     );
+  });
+
+  it("LA2: renders both back-link copies (CSS shows the top one on phone, the footer one from 1024px up)", () => {
+    renderWithIntl(<LabAddForm onCreated={vi.fn()} onBack={vi.fn()} />);
+
+    // `getByText`, not `getByRole`: the desktop copy is `display: none` at
+    // jsdom's default (narrow) width, same as `ProfileContent`'s phone/
+    // desktop switch-account copies — CSS breakpoints are untestable here.
+    expect(screen.getByText("‹ Quay lại")).toBeInTheDocument();
+    expect(screen.getByText("‹ Quay lại danh sách lab")).toBeInTheDocument();
+  });
+
+  it("calls onBack from the desktop footer link", () => {
+    const onBack = vi.fn();
+    renderWithIntl(<LabAddForm onCreated={vi.fn()} onBack={onBack} />);
+
+    fireEvent.click(screen.getByText("‹ Quay lại danh sách lab"));
+
+    expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves out both back links when there's no onBack", () => {
+    renderWithIntl(<LabAddForm onCreated={vi.fn()} />);
+
+    expect(screen.queryByText("‹ Quay lại")).not.toBeInTheDocument();
+    expect(screen.queryByText("‹ Quay lại danh sách lab")).not.toBeInTheDocument();
   });
 
   it("toggles service chips with aria-pressed", async () => {

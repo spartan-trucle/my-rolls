@@ -63,6 +63,16 @@ afterEach(() => {
 });
 
 describe("LabPicker", () => {
+  it("L1: shows the 'Tráng ở lab nào?' h1 under the roll kicker", async () => {
+    listLabCitiesAction.mockResolvedValue([]);
+    searchLabsAction.mockResolvedValue([]);
+
+    renderWithIntl(<LabPicker heading="Cuộn #14 · Gold 200" onPick={vi.fn()} onAddNew={vi.fn()} />);
+
+    expect(screen.getByRole("heading", { level: 1, name: "Tráng ở lab nào?" })).toBeInTheDocument();
+    expect(screen.getByText("Cuộn #14 · Gold 200")).toBeInTheDocument();
+  });
+
   it("shows the home-development lab first", async () => {
     listLabCitiesAction.mockResolvedValue(["TP.HCM"]);
     searchLabsAction.mockResolvedValue([homeDevelopment, makeLab()]);

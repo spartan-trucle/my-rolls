@@ -213,9 +213,19 @@ export function LabAddForm({ onCreated, onBack, className }: LabAddFormProps) {
 
       {generalError ? <span className={styles.generalError}>{generalError}</span> : null}
 
-      <Button type="submit" variant="primary" className="w-full" disabled={pending}>
-        {pending ? t("savingButton") : t("saveButton")}
-      </Button>
+      {/* LA2: phone keeps only the Save button here; from 1024px up this
+          becomes the board's footer row, back link (desktop copy) beside
+          Save, replacing the `.back` link at the top. */}
+      <div className={styles.footer}>
+        {onBack ? (
+          <button type="button" className={styles.backDesktop} onClick={onBack}>
+            {t("backDesktop")}
+          </button>
+        ) : null}
+        <Button type="submit" variant="primary" className={cx("w-full", styles.saveButton)} disabled={pending}>
+          {pending ? t("savingButton") : t("saveButton")}
+        </Button>
+      </div>
     </form>
   );
 }

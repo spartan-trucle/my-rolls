@@ -129,6 +129,8 @@ export function LabPicker({ heading, onPick, onAddNew, className }: LabPickerPro
     <div className={cx("flex flex-col gap-4", className)}>
       <div className="flex flex-col gap-1">
         <span className="text-label uppercase text-ink-muted">{heading}</span>
+        {/* L1: the board's h1, under the "Cuộn #N · Film" kicker `heading` prop. */}
+        <h1 className="font-display text-display-l text-balance">{t("title")}</h1>
       </div>
 
       <div className={styles.searchRow}>
