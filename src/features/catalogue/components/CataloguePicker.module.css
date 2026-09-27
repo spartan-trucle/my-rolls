@@ -1,22 +1,73 @@
+/*
+ * `.root` gives the dialog a real flex column of its own (header, controls,
+ * results) filling `ResponsiveDialog`'s `.content` — without it `.results`'s
+ * `flex-grow` had no flex parent to grow inside, so the box never held a
+ * constant height and just shrank to whatever little content it had (fix 1
+ * / fix 2's "the dialog only shows a hint" bug).
+ */
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: var(--space-3) var(--space-4) 0;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-4) 0;
+}
+
+.headingText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
 }
 
 .title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--text-display-l);
+  font-size: 24px;
+  line-height: 30px;
   font-weight: 600;
+}
+
+.lead {
+  display: none;
+  margin: 0;
 }
 
 .controls {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-4) 0;
+  padding: var(--space-3) var(--space-4) 0;
+}
+
+@media (min-width: 1024px) {
+  .header {
+    padding: 28px 32px 0;
+  }
+
+  .title {
+    font-size: 32px;
+    line-height: 36px;
+    font-weight: 500;
+  }
+
+  .lead {
+    display: block;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--ink-muted);
+  }
+
+  .controls {
+    padding: var(--space-4) 32px 0;
+  }
 }
 
 .seg {
@@ -58,11 +109,10 @@
   padding: var(--space-2) var(--space-4) var(--space-4);
 }
 
-.hint {
-  margin: var(--space-4) 0 0;
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--ink-muted);
+@media (min-width: 1024px) {
+  .results {
+    padding: var(--space-2) 32px 20px;
+  }
 }
 
 .list {

@@ -1,3 +1,16 @@
+/*
+ * `.root` gives the form a real flex column of its own (heading, sections,
+ * footer) filling `ResponsiveDialog`'s `.content`, the same fix as
+ * `CataloguePicker.module.css`'s `.root` — without it `.scroll`'s
+ * `flex-grow` had nothing to grow inside.
+ */
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
 .scroll {
   flex-grow: 1;
   min-height: 0;
@@ -5,13 +18,21 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
-  padding: var(--space-2) var(--space-4) var(--space-6);
+  padding: var(--space-4) var(--space-4) var(--space-6);
+}
+
+.headingRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
 }
 
 .headingBlock {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  min-width: 0;
 }
 
 .heading {
@@ -26,6 +47,13 @@
   font-size: 15px;
   line-height: 22px;
   color: var(--ink-muted);
+}
+
+@media (min-width: 1024px) {
+  .scroll {
+    padding: 28px 32px 20px;
+    gap: var(--space-6);
+  }
 }
 
 .seg {

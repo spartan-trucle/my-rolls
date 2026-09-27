@@ -51,6 +51,7 @@ export function CataloguePreview() {
               setOpen(false);
             }}
             onAddCustom={(kind, query) => setMode({ view: "custom", kind, query })}
+            onClose={() => setOpen(false)}
           />
         ) : (
           <CustomEntryForm
@@ -61,6 +62,7 @@ export function CataloguePreview() {
               setLog((prev) => [`Đã thêm riêng (${entry.kind}), vào túi`, ...prev]);
               setOpen(false);
             }}
+            onClose={() => setOpen(false)}
           />
         )}
       </ResponsiveDialog>

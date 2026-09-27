@@ -1,6 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/i18n/test-utils";
 import type { TBagEntry } from "@/features/bag/queries";
 
@@ -9,10 +9,12 @@ const removeFromBag = vi.hoisted(() => vi.fn());
 const listBag = vi.hoisted(() => vi.fn());
 const addCustomLens = vi.hoisted(() => vi.fn());
 const searchCatalogue = vi.hoisted(() => vi.fn());
+const listCatalogue = vi.hoisted(() => vi.fn());
 
 vi.mock("@/features/bag/actions", () => ({ addToBag, removeFromBag, listBag }));
 vi.mock("@/features/catalogue/actions", () => ({
   searchCatalogue,
+  listCatalogue,
   addCustomStock: vi.fn(),
   addCustomCamera: vi.fn(),
   addCustomLens,
@@ -104,12 +106,17 @@ function setup(entries: TBagEntry[]) {
 }
 
 describe("BagList", () => {
+  beforeEach(() => {
+    listCatalogue.mockResolvedValue({ ok: true, entries: [] });
+  });
+
   afterEach(() => {
     addToBag.mockReset();
     removeFromBag.mockReset();
     listBag.mockReset();
     addCustomLens.mockReset();
     searchCatalogue.mockReset();
+    listCatalogue.mockReset();
   });
 
   it("groups entries by kind, with a lens section (design finding 1)", () => {
@@ -145,21 +152,32 @@ describe("BagList", () => {
     expect(screen.getByText("Film cố định: Kodak Gold 200")).toBeInTheDocument();
   });
 
-  it("removes an item: calls removeFromBag and drops it from the list, with an undo toast", async () => {
-    removeFromBag.mockResolvedValue({ ok: true });
-    addToBag.mockResolvedValue({ ok: true, bagItemId: "bag-stock-2" });
-    listBag.mockResolvedValue([stockEntry()]);
+  it("opens a confirm dialog naming the item; cancel does nothing", async () => {
     const { user } = setup([stockEntry()]);
 
     await user.click(screen.getByRole("button", { name: "Bỏ Kodak Gold 200 khỏi túi" }));
 
+    expect(await screen.findByRole("heading", { name: "Bỏ Kodak Gold 200 khỏi túi?" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Huỷ" }));
+
+    expect(removeFromBag).not.toHaveBeenCalled();
+    expect(screen.queryByRole("heading", { name: "Bỏ Kodak Gold 200 khỏi túi?" })).not.toBeInTheDocument();
+    expect(screen.getByText("Kodak Gold 200")).toBeInTheDocument();
+  });
+
+  it("confirming the dialog calls removeFromBag and drops the item from the list", async () => {
+    removeFromBag.mockResolvedValue({ ok: true });
+    const { user } = setup([stockEntry()]);
+
+    await user.click(screen.getByRole("button", { name: "Bỏ Kodak Gold 200 khỏi túi" }));
+    await screen.findByRole("heading", { name: "Bỏ Kodak Gold 200 khỏi túi?" });
+
+    await user.click(screen.getByRole("button", { name: "Xoá khỏi túi" }));
+
     expect(removeFromBag).toHaveBeenCalledWith({ bagItemId: "bag-stock-1" });
     await waitFor(() => expect(screen.queryByText("Kodak Gold 200")).not.toBeInTheDocument());
-    expect(screen.getByText("Đã bỏ Kodak Gold 200 khỏi túi.")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Hoàn tác" }));
-    expect(addToBag).toHaveBeenCalledWith({ kind: "stock", refId: "stock-1" });
-    await waitFor(() => expect(listBag).toHaveBeenCalled());
+    expect(screen.queryByRole("heading", { name: "Bỏ Kodak Gold 200 khỏi túi?" })).not.toBeInTheDocument();
   });
 
   it("adds from the catalogue picker: opens it with bagRefIds, and updates the list once picked", async () => {

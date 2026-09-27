@@ -13,6 +13,7 @@ import {
 } from "@/features/catalogue/core";
 import {
   getCatalogueBySlugs as getCatalogueBySlugsQuery,
+  listCatalogue as listCatalogueQuery,
   searchCatalogue as searchCatalogueQuery,
   type TCatalogueEntry,
   type TCatalogueKind,
@@ -67,6 +68,24 @@ export async function addCustomLens(input: unknown): Promise<TAddCustomResult> {
   if (!parsed.success) return { ok: false, error: "validation" };
 
   return addCustomLensCore(getDb(), userId, parsed.data);
+}
+
+export type TListCatalogueResult =
+  | { ok: true; entries: TCatalogueEntry[] }
+  | { ok: false; error: "unauthenticated" };
+
+/**
+ * D1 review's read side: `CataloguePicker`'s empty-query list (own entries,
+ * then the curated popular slugs, then the rest), session-checked like
+ * every action above, delegating the actual ordering to `queries.ts`'s
+ * `listCatalogue`.
+ */
+export async function listCatalogue(input: { kind: TCatalogueKind }): Promise<TListCatalogueResult> {
+  const userId = await requireUserId();
+  if (!userId) return { ok: false, error: "unauthenticated" };
+
+  const entries = await listCatalogueQuery(getDb(), { kind: input.kind, userId });
+  return { ok: true, entries };
 }
 
 export type TSearchCatalogueResult =

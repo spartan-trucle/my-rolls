@@ -1,6 +1,7 @@
 {
   "common": {
-    "appName": "Cuộn"
+    "appName": "Cuộn",
+    "close": "Đóng"
   },
   "theme": {
     "toggleToDark": "Chuyển sang giao diện tối",
@@ -297,6 +298,7 @@
   "catalogue": {
     "picker": {
       "title": "Danh mục",
+      "lead": "Mọi film bán ở Việt Nam và những máy hay gặp. Chọn xong, nó vào túi và vào cuộn này.",
       "close": "Đóng",
       "kindGroupLabel": "Loại",
       "kindStock": "Film",
@@ -315,8 +317,7 @@
       "emptyTitle": "Danh mục chưa có “{query}”.",
       "emptyBodyStock": "Film chiết, film hết hạn hay film tiệm tự chiết đều thêm được. Chỉ mình bạn thấy, vào túi ngay.",
       "emptyBodyCamera": "Máy hiếm hay máy tự chế đều thêm được. Chỉ mình bạn thấy, vào túi ngay.",
-      "clearSearch": "Xoá ô tìm, xem cả danh mục",
-      "startHint": "Gõ tên film hoặc máy để tìm trong danh mục."
+      "clearSearch": "Xoá ô tìm, xem cả danh mục"
     },
     "customEntry": {
       "segmentLabel": "Thêm gì",
@@ -392,8 +393,9 @@
     "addLens": "+ Thêm ống kính",
     "fixedStockNote": "Film cố định: {name}",
     "removeLabel": "Bỏ {name} khỏi túi",
-    "removedToast": "Đã bỏ {name} khỏi túi.",
-    "undo": "Hoàn tác",
+    "removeConfirmTitle": "Bỏ {name} khỏi túi?",
+    "removeConfirmConfirm": "Xoá khỏi túi",
+    "removeConfirmCancel": "Huỷ",
     "emptyTitle": "Túi trống trơn.",
     "emptyBody": "Thêm máy và film bạn hay dùng, lần ghi cuộn sau chọn được luôn.",
     "emptyAddCamera": "+ Thêm máy",

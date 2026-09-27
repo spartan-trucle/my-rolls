@@ -11,6 +11,10 @@ export interface ResponsiveDialogProps {
   labelledBy: string;
   children: ReactNode;
   className?: string;
+  /** `compact` (fix 3, the bag's delete confirm): a narrower, content-sized
+   * box at 1024px and up instead of the full 840x772 catalogue dialog. No
+   * effect on the phone sheet, which is always full height. */
+  size?: "default" | "compact";
 }
 
 /**
@@ -25,7 +29,7 @@ export interface ResponsiveDialogProps {
  * path back to the caller and no risk of calling `onClose` twice for one
  * dismissal.
  */
-export function ResponsiveDialog({ open, onClose, labelledBy, children, className }: ResponsiveDialogProps) {
+export function ResponsiveDialog({ open, onClose, labelledBy, children, className, size = "default" }: ResponsiveDialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const onCloseRef = useRef(onClose);
 
@@ -74,7 +78,12 @@ export function ResponsiveDialog({ open, onClose, labelledBy, children, classNam
   }
 
   return (
-    <dialog ref={ref} aria-labelledby={labelledBy} className={cx(styles.dialog, className)} onClick={handleClick}>
+    <dialog
+      ref={ref}
+      aria-labelledby={labelledBy}
+      className={cx(styles.dialog, size === "compact" && styles.compact, className)}
+      onClick={handleClick}
+    >
       <div className={styles.content}>{children}</div>
     </dialog>
   );

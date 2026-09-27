@@ -8,6 +8,18 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
+// `CataloguePicker` mounts as soon as `CataloguePreview` does (it's always
+// in the DOM, just inside a closed `ResponsiveDialog`), and now fetches
+// `listCatalogue` on mount (fix 2) — without this mock that hits the real
+// session/env this test doesn't stub.
+vi.mock("@/features/catalogue/actions", () => ({
+  listCatalogue: vi.fn().mockResolvedValue({ ok: true, entries: [] }),
+  searchCatalogue: vi.fn(),
+  addCustomStock: vi.fn(),
+  addCustomCamera: vi.fn(),
+  addCustomLens: vi.fn(),
+}));
+
 describe("/dev/catalogue", () => {
   afterEach(() => {
     vi.unstubAllEnvs();

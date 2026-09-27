@@ -3,8 +3,10 @@
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { useTranslations } from "next-intl";
 import { Field, Icon, Stamp } from "@/design-system";
+import { cx } from "@/design-system/cx";
+import { DialogCloseButton } from "@/components/overlay/DialogCloseButton";
 import { addToBag } from "@/features/bag/actions";
-import { searchCatalogue } from "@/features/catalogue/actions";
+import { listCatalogue, searchCatalogue } from "@/features/catalogue/actions";
 import { cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
 import type { TCatalogueEntry, TCatalogueKind } from "@/features/catalogue/queries";
 import styles from "./CataloguePicker.module.css";
@@ -20,6 +22,8 @@ export interface CataloguePickerProps {
   onPicked: (entry: TCatalogueEntry) => void;
   /** The no-match state's action, and the results list's "không thấy?" link — opens `CustomEntryForm` prefilled with what was typed. */
   onAddCustom: (kind: TCatalogueKind, query: string) => void;
+  /** The heading row's close button (the board's `.xbtn`) — omitted when there's nothing for it to call, e.g. the dev preview's own close. */
+  onClose?: () => void;
   /** id put on the `<h2>` title — pass the same id as the host `ResponsiveDialog`'s `labelledBy`. Falls back to a generated id when rendered standalone. */
   titleId?: string;
   className?: string;
@@ -41,15 +45,17 @@ function CanisterSwatch({ color }: { color: string | null }) {
 
 /**
  * D1: search the catalogue (debounced ~200ms) and pick an entry straight
- * into the bag. CAT-1's "no thấy" flow and the empty-query state (queries.ts:
- * an empty `q` returns nothing) both route to `onAddCustom` rather than
- * building their own form here.
+ * into the bag. CAT-1's "no thấy" flow routes to `onAddCustom` rather than
+ * building its own form here. Before anything is typed, the list is
+ * `listCatalogue`'s own entries (D1 review's fix) rather than a bare hint —
+ * the query box only takes over once there's something to search for.
  */
 export function CataloguePicker({
   initialKind = "stock",
   bagRefIds,
   onPicked,
   onAddCustom,
+  onClose,
   titleId,
   className,
 }: CataloguePickerProps) {
@@ -66,9 +72,16 @@ export function CataloguePicker({
   // stale results (or the wrong one of "results" / "no match") for a
   // query it doesn't belong to.
   const [entriesQuery, setEntriesQuery] = useState<string | null>(null);
+  // `listCatalogue`'s own entries (D1 review), shown while `rawQuery` is
+  // empty — kept in its own state, and its own `listKind` marker (the
+  // `entriesQuery` pattern above), so a still-in-flight list fetch for a
+  // kind the user has since switched away from never renders.
+  const [listEntries, setListEntries] = useState<TCatalogueEntry[]>([]);
+  const [listKind, setListKind] = useState<TCatalogueKind | null>(null);
   const [addedKeys, setAddedKeys] = useState<Set<string>>(() => new Set(bagRefIds ?? []));
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const requestId = useRef(0);
+  const listRequestId = useRef(0);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQuery(rawQuery.trim()), DEBOUNCE_MS);
@@ -90,7 +103,22 @@ export function CataloguePicker({
     });
   }, [kind, debouncedQuery]);
 
-  const searched = debouncedQuery !== "" && entriesQuery === debouncedQuery;
+  useEffect(() => {
+    const thisRequest = ++listRequestId.current;
+
+    listCatalogue({ kind }).then((result) => {
+      if (thisRequest !== listRequestId.current) return; // a newer request has already landed
+      setListEntries(result.ok ? result.entries : []);
+      setListKind(kind);
+    });
+  }, [kind]);
+
+  const isSearching = debouncedQuery !== "";
+  const searched = isSearching && entriesQuery === debouncedQuery;
+  const listed = !isSearching && listKind === kind;
+  const displayEntries = isSearching ? entries : listEntries;
+  const hasHits = isSearching ? searched && entries.length > 0 : listed && listEntries.length > 0;
+  const noHits = isSearching && searched && entries.length === 0;
 
   async function handlePick(entry: TCatalogueEntry) {
     const key = entryKey(entry.kind, entry.id);
@@ -111,11 +139,15 @@ export function CataloguePicker({
   const notFoundPrompt = t(kind === "stock" ? "notFoundPromptStock" : "notFoundPromptCamera");
 
   return (
-    <div className={className}>
+    <div className={cx(styles.root, className)}>
       <div className={styles.header}>
-        <h2 id={headingId} className={styles.title}>
-          {t("title")}
-        </h2>
+        <div className={styles.headingText}>
+          <h2 id={headingId} className={styles.title}>
+            {t("title")}
+          </h2>
+          <p className={styles.lead}>{t("lead")}</p>
+        </div>
+        {onClose ? <DialogCloseButton onClose={onClose} /> : null}
       </div>
 
       <div className={styles.controls}>
@@ -141,12 +173,10 @@ export function CataloguePicker({
       </div>
 
       <div className={styles.results}>
-        {debouncedQuery === "" ? <p className={styles.hint}>{t("startHint")}</p> : null}
-
-        {searched && entries.length > 0 ? (
+        {hasHits ? (
           <>
             <ul className={styles.list}>
-              {entries.map((entry) => {
+              {displayEntries.map((entry) => {
                 const key = entryKey(entry.kind, entry.id);
                 const inBag = addedKeys.has(key);
                 const label =
@@ -199,7 +229,7 @@ export function CataloguePicker({
           </>
         ) : null}
 
-        {searched && entries.length === 0 ? (
+        {noHits ? (
           <div className={styles.empty} data-testid={`${noun}-empty`}>
             <p className={styles.emptyTitle}>{t("emptyTitle", { query: debouncedQuery })}</p>
             <p className={styles.emptyBody}>{t(kind === "stock" ? "emptyBodyStock" : "emptyBodyCamera")}</p>
