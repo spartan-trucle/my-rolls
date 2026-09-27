@@ -31,7 +31,7 @@ function makeStock(overrides: Partial<TStockRow>): TStockRow {
     name: "Gold 200",
     iso: 200,
     formats: ["35mm"],
-    type: "MÀU",
+    type: "color-negative",
     canisterColor: "gold",
     canisterPhotoKey: null,
     status: "current",
@@ -63,7 +63,14 @@ function makeCamera(overrides: Partial<TCameraRow>): TCameraRow {
 }
 
 const goldStock = makeStock({});
-const hp5Stock = makeStock({ id: "stock-hp5", brand: "Ilford", name: "HP5 Plus 400", iso: 400, canisterColor: "mono" });
+const hp5Stock = makeStock({
+  id: "stock-hp5",
+  brand: "Ilford",
+  name: "HP5 Plus 400",
+  iso: 400,
+  canisterColor: "mono",
+  type: "bw",
+});
 
 const GOLD: TBagEntry = { bagItemId: "bag-stock-gold", kind: "stock", createdAt: new Date("2026-09-01"), stock: goldStock };
 
@@ -83,7 +90,7 @@ const FUNSAVER: TBagEntry = {
   bagItemId: "bag-cam-funsaver",
   kind: "camera",
   createdAt: new Date("2026-09-03"),
-  camera: makeCamera({ id: "cam-funsaver", brand: "Kodak", model: "FunSaver", fixedStockId: "stock-hp5" }),
+  camera: makeCamera({ id: "cam-funsaver", brand: "Kodak", model: "FunSaver", type: "single-use", fixedStockId: "stock-hp5" }),
   fixedStock: hp5Stock,
 };
 
@@ -115,13 +122,26 @@ describe("RollForm", () => {
     expect(posthogCapture).toHaveBeenCalledWith("roll_form_opened", { mode: "past" });
   });
 
+  it("shows the film and camera type as a Vietnamese label, never the raw slug", async () => {
+    listBag.mockResolvedValue([GOLD, HP5, K1000]);
+    setup();
+
+    await screen.findByText("Kodak Gold 200", { exact: false });
+
+    expect(screen.getByText(/Màu âm/)).toBeInTheDocument();
+    expect(screen.getByText(/Đen trắng/)).toBeInTheDocument();
+    expect(screen.getByText(/Máy cơ SLR/)).toBeInTheDocument();
+    expect(screen.queryByText(/color-negative/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/\bslr\b/)).not.toBeInTheDocument();
+  });
+
   it("shows the bag first and auto-selects the first film and camera (bag-first ordering)", async () => {
     listBag.mockResolvedValue([GOLD, HP5, K1000]);
     setup();
 
-    const goldChip = await screen.findByText("Kodak Gold 200");
+    const goldChip = await screen.findByText("Kodak Gold 200", { exact: false });
     const goldRadio = goldChip.closest("label")?.querySelector("input");
-    const camRadio = (await screen.findByText("Pentax K1000")).closest("label")?.querySelector("input");
+    const camRadio = (await screen.findByText("Pentax K1000", { exact: false })).closest("label")?.querySelector("input");
 
     expect(goldRadio).toBeChecked();
     expect(camRadio).toBeChecked();
@@ -131,7 +151,7 @@ describe("RollForm", () => {
     listBag.mockResolvedValue([GOLD, K1000]);
     setup();
 
-    await screen.findByText("Kodak Gold 200");
+    await screen.findByText("Kodak Gold 200", { exact: false });
     expect(screen.getByRole("button", { name: "Lưu cuộn" })).toBeEnabled();
   });
 
@@ -139,12 +159,13 @@ describe("RollForm", () => {
     listBag.mockResolvedValue([GOLD, HP5, K1000, FUNSAVER]);
     const { user } = setup();
 
-    await screen.findByText("Kodak Gold 200");
-    await user.click(screen.getByText("Kodak FunSaver"));
+    await screen.findByText("Kodak Gold 200", { exact: false });
+    await user.click(screen.getByText("Kodak FunSaver", { exact: false }));
 
     expect(await screen.findByText("Máy dùng 1 lần, film cố định là Ilford HP5 Plus 400.")).toBeInTheDocument();
-    const goldRadio = screen.getByText("Kodak Gold 200").closest("label")?.querySelector("input");
-    const hp5Radio = screen.getByText("Ilford HP5 Plus 400").closest("label")?.querySelector("input");
+    const goldRadio = screen.getByText("Kodak Gold 200", { exact: false }).closest("label")?.querySelector("input");
+    const hp5Chip = screen.getAllByText(/Ilford HP5 Plus 400/).find((el) => el.closest("label"));
+    const hp5Radio = hp5Chip?.closest("label")?.querySelector("input");
     expect(goldRadio).toBeDisabled();
     expect(hp5Radio).toBeChecked();
     expect(hp5Radio).toBeDisabled();
@@ -159,7 +180,7 @@ describe("RollForm", () => {
     addToBag.mockResolvedValue({ ok: true, bagItemId: "bag-stock-gold" });
     const { user } = setup();
 
-    await screen.findByText("Pentax K1000");
+    await screen.findByText("Pentax K1000", { exact: false });
     await user.click(screen.getByRole("button", { name: "+ Film khác" }));
 
     await user.type(screen.getByLabelText("Tìm trong danh mục"), "gold");
@@ -171,7 +192,7 @@ describe("RollForm", () => {
     expect(addToBag).toHaveBeenCalledWith({ kind: "stock", refId: "stock-gold" });
     await waitFor(() => expect(listBag).toHaveBeenCalledTimes(2));
     await waitFor(() => {
-      const goldRadio = screen.getByText("Kodak Gold 200").closest("label")?.querySelector("input");
+      const goldRadio = screen.getByText("Kodak Gold 200", { exact: false }).closest("label")?.querySelector("input");
       expect(goldRadio).toBeChecked();
     });
   });
@@ -180,7 +201,7 @@ describe("RollForm", () => {
     listBag.mockResolvedValue([GOLD, K1000]);
     const { user } = setup();
 
-    await screen.findByText("Kodak Gold 200");
+    await screen.findByText("Kodak Gold 200", { exact: false });
     await user.click(screen.getByRole("button", { name: /^Thêm chi tiết/ }));
     await user.type(screen.getByLabelText("ISO chụp"), "400");
 
@@ -191,7 +212,7 @@ describe("RollForm", () => {
     listBag.mockResolvedValue([GOLD, K1000]);
     const { user } = setup("past");
 
-    await screen.findByText("Kodak Gold 200");
+    await screen.findByText("Kodak Gold 200", { exact: false });
     const farFuture = "2099-01-01";
     await user.type(screen.getByLabelText("Ngày bắt đầu"), farFuture);
     await user.type(screen.getByLabelText("Ngày chụp xong"), farFuture);
@@ -206,7 +227,7 @@ describe("RollForm", () => {
     createRoll.mockResolvedValue({ ok: true, rollId: "roll-1" });
     const { user } = setup();
 
-    await screen.findByText("Kodak Gold 200");
+    await screen.findByText("Kodak Gold 200", { exact: false });
     await user.click(screen.getByRole("button", { name: "Lưu cuộn" }));
 
     await waitFor(() => expect(createRoll).toHaveBeenCalledTimes(1));

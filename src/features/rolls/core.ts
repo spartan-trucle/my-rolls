@@ -239,11 +239,15 @@ export interface IRollStockSummary {
   name: string;
   iso: number | null;
   canisterColor: string | null;
+  /** Natural-key slug (`stock.type`, e.g. `"color-negative"`) — the caller maps it through `stockTypeLabelKey` before showing it (never the raw slug). */
+  type: string | null;
 }
 
 export interface IRollCameraSummary {
   brand: string;
   model: string;
+  /** Natural-key slug (`camera.type`, e.g. `"slr"`) — the caller maps it through `cameraTypeLabelKey` before showing it (never the raw slug). */
+  type: string | null;
 }
 
 export interface IRollLensSummary {
@@ -340,9 +344,10 @@ async function hydrateRolls<TQueryResult extends PgQueryResultHKT>(
             name: stockRow.name,
             iso: stockRow.iso,
             canisterColor: stockRow.canisterColor,
+            type: stockRow.type,
           }
         : null,
-      camera: cameraRow ? { brand: cameraRow.brand, model: cameraRow.model } : null,
+      camera: cameraRow ? { brand: cameraRow.brand, model: cameraRow.model, type: cameraRow.type } : null,
       lens: lensRow ? { brand: lensRow.brand, model: lensRow.model, focalLength: lensRow.focalLength } : null,
     };
   });

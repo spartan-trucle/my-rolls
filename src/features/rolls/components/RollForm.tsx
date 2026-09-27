@@ -11,6 +11,7 @@ import { listBag } from "@/features/bag/actions";
 import type { TBagEntry, TCameraRow, TLensRow, TStockRow } from "@/features/bag/queries";
 import { CataloguePicker } from "@/features/catalogue/components/CataloguePicker";
 import { CustomEntryForm, type ICustomEntryCreated, type TCustomEntryKind } from "@/features/catalogue/components/CustomEntryForm";
+import { cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
 import type { TCatalogueEntry, TCatalogueKind } from "@/features/catalogue/queries";
 import { createRoll } from "@/features/rolls/actions";
 import { isFutureVnDay } from "@/features/rolls/date-utils";
@@ -61,6 +62,7 @@ function splitBag(entries: TBagEntry[]) {
  */
 export function RollForm({ mode }: RollFormProps) {
   const t = useTranslations("rolls.form");
+  const tTypes = useTranslations("catalogue.types");
   const router = useRouter();
   const titleId = useId();
 
@@ -274,25 +276,29 @@ export function RollForm({ mode }: RollFormProps) {
           <p className={styles.hint}>{t("emptyBagStock")}</p>
         ) : (
           <div className={styles.chips}>
-            {bagStocks.map((stockRow) => (
-              <label key={stockRow.id} className={styles.chip} data-checked={selectedStockId === stockRow.id}>
-                <input
-                  type="radio"
-                  name="roll-stock"
-                  className={styles.srOnly}
-                  checked={selectedStockId === stockRow.id}
-                  disabled={lockedStock !== null}
-                  onChange={() => {
-                    setExplicitStockId(stockRow.id);
-                    setBoxIsoOverride(null);
-                  }}
-                />
-                <CanisterChipSwatch color={stockRow.canisterColor} />
-                <span>
-                  {stockRow.brand} {stockRow.name}
-                </span>
-              </label>
-            ))}
+            {bagStocks.map((stockRow) => {
+              const typeKey = stockTypeLabelKey(stockRow.type);
+              return (
+                <label key={stockRow.id} className={styles.chip} data-checked={selectedStockId === stockRow.id}>
+                  <input
+                    type="radio"
+                    name="roll-stock"
+                    className={styles.srOnly}
+                    checked={selectedStockId === stockRow.id}
+                    disabled={lockedStock !== null}
+                    onChange={() => {
+                      setExplicitStockId(stockRow.id);
+                      setBoxIsoOverride(null);
+                    }}
+                  />
+                  <CanisterChipSwatch color={stockRow.canisterColor} />
+                  <span>
+                    {stockRow.brand} {stockRow.name}
+                    {typeKey ? <span className={styles.chipMeta}> · {tTypes(typeKey)}</span> : null}
+                  </span>
+                </label>
+              );
+            })}
           </div>
         )}
         {lockedStock ? <p className={styles.fieldHint}>{t("fixedFilmHint", { name: `${lockedStock.brand} ${lockedStock.name}` })}</p> : null}
@@ -317,21 +323,25 @@ export function RollForm({ mode }: RollFormProps) {
           <p className={styles.hint}>{t("emptyBagCamera")}</p>
         ) : (
           <div className={styles.chips}>
-            {bagCameras.map(({ camera, bagItemId }) => (
-              <label key={bagItemId} className={styles.chip} data-checked={selectedCameraBagItemId === bagItemId}>
-                <input
-                  type="radio"
-                  name="roll-camera"
-                  className={styles.srOnly}
-                  checked={selectedCameraBagItemId === bagItemId}
-                  onChange={() => setExplicitCameraBagItemId(bagItemId)}
-                />
-                <Icon name="camera" size={18} />
-                <span>
-                  {camera.brand} {camera.model}
-                </span>
-              </label>
-            ))}
+            {bagCameras.map(({ camera, bagItemId }) => {
+              const typeKey = cameraTypeLabelKey(camera.type);
+              return (
+                <label key={bagItemId} className={styles.chip} data-checked={selectedCameraBagItemId === bagItemId}>
+                  <input
+                    type="radio"
+                    name="roll-camera"
+                    className={styles.srOnly}
+                    checked={selectedCameraBagItemId === bagItemId}
+                    onChange={() => setExplicitCameraBagItemId(bagItemId)}
+                  />
+                  <Icon name="camera" size={18} />
+                  <span>
+                    {camera.brand} {camera.model}
+                    {typeKey ? <span className={styles.chipMeta}> · {tTypes(typeKey)}</span> : null}
+                  </span>
+                </label>
+              );
+            })}
           </div>
         )}
         <button type="button" className={styles.chipAdd} onClick={() => setDialog({ view: "picker", kind: "camera" })}>

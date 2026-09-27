@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Icon, Stamp } from "@/design-system";
+import { cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
 import type { IRollEntry } from "@/features/rolls/core";
 import { formatRollDate } from "@/features/rolls/format-date";
 import styles from "./RollPage.module.css";
@@ -28,11 +29,19 @@ function DetailRow({ label, value }: { label: string; value: string | null }) {
  */
 export async function RollPage({ roll }: RollPageProps) {
   const t = await getTranslations("rolls.page");
+  const tTypes = await getTranslations("catalogue.types");
 
-  const stockLabel = roll.stock ? `${roll.stock.brand} ${roll.stock.name}` : null;
-  const cameraLabel = roll.camera ? `${roll.camera.brand} ${roll.camera.model}` : null;
+  const stockTypeLabel = roll.stock ? stockTypeLabelKey(roll.stock.type) : null;
+  const cameraTypeLabel = roll.camera ? cameraTypeLabelKey(roll.camera.type) : null;
+
+  const stockLabel = roll.stock
+    ? [`${roll.stock.brand} ${roll.stock.name}`, stockTypeLabel ? tTypes(stockTypeLabel) : null].filter(Boolean).join(" · ")
+    : null;
+  const cameraLabel = roll.camera
+    ? [`${roll.camera.brand} ${roll.camera.model}`, cameraTypeLabel ? tTypes(cameraTypeLabel) : null].filter(Boolean).join(" · ")
+    : null;
   const lensLabel = roll.lens ? `${roll.lens.brand} ${roll.lens.model ?? ""}`.trim() : null;
-  const title = roll.name ?? stockLabel ?? t("detailFilm");
+  const title = roll.name ?? (roll.stock ? `${roll.stock.brand} ${roll.stock.name}` : null) ?? t("detailFilm");
 
   const shotIsoLine =
     roll.shotIso !== null ? `${roll.shotIso}${roll.pushPull && roll.pushPull !== "0" ? ` · ${roll.pushPull}` : ""}` : null;

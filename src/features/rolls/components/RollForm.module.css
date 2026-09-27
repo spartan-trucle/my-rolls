@@ -138,6 +138,11 @@
   cursor: default;
 }
 
+.chipMeta {
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+
 .mcan {
   width: 12px;
   height: 20px;

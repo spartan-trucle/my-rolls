@@ -18,8 +18,8 @@ const baseEntry: IRollEntry = {
   version: 1,
   createdAt: new Date("2025-10-12T12:00:00Z"),
   pushPull: "0",
-  stock: { id: "stock-1", brand: "Kodak", name: "Gold 200", iso: 200, canisterColor: "gold" },
-  camera: { brand: "Pentax", model: "K1000" },
+  stock: { id: "stock-1", brand: "Kodak", name: "Gold 200", iso: 200, canisterColor: "gold", type: null },
+  camera: { brand: "Pentax", model: "K1000", type: null },
   lens: null,
 };
 

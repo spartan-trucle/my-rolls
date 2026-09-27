@@ -7,7 +7,8 @@ import type { IRollEntry } from "@/features/rolls/core";
 vi.mock("next-intl/server", async () => {
   const { createTranslator } = await import("next-intl");
   return {
-    getTranslations: async (namespace: "rolls.page") => createTranslator({ locale: "vi", messages, namespace }),
+    getTranslations: async (namespace: "rolls.page" | "catalogue.types") =>
+      createTranslator({ locale: "vi", messages, namespace }),
   };
 });
 
@@ -30,8 +31,8 @@ function makeRoll(overrides: Partial<IRollEntry>): IRollEntry {
     version: 1,
     createdAt: new Date("2025-10-12T12:00:00Z"),
     pushPull: "0",
-    stock: { id: "stock-1", brand: "Kodak", name: "Gold 200", iso: 200, canisterColor: "gold" },
-    camera: { brand: "Pentax", model: "K1000" },
+    stock: { id: "stock-1", brand: "Kodak", name: "Gold 200", iso: 200, canisterColor: "gold", type: "color-negative" },
+    camera: { brand: "Pentax", model: "K1000", type: "slr" },
     lens: null,
     ...overrides,
   };
@@ -42,10 +43,31 @@ describe("RollPage", () => {
     render(await RollPage({ roll: makeRoll({}) }));
 
     expect(screen.getByRole("heading", { name: "Kodak Gold 200" })).toBeInTheDocument();
-    expect(screen.getAllByText("Kodak Gold 200").length).toBeGreaterThan(0);
-    expect(screen.getByText("Pentax K1000")).toBeInTheDocument();
+    expect(screen.getByText("Kodak Gold 200 · Màu âm")).toBeInTheDocument();
+    expect(screen.getByText("Pentax K1000 · Máy cơ SLR")).toBeInTheDocument();
     expect(screen.getAllByText("Chờ scan").length).toBeGreaterThan(0);
     expect(screen.getByText("Sắp có")).toBeInTheDocument();
+  });
+
+  it("shows the stock and camera type as a Vietnamese label, never the raw slug", async () => {
+    render(await RollPage({ roll: makeRoll({}) }));
+
+    expect(screen.queryByText(/color-negative/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/\bslr\b/)).not.toBeInTheDocument();
+  });
+
+  it("falls back to just brand and name when the type is unknown or missing", async () => {
+    render(
+      await RollPage({
+        roll: makeRoll({
+          stock: { id: "stock-1", brand: "Kodak", name: "Gold 200", iso: 200, canisterColor: "gold", type: null },
+          camera: { brand: "Pentax", model: "K1000", type: null },
+        }),
+      }),
+    );
+
+    expect(screen.getAllByText("Kodak Gold 200").length).toBeGreaterThan(0);
+    expect(screen.getByText("Pentax K1000")).toBeInTheDocument();
   });
 
   it("shows the roll's own name, falling back to the stock's name otherwise", async () => {
