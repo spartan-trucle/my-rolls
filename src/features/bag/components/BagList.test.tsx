@@ -197,7 +197,7 @@ describe("BagList", () => {
     await user.type(screen.getByLabelText("Tìm trong danh mục"), "superia");
 
     await waitFor(() => expect(searchCatalogue).toHaveBeenCalledWith({ kind: "stock", q: "superia" }));
-    await user.click(await screen.findByRole("button", { name: "Fujifilm Superia 400" }));
+    await user.click(await screen.findByRole("button", { name: "Superia 400" }));
 
     await waitFor(() => expect(listBag).toHaveBeenCalled());
   });

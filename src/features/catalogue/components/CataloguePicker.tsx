@@ -7,7 +7,7 @@ import { cx } from "@/design-system/cx";
 import { DialogCloseButton } from "@/components/overlay/DialogCloseButton";
 import { addToBag } from "@/features/bag/actions";
 import { listCatalogue, searchCatalogue } from "@/features/catalogue/actions";
-import { cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
+import { cameraFormatLabelKey, cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
 import type { TCatalogueEntry, TCatalogueKind } from "@/features/catalogue/queries";
 import styles from "./CataloguePicker.module.css";
 
@@ -31,6 +31,15 @@ export interface CataloguePickerProps {
   onAddCustom: (kind: TCatalogueKind, query: string) => void;
   /** The heading row's close button (the board's `.xbtn`) — omitted when there's nothing for it to call, e.g. the dev preview's own close. */
   onClose?: () => void;
+  /**
+   * C6 (audit, CatalogueSearchWeb/CatalogueEmptyWeb): the desktop footer's
+   * secondary "‹ Quay lại cuộn" link, next to "+ Thêm film riêng" — its
+   * label is caller-supplied because it names where "back" goes (the roll
+   * form, the bag…), which this component doesn't know. Omitted where
+   * there's nowhere to go back to (e.g. the bag, which only has close).
+   */
+  onGoBack?: () => void;
+  backLabel?: string;
   /** id put on the `<h2>` title — pass the same id as the host `ResponsiveDialog`'s `labelledBy`. Falls back to a generated id when rendered standalone. */
   titleId?: string;
   className?: string;
@@ -64,6 +73,8 @@ export function CataloguePicker({
   onPicked,
   onAddCustom,
   onClose,
+  onGoBack,
+  backLabel,
   titleId,
   className,
 }: CataloguePickerProps) {
@@ -186,33 +197,52 @@ export function CataloguePicker({
             {isSearching ? (
               <p className={styles.resultCount}>{t("resultCount", { count: entries.length, query: debouncedQuery })}</p>
             ) : null}
+            {/* C5 (audit, CatalogueSearchWeb): desktop-only table header row, hidden on phone via CSS. */}
+            <div className={cx(styles.tableHeaderRow, kind === "stock" ? styles.tableHeaderRowStock : styles.tableHeaderRowCamera)} aria-hidden="true">
+              <span />
+              <span>{t("colName")}</span>
+              <span>{t("colBrand")}</span>
+              <span>{t("colType")}</span>
+              {kind === "stock" ? <span>{t("colIso")}</span> : null}
+              <span>{t("colFormat")}</span>
+              <span />
+            </div>
             <ul className={styles.list}>
               {displayEntries.map((entry) => {
                 const key = entryKey(entry.kind, entry.id);
                 const inBag = addedKeys.has(key);
-                // C3 (audit): the board drops the brand from the row name
-                // (it's already first in `meta`) for stock. Left as
-                // `brand + name` here instead — RollForm (W2) asserts on
-                // the full "Kodak Gold 200" label, and this component is
-                // shared between the two; flagged for W2 to decide.
-                const label =
-                  entry.kind === "stock" ? `${entry.brand} ${entry.name}` : `${entry.brand} ${entry.model}`;
+                // C3 (audit, approved by the owner 27.09.2026): the board
+                // drops the brand from the stock row name — it's already
+                // first in `meta`. Camera keeps `brand + model` (no
+                // separate brand column there). W2 updates RollForm's own
+                // tests for this shared component.
+                const label = entry.kind === "stock" ? entry.name : `${entry.brand} ${entry.model}`;
                 const typeKey = entry.kind === "stock" ? stockTypeLabelKey(entry.type) : cameraTypeLabelKey(entry.type);
                 const typeLabel = typeKey ? tTypes(typeKey) : null;
+                // E3: a camera's "other" ("Khác") format is translated;
+                // every other format (stock's 35mm/120 included) renders as-is.
+                const cameraFormatKey = entry.kind === "camera" ? cameraFormatLabelKey(entry.format) : null;
+                const cameraFormatText = cameraFormatKey ? tTypes(cameraFormatKey) : (entry.kind === "camera" ? entry.format : null);
                 const meta =
                   entry.kind === "stock"
                     ? joinMeta([entry.iso != null && `ISO ${entry.iso}`, entry.brand, typeLabel, entry.formats?.join(", ")])
-                    : joinMeta([entry.brand, typeLabel, entry.format]);
+                    : joinMeta([entry.brand, typeLabel, cameraFormatText]);
                 // BAG-2 (N6): a stock already counted in the bag shows
                 // "×N" (or "hết" at 0) instead of the plain "Trong túi" stamp.
                 const bagQty = entry.kind === "stock" ? bagQtyByKey?.get(key) : undefined;
                 const qtyBadge = bagQty != null ? (bagQty > 0 ? `×${bagQty}` : t("stockOut")) : null;
 
+                // C5: the same fields `meta` joins for the phone line,
+                // kept separate too so the desktop table can put each in
+                // its own column.
+                const isoCell = entry.kind === "stock" && entry.iso != null ? `ISO ${entry.iso}` : "—";
+                const formatCell = entry.kind === "stock" ? (entry.formats?.join(", ") ?? "—") : (cameraFormatText ?? "—");
+
                 return (
                   <li key={entry.id}>
                     <button
                       type="button"
-                      className={styles.result}
+                      className={cx(styles.result, kind === "stock" ? styles.resultStock : styles.resultCamera)}
                       onClick={() => handlePick(entry)}
                       disabled={inBag || pendingKey === key}
                       aria-label={inBag ? `${label}, ${t("inBag")}` : label}
@@ -228,6 +258,10 @@ export function CataloguePicker({
                         <span className={styles.resultName}>{label}</span>
                         {meta ? <span className={styles.resultMeta}>{meta}</span> : null}
                       </span>
+                      <span className={styles.colBrand}>{entry.brand}</span>
+                      <span className={styles.colType}>{typeLabel ?? "—"}</span>
+                      {kind === "stock" ? <span className={styles.colIso}>{isoCell}</span> : null}
+                      <span className={styles.colFormat}>{formatCell}</span>
                       {qtyBadge ? (
                         <Stamp tone="ink">{qtyBadge}</Stamp>
                       ) : inBag ? (
@@ -242,10 +276,6 @@ export function CataloguePicker({
                 );
               })}
             </ul>
-            <button type="button" className={styles.addCustomLink} onClick={() => onAddCustom(kind, rawQuery.trim())}>
-              <span className={styles.notFound}>{notFoundPrompt}</span> {addCustomLabel}
-            </button>
-            <p className={styles.footerHint}>{t("footerHint")}</p>
           </>
         ) : null}
 
@@ -266,6 +296,27 @@ export function CataloguePicker({
           </div>
         ) : null}
       </div>
+
+      {/* C6 (audit): pinned footer inside the fixed-height dialog — a
+          sibling of the scrollable `.results`, not inside it, so it never
+          scrolls out of view at any width. */}
+      {hasHits || onGoBack ? (
+        <div className={styles.pinnedFooter}>
+          {onGoBack ? (
+            <button type="button" className={styles.backLink} onClick={onGoBack}>
+              {backLabel}
+            </button>
+          ) : null}
+          {hasHits ? (
+            <div className={styles.pinnedFooterAdd}>
+              <button type="button" className={styles.addCustomLink} onClick={() => onAddCustom(kind, rawQuery.trim())}>
+                <span className={styles.notFound}>{notFoundPrompt}</span> {addCustomLabel}
+              </button>
+              <p className={styles.footerHint}>{t("footerHint")}</p>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }
