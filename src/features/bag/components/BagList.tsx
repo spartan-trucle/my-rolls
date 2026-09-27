@@ -1,10 +1,11 @@
 "use client";
 
-import { useId, useMemo, useState, type CSSProperties } from "react";
+import { useId, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Icon, Stamp } from "@/design-system";
+import { DialogCloseButton } from "@/components/overlay/DialogCloseButton";
 import { ResponsiveDialog } from "@/components/overlay/ResponsiveDialog";
-import { addToBag, listBag, removeFromBag } from "@/features/bag/actions";
+import { listBag, removeFromBag } from "@/features/bag/actions";
 import type { TBagEntry } from "@/features/bag/queries";
 import { CataloguePicker } from "@/features/catalogue/components/CataloguePicker";
 import { CustomEntryForm, type TCustomEntryKind } from "@/features/catalogue/components/CustomEntryForm";
@@ -16,12 +17,6 @@ type TDialogMode =
   | { view: "closed" }
   | { view: "picker"; kind: TCatalogueKind }
   | { view: "custom"; kind: TCustomEntryKind; query?: string };
-
-interface IRemovedItem {
-  kind: TBagEntry["kind"];
-  refId: string;
-  name: string;
-}
 
 export interface BagListProps {
   initialEntries: TBagEntry[];
@@ -87,11 +82,12 @@ export function BagList({ initialEntries }: BagListProps) {
   const tTypes = useTranslations("catalogue.types");
   const typeLabel = (key: Parameters<typeof tTypes>[0] | null) => (key ? tTypes(key) : null);
   const dialogTitleId = useId();
+  const confirmTitleId = useId();
   const [entries, setEntries] = useState<TBagEntry[]>(initialEntries);
   const [dialog, setDialog] = useState<TDialogMode>({ view: "closed" });
-  const [removed, setRemoved] = useState<IRemovedItem | null>(null);
-  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
-  const [undoing, setUndoing] = useState(false);
+  const [confirmEntry, setConfirmEntry] = useState<TBagEntry | null>(null);
+  const [removing, setRemoving] = useState(false);
+  const sectionsRef = useRef<HTMLDivElement>(null);
 
   const bagRefIds = useMemo(
     () => new Set(entries.map((entry) => `${entry.kind}:${entryRefId(entry)}`)),
@@ -124,31 +120,30 @@ export function BagList({ initialEntries }: BagListProps) {
     closeDialog();
   }
 
-  async function handleRemove(entry: TBagEntry) {
-    setPendingRemoveId(entry.bagItemId);
-    const result = await removeFromBag({ bagItemId: entry.bagItemId });
-    setPendingRemoveId(null);
-    if (!result.ok) return;
-
-    setEntries((prev) => prev.filter((item) => item.bagItemId !== entry.bagItemId));
-    setRemoved({ kind: entry.kind, refId: entryRefId(entry), name: entryName(entry) });
+  /**
+   * Fix 3 (owner review): removing an item opens a confirm dialog naming
+   * it, rather than removing straight away with an undo toast — the
+   * confirm replaces the undo, so there's no second safety net to keep in
+   * sync with it.
+   */
+  function closeConfirm() {
+    setConfirmEntry(null);
+    // Focus returns to the list, not the trigger button — the item (and
+    // its button) that opened this dialog may no longer exist once a
+    // remove actually goes through.
+    sectionsRef.current?.focus();
   }
 
-  /**
-   * `removeFromBag` soft-deletes (D9) — there's no restore action, so
-   * "undo" re-adds the same `kind` + `refId`: `addToBag` (B4) has no
-   * problem creating a fresh bag item for a ref whose earlier one is now
-   * soft-deleted, and to the user the film or camera just reappears.
-   */
-  async function handleUndo() {
-    if (!removed) return;
-    setUndoing(true);
-    const result = await addToBag({ kind: removed.kind, refId: removed.refId });
-    setUndoing(false);
-    if (result.ok || result.error === "duplicate") {
-      setRemoved(null);
-      await refresh();
-    }
+  async function handleConfirmRemove() {
+    if (!confirmEntry) return;
+
+    setRemoving(true);
+    const result = await removeFromBag({ bagItemId: confirmEntry.bagItemId });
+    setRemoving(false);
+    if (!result.ok) return;
+
+    setEntries((prev) => prev.filter((item) => item.bagItemId !== confirmEntry.bagItemId));
+    closeConfirm();
   }
 
   const films = entries.filter((entry) => entry.kind === "stock");
@@ -189,7 +184,7 @@ export function BagList({ initialEntries }: BagListProps) {
           </div>
         </div>
       ) : (
-        <div className={styles.sections}>
+        <div className={styles.sections} ref={sectionsRef} tabIndex={-1}>
           <section aria-labelledby="bag-film-heading" className="flex flex-col gap-2">
             <h2 id="bag-film-heading" className={styles.sectionHeading}>
               {t("sectionFilm", { count: films.length })}
@@ -217,8 +212,8 @@ export function BagList({ initialEntries }: BagListProps) {
                     type="button"
                     className={styles.removeButton}
                     aria-label={t("removeLabel", { name: entryName(entry) })}
-                    onClick={() => handleRemove(entry)}
-                    disabled={pendingRemoveId === entry.bagItemId}
+                    onClick={() => setConfirmEntry(entry)}
+                    disabled={removing && confirmEntry?.bagItemId === entry.bagItemId}
                   >
                     <RemoveIcon />
                   </button>
@@ -259,8 +254,8 @@ export function BagList({ initialEntries }: BagListProps) {
                     type="button"
                     className={styles.removeButton}
                     aria-label={t("removeLabel", { name: entryName(entry) })}
-                    onClick={() => handleRemove(entry)}
-                    disabled={pendingRemoveId === entry.bagItemId}
+                    onClick={() => setConfirmEntry(entry)}
+                    disabled={removing && confirmEntry?.bagItemId === entry.bagItemId}
                   >
                     <RemoveIcon />
                   </button>
@@ -296,8 +291,8 @@ export function BagList({ initialEntries }: BagListProps) {
                     type="button"
                     className={styles.removeButton}
                     aria-label={t("removeLabel", { name: entryName(entry) })}
-                    onClick={() => handleRemove(entry)}
-                    disabled={pendingRemoveId === entry.bagItemId}
+                    onClick={() => setConfirmEntry(entry)}
+                    disabled={removing && confirmEntry?.bagItemId === entry.bagItemId}
                   >
                     <RemoveIcon />
                   </button>
@@ -311,15 +306,6 @@ export function BagList({ initialEntries }: BagListProps) {
           </section>
         </div>
       )}
-
-      {removed ? (
-        <div className={styles.toast} role="status">
-          <span>{t("removedToast", { name: removed.name })}</span>
-          <button type="button" onClick={handleUndo} disabled={undoing}>
-            {t("undo")}
-          </button>
-        </div>
-      ) : null}
 
       <ResponsiveDialog open={dialog.view !== "closed"} onClose={closeDialog} labelledBy={dialogTitleId}>
         {dialog.view === "picker" ? (
@@ -339,6 +325,27 @@ export function BagList({ initialEntries }: BagListProps) {
             onCreated={handleCreated}
             onClose={closeDialog}
           />
+        ) : null}
+      </ResponsiveDialog>
+
+      <ResponsiveDialog open={confirmEntry !== null} onClose={closeConfirm} labelledBy={confirmTitleId} size="compact">
+        {confirmEntry ? (
+          <div className={styles.confirm}>
+            <div className={styles.confirmHeader}>
+              <h2 id={confirmTitleId} className={styles.confirmTitle}>
+                {t("removeConfirmTitle", { name: entryName(confirmEntry) })}
+              </h2>
+              <DialogCloseButton onClose={closeConfirm} />
+            </div>
+            <div className={styles.confirmActions}>
+              <button type="button" className={styles.confirmCancel} onClick={closeConfirm} disabled={removing}>
+                {t("removeConfirmCancel")}
+              </button>
+              <button type="button" className={styles.confirmDanger} onClick={handleConfirmRemove} disabled={removing}>
+                {t("removeConfirmConfirm")}
+              </button>
+            </div>
+          </div>
         ) : null}
       </ResponsiveDialog>
     </div>
