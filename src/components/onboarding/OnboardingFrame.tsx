@@ -54,13 +54,21 @@ export function OnboardingFrame({ step, skipHref, children, footer }: Onboarding
   );
 
   return (
-    <div className="rc-paper flex min-h-dvh flex-col">
-      <header className="hidden h-20 items-center justify-between border-b border-line px-[120px] lg:flex">
+    // A real `h-dvh` (not `min-h-dvh`) with the middle region as the only
+    // scroller (fix 4, owner review): the footer is a sibling flex item
+    // below it, sized to its own content, so it always stays in view
+    // instead of a taller-than-viewport middle region pushing it off — or,
+    // worse, a `min-h-dvh` box letting the page grow past the viewport
+    // while the footer still reads as "pinned" — either way covering the
+    // bottom of whatever's currently on screen (the two option cards on
+    // `/onboarding/first-roll`, the chip groups on `/onboarding/bag`).
+    <div className="rc-paper flex h-dvh flex-col">
+      <header className="hidden h-20 shrink-0 items-center justify-between border-b border-line px-[120px] lg:flex">
         <span className="font-display text-title font-semibold">{tCommon("appName")}</span>
         <ThemeToggle />
       </header>
 
-      <div className="flex flex-grow flex-col gap-5 px-4 py-4 pb-6 lg:flex-grow-0 lg:items-center lg:px-[120px] lg:pt-12 lg:pb-0">
+      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 py-4 pb-6 lg:items-center lg:px-[120px] lg:pt-12 lg:pb-6">
         <div className="lg:hidden">{stepRow}</div>
 
         <div className="flex flex-grow flex-col gap-7 lg:w-[880px] lg:flex-grow-0">
@@ -69,7 +77,7 @@ export function OnboardingFrame({ step, skipHref, children, footer }: Onboarding
         </div>
       </div>
 
-      <div className="mt-auto flex flex-col gap-2.5 px-4 pb-6 lg:mt-0 lg:flex-row lg:items-center lg:justify-between lg:border-t lg:border-line lg:bg-paper-raised lg:px-[280px] lg:py-5">
+      <div className="flex shrink-0 flex-col gap-2.5 px-4 pb-6 lg:flex-row lg:items-center lg:justify-between lg:border-t lg:border-line lg:bg-paper-raised lg:px-[280px] lg:py-5">
         {footer}
       </div>
     </div>
