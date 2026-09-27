@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { bagItem, camera, lens, roll, stock } from "@/db/schema";
 import { createTestDb } from "@/db/test-db";
 import { toSearchText } from "@/lib/search-text";
@@ -526,5 +526,414 @@ describe("listRollsCore and getRollCore", () => {
     const entry = await getRollCore(db, OWNER, created.rollId);
     expect(entry?.id).toBe(created.rollId);
     expect(entry?.pushPull).toBe("0");
+  });
+});
+
+describe("createRollCore — roll numbers (R2-5)", () => {
+  let cleanup: (() => Promise<void>) | undefined;
+
+  afterEach(async () => {
+    await cleanup?.();
+    cleanup = undefined;
+  });
+
+  it("assigns 1 to a user's first roll, day precision by default", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    const result = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.number).toBe(1);
+    const [rollRow] = await db.select().from(roll).where(eq(roll.id, result.rollId));
+    expect(rollRow.number).toBe(1);
+    expect(rollRow.datePrecision).toBe("day");
+  });
+
+  it("increments per user, in creation order", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    const first = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+    const second = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW + 1000,
+    );
+
+    expect(first.ok && first.number).toBe(1);
+    expect(second.ok && second.number).toBe(2);
+  });
+
+  it("never reuses a number after its roll is soft-deleted", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    const first = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+    if (!first.ok) throw new Error("expected first create to succeed");
+    await db.update(roll).set({ deletedAt: new Date() }).where(eq(roll.id, first.rollId));
+
+    const second = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW + 1000,
+    );
+
+    expect(second.ok && second.number).toBe(2);
+  });
+
+  it("numbers each user independently", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraRow, cameraBagItemRow } = await seedBasics(db);
+    const [otherCameraBagItem] = await db
+      .insert(bagItem)
+      .values({ userId: OTHER_USER, kind: "camera", refId: cameraRow.id })
+      .returning();
+
+    const ownerRoll = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+    const otherRoll = await createRollCore(
+      db,
+      OTHER_USER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: otherCameraBagItem.id },
+      NOW,
+    );
+
+    expect(ownerRoll.ok && ownerRoll.number).toBe(1);
+    expect(otherRoll.ok && otherRoll.number).toBe(1);
+  });
+
+  it("retries once on a simulated unique violation on the roll number", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    const originalTransaction = client.transaction.bind(client);
+    let insertAttempts = 0;
+    const transactionSpy = vi
+      .spyOn(client, "transaction")
+      .mockImplementation(async (callback: Parameters<typeof client.transaction>[0]) => {
+        return originalTransaction(async (txClient) => {
+          const originalQuery = txClient.query.bind(txClient);
+          txClient.query = (async (...args: Parameters<typeof originalQuery>) => {
+            const sqlText = String(args[0] ?? "");
+            if (/insert into "?roll"?/i.test(sqlText)) {
+              insertAttempts += 1;
+              if (insertAttempts === 1) {
+                const error = new Error("duplicate key value violates unique constraint") as Error & {
+                  code: string;
+                };
+                error.code = "23505";
+                throw error;
+              }
+            }
+            return originalQuery(...args);
+          }) as typeof txClient.query;
+
+          return callback(txClient);
+        });
+      });
+
+    const result = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+
+    transactionSpy.mockRestore();
+
+    expect(result.ok).toBe(true);
+    expect(insertAttempts).toBe(2);
+    expect(await db.select().from(roll)).toHaveLength(1);
+  });
+});
+
+describe("createRollCore — BAG-2 decrement on load (R2-3)", () => {
+  let cleanup: (() => Promise<void>) | undefined;
+
+  afterEach(async () => {
+    await cleanup?.();
+    cleanup = undefined;
+  });
+
+  it("decrements qty by one and returns remainingQty when the stock is counted", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+    await db.insert(bagItem).values({ userId: OWNER, kind: "stock", refId: stockRow.id, qty: 3 });
+
+    const result = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+
+    expect(result.ok && result.remainingQty).toBe(2);
+    const [bagRow] = await db
+      .select()
+      .from(bagItem)
+      .where(and(eq(bagItem.userId, OWNER), eq(bagItem.refId, stockRow.id)));
+    expect(bagRow.qty).toBe(2);
+  });
+
+  it("leaves qty alone and returns remainingQty null when the stock isn't counted (qty null)", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+    await db.insert(bagItem).values({ userId: OWNER, kind: "stock", refId: stockRow.id });
+
+    const result = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+
+    expect(result.ok && result.remainingQty).toBeNull();
+    const [bagRow] = await db
+      .select()
+      .from(bagItem)
+      .where(and(eq(bagItem.userId, OWNER), eq(bagItem.refId, stockRow.id)));
+    expect(bagRow.qty).toBeNull();
+  });
+
+  it("leaves qty at 0 and returns remainingQty null, still creates the roll", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+    await db.insert(bagItem).values({ userId: OWNER, kind: "stock", refId: stockRow.id, qty: 0 });
+
+    const result = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.ok && result.remainingQty).toBeNull();
+    const [bagRow] = await db
+      .select()
+      .from(bagItem)
+      .where(and(eq(bagItem.userId, OWNER), eq(bagItem.refId, stockRow.id)));
+    expect(bagRow.qty).toBe(0);
+  });
+
+  it("returns remainingQty null when the stock wasn't in the bag yet (it's added fresh, uncounted)", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    const result = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+
+    expect(result.ok && result.remainingQty).toBeNull();
+  });
+});
+
+describe("createRollCore — past-mode month-precision dates (R2-4)", () => {
+  let cleanup: (() => Promise<void>) | undefined;
+
+  afterEach(async () => {
+    await cleanup?.();
+    cleanup = undefined;
+  });
+
+  it("stores the month's first/last instant in Vietnam time and datePrecision month", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    const result = await createRollCore(
+      db,
+      OWNER,
+      {
+        mode: "past",
+        stockId: stockRow.id,
+        cameraBagItemId: cameraBagItemRow.id,
+        shotFromMonth: { month: 4, year: 2026 },
+        shotToMonth: { month: 5, year: 2026 },
+      },
+      NOW,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const [rollRow] = await db.select().from(roll).where(eq(roll.id, result.rollId));
+    expect(rollRow.datePrecision).toBe("month");
+    expect(rollRow.shotFrom?.toISOString()).toBe("2026-03-31T17:00:00.000Z");
+    expect(rollRow.shotTo?.toISOString()).toBe("2026-05-31T16:59:59.999Z");
+  });
+
+  it("'Không nhớ' on both sides: null dates, null precision", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    const result = await createRollCore(
+      db,
+      OWNER,
+      {
+        mode: "past",
+        stockId: stockRow.id,
+        cameraBagItemId: cameraBagItemRow.id,
+        shotFromMonth: null,
+        shotToMonth: null,
+      },
+      NOW,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const [rollRow] = await db.select().from(roll).where(eq(roll.id, result.rollId));
+    expect(rollRow.shotFrom).toBeNull();
+    expect(rollRow.shotTo).toBeNull();
+    expect(rollRow.datePrecision).toBeNull();
+  });
+
+  it("'Không nhớ' on one side only: that side stays null, precision still month", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    const result = await createRollCore(
+      db,
+      OWNER,
+      {
+        mode: "past",
+        stockId: stockRow.id,
+        cameraBagItemId: cameraBagItemRow.id,
+        shotFromMonth: { month: 4, year: 2026 },
+        shotToMonth: null,
+      },
+      NOW,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const [rollRow] = await db.select().from(roll).where(eq(roll.id, result.rollId));
+    expect(rollRow.shotFrom).not.toBeNull();
+    expect(rollRow.shotTo).toBeNull();
+    expect(rollRow.datePrecision).toBe("month");
+  });
+
+  it("rejects a future month (Vietnam time)", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    // NOW is June 2026 — July 2026 is a future month.
+    const result = await createRollCore(
+      db,
+      OWNER,
+      {
+        mode: "past",
+        stockId: stockRow.id,
+        cameraBagItemId: cameraBagItemRow.id,
+        shotFromMonth: { month: 7, year: 2026 },
+        shotToMonth: null,
+      },
+      NOW,
+    );
+
+    expect(result).toEqual({ ok: false, error: "validation" });
+  });
+
+  it("accepts the current Vietnam month (not future)", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    const result = await createRollCore(
+      db,
+      OWNER,
+      {
+        mode: "past",
+        stockId: stockRow.id,
+        cameraBagItemId: cameraBagItemRow.id,
+        shotFromMonth: { month: 6, year: 2026 },
+        shotToMonth: null,
+      },
+      NOW,
+    );
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("rejects fromMonth after toMonth", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    const result = await createRollCore(
+      db,
+      OWNER,
+      {
+        mode: "past",
+        stockId: stockRow.id,
+        cameraBagItemId: cameraBagItemRow.id,
+        shotFromMonth: { month: 5, year: 2026 },
+        shotToMonth: { month: 4, year: 2026 },
+      },
+      NOW,
+    );
+
+    expect(result).toEqual({ ok: false, error: "validation" });
+  });
+
+  it("still accepts exact shotFrom/shotTo in past mode (backward compatible, day precision)", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    const result = await createRollCore(
+      db,
+      OWNER,
+      {
+        mode: "past",
+        stockId: stockRow.id,
+        cameraBagItemId: cameraBagItemRow.id,
+        shotFrom: vnMidnight("2026-06-10"),
+        shotTo: vnMidnight("2026-06-12"),
+      },
+      NOW,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const [rollRow] = await db.select().from(roll).where(eq(roll.id, result.rollId));
+    expect(rollRow.datePrecision).toBe("day");
   });
 });

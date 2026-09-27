@@ -5,11 +5,19 @@ import { and, desc, eq, inArray, isNull, or } from "drizzle-orm";
 import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { bagItem, camera, lens, roll, stock } from "@/db/schema";
 import type { TDb } from "@/features/shared/db";
-import { isFutureVnDay } from "@/features/rolls/date-utils";
+import { isFutureVnDay, isFutureVnMonth, vnMonthEnd, vnMonthStart } from "@/features/rolls/date-utils";
 import { formatPushPull, pushPullStops } from "@/features/rolls/push-pull";
 
 /** Same two formats CAT-2's custom stock entries know about (D4). */
 const FORMATS = ["35mm", "120"] as const;
+
+/** R2-4: a past-mode "Chụp khoảng khi nào" month + year pick. `month` is 1–12. */
+const monthYearSchema = z.object({
+  month: z.number().int().min(1).max(12),
+  year: z.number().int(),
+});
+
+export type TMonthYear = z.infer<typeof monthYearSchema>;
 
 export const createRollInputSchema = z
   .object({
@@ -25,9 +33,19 @@ export const createRollInputSchema = z
     locations: z.array(z.string().trim().min(1)).optional(),
     // Epoch ms, same shape as `formOpenedAt` — the client sends `Date`
     // boundaries as timestamps, not ISO strings, so there's one date
-    // representation crossing the Server Action boundary.
+    // representation crossing the Server Action boundary. Always how a
+    // "new"-mode roll's dates are sent (day precision); also how a
+    // "past"-mode roll can still be sent exact-day (backward compatible
+    // with the day-picker form that predates R2-4).
     shotFrom: z.number().int().optional(),
     shotTo: z.number().int().optional(),
+    // R2-4: past mode's month-precision alternative to shotFrom/shotTo
+    // above. `null` means "Không nhớ" for that side; omitting the key
+    // entirely is the same as `null` (see `resolvePastDates`). Presence
+    // of either key (even as `null`) switches `createRollCore` onto the
+    // month-precision path instead of requiring shotFrom/shotTo.
+    shotFromMonth: monthYearSchema.nullable().optional(),
+    shotToMonth: monthYearSchema.nullable().optional(),
     // D16: when the form was opened, so the action can derive
     // `duration_ms` for the `roll_created` event.
     formOpenedAt: z.number().int().optional(),
@@ -35,18 +53,76 @@ export const createRollInputSchema = z
   .superRefine((value, ctx) => {
     if (value.mode !== "past") return;
 
-    if (value.shotFrom === undefined) {
-      ctx.addIssue({ code: "custom", path: ["shotFrom"], message: "shotFrom is required in past mode" });
+    const hasExact = value.shotFrom !== undefined && value.shotTo !== undefined;
+    const hasMonth = value.shotFromMonth !== undefined || value.shotToMonth !== undefined;
+
+    if (!hasExact && !hasMonth) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["shotFrom"],
+        message: "shotFrom/shotTo or shotFromMonth/shotToMonth is required in past mode",
+      });
+      return;
     }
-    if (value.shotTo === undefined) {
-      ctx.addIssue({ code: "custom", path: ["shotTo"], message: "shotTo is required in past mode" });
-    }
-    if (value.shotFrom !== undefined && value.shotTo !== undefined && value.shotFrom > value.shotTo) {
+
+    if (hasExact && !hasMonth && value.shotFrom! > value.shotTo!) {
       ctx.addIssue({ code: "custom", path: ["shotTo"], message: "shotFrom must be at or before shotTo" });
     }
   });
 
 export type TCreateRollInput = z.infer<typeof createRollInputSchema>;
+
+type TStockSelectRow = typeof stock.$inferSelect;
+
+type TResolvedDates =
+  | { ok: true; shotFrom: Date | null; shotTo: Date | null; datePrecision: "day" | "month" | null }
+  | { ok: false };
+
+/**
+ * R2-4: resolves `input`'s dates to a `shotFrom`/`shotTo`/`datePrecision`
+ * triple, for both roll modes. "new" mode is always day precision
+ * (defaulting `shotFrom` to `now` when omitted, same as before R2-4).
+ * "past" mode picks month precision the moment either `shotFromMonth` or
+ * `shotToMonth` was sent at all (even as `null`, "Không nhớ" — see the
+ * schema comment above); otherwise it falls back to the exact-day
+ * `shotFrom`/`shotTo` path, unchanged since before R2-4 for backward
+ * compatibility with any caller still sending exact past-mode dates.
+ */
+function resolveDates(input: TCreateRollInput, now: number): TResolvedDates {
+  if (input.mode === "new") {
+    const shotFrom = input.shotFrom !== undefined ? new Date(input.shotFrom) : new Date(now);
+    const shotTo = input.shotTo !== undefined ? new Date(input.shotTo) : null;
+    return { ok: true, shotFrom, shotTo, datePrecision: "day" };
+  }
+
+  const usesMonthPrecision = input.shotFromMonth !== undefined || input.shotToMonth !== undefined;
+
+  if (usesMonthPrecision) {
+    const fromMonthYear = input.shotFromMonth ?? null;
+    const toMonthYear = input.shotToMonth ?? null;
+
+    if (fromMonthYear && isFutureVnMonth(fromMonthYear.month, fromMonthYear.year, now)) return { ok: false };
+    if (toMonthYear && isFutureVnMonth(toMonthYear.month, toMonthYear.year, now)) return { ok: false };
+    if (fromMonthYear && toMonthYear) {
+      const fromKey = fromMonthYear.year * 12 + fromMonthYear.month;
+      const toKey = toMonthYear.year * 12 + toMonthYear.month;
+      if (fromKey > toKey) return { ok: false };
+    }
+
+    return {
+      ok: true,
+      shotFrom: fromMonthYear ? vnMonthStart(fromMonthYear.month, fromMonthYear.year) : null,
+      shotTo: toMonthYear ? vnMonthEnd(toMonthYear.month, toMonthYear.year) : null,
+      datePrecision: fromMonthYear || toMonthYear ? "month" : null,
+    };
+  }
+
+  if (input.shotFrom === undefined || input.shotTo === undefined) return { ok: false };
+  if (input.shotFrom > input.shotTo) return { ok: false };
+  if (isFutureVnDay(input.shotFrom, now) || isFutureVnDay(input.shotTo, now)) return { ok: false };
+
+  return { ok: true, shotFrom: new Date(input.shotFrom), shotTo: new Date(input.shotTo), datePrecision: "day" };
+}
 
 export type TCreateRollErrorCode =
   | "unauthenticated"
@@ -54,7 +130,19 @@ export type TCreateRollErrorCode =
   | "not_found"
   | "fixed_stock_mismatch";
 export type TCreateRollResult =
-  | { ok: true; rollId: string }
+  | {
+      ok: true;
+      rollId: string;
+      /** R2-5: the roll's "Cuộn #N" (`RollSaved`'s kicker). */
+      number: number;
+      /**
+       * BAG-2 (R2-3): the stock bag item's `qty` after this roll took one
+       * out, so the form can show "túi còn N" — `null` when the stock
+       * wasn't being counted (its bag item had `qty` 0 or `null`) or
+       * wasn't in the bag at all yet.
+       */
+      remainingQty: number | null;
+    }
   | { ok: false; error: TCreateRollErrorCode };
 
 /**
@@ -171,29 +259,55 @@ export async function createRollCore<TQueryResult extends PgQueryResultHKT>(
     finalStockRow = stockRow;
   }
 
-  let shotFrom: Date;
-  let shotTo: Date | null;
+  const resolvedDates = resolveDates(input, now);
+  if (!resolvedDates.ok) return { ok: false, error: "validation" };
+  const { shotFrom, shotTo, datePrecision } = resolvedDates;
 
-  if (input.mode === "past") {
-    if (input.shotFrom === undefined || input.shotTo === undefined) {
-      return { ok: false, error: "validation" };
+  // R2-5: retried once on a `roll_user_id_number_idx` unique violation —
+  // two concurrent creates for the same user can both read the same
+  // `MAX(number)` before either commits (the `FOR UPDATE` lock inside the
+  // transaction only protects against that once a first roll already
+  // exists to lock). A non-uniqueness failure (a bug, a constraint the
+  // test suite fakes) is never retried, and rethrows past this function,
+  // same as before R2-5.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      return await attemptCreateRoll(db, userId, input, finalStockRow, { shotFrom, shotTo, datePrecision });
+    } catch (error) {
+      if (attempt === 0 && isUniqueViolation(error)) continue;
+      throw error;
     }
-    if (input.shotFrom > input.shotTo) {
-      return { ok: false, error: "validation" };
-    }
-    if (isFutureVnDay(input.shotFrom, now) || isFutureVnDay(input.shotTo, now)) {
-      return { ok: false, error: "validation" };
-    }
-    shotFrom = new Date(input.shotFrom);
-    shotTo = new Date(input.shotTo);
-  } else {
-    shotFrom = input.shotFrom !== undefined ? new Date(input.shotFrom) : new Date(now);
-    shotTo = input.shotTo !== undefined ? new Date(input.shotTo) : null;
   }
 
+  // Unreachable — the loop above always returns or throws — but keeps
+  // the function's return type total for TypeScript.
+  throw new Error("createRollCore: unreachable");
+}
+
+/**
+ * Postgres's `unique_violation` SQLSTATE (`23505`). `pg` and PGlite put it
+ * straight on the thrown error's `.code`; drizzle-orm's own
+ * `DrizzleQueryError` wraps that as `.cause` instead, so both are
+ * checked.
+ */
+function isUniqueViolation(error: unknown): boolean {
+  const code = (error as { code?: unknown } | undefined)?.code;
+  if (code === "23505") return true;
+
+  const cause = (error as { cause?: unknown } | undefined)?.cause;
+  return (cause as { code?: unknown } | undefined)?.code === "23505";
+}
+
+async function attemptCreateRoll<TQueryResult extends PgQueryResultHKT>(
+  db: TDb<TQueryResult>,
+  userId: string,
+  input: TCreateRollInput,
+  finalStockRow: TStockSelectRow,
+  dates: { shotFrom: Date | null; shotTo: Date | null; datePrecision: "day" | "month" | null },
+): Promise<TCreateRollResult> {
   return db.transaction(async (tx) => {
     const existingBagItem = await tx
-      .select({ id: bagItem.id })
+      .select({ id: bagItem.id, qty: bagItem.qty })
       .from(bagItem)
       .where(
         and(
@@ -205,9 +319,31 @@ export async function createRollCore<TQueryResult extends PgQueryResultHKT>(
       )
       .limit(1);
 
+    // BAG-2 (R2-3): loading a roll takes one out. Only when the stock is
+    // already in the bag and being counted (`qty` a positive number) —
+    // a brand-new bag item (added right here) has no count yet, and
+    // `qty` 0/`null` means "not counted", left alone rather than going
+    // negative or being silently turned into a count.
+    let remainingQty: number | null = null;
     if (!existingBagItem[0]) {
       await tx.insert(bagItem).values({ userId, kind: "stock", refId: finalStockRow.id });
+    } else if (existingBagItem[0].qty !== null && existingBagItem[0].qty > 0) {
+      remainingQty = existingBagItem[0].qty - 1;
+      await tx.update(bagItem).set({ qty: remainingQty }).where(eq(bagItem.id, existingBagItem[0].id));
     }
+
+    // R2-5: the next per-user roll number, over every row (live or soft-
+    // deleted, D9) so a number is never reused. `FOR UPDATE` locks the
+    // highest-numbered row so a second concurrent transaction for the
+    // same user blocks here until this one commits or rolls back.
+    const latestNumberRows = await tx
+      .select({ number: roll.number })
+      .from(roll)
+      .where(eq(roll.userId, userId))
+      .orderBy(desc(roll.number))
+      .limit(1)
+      .for("update");
+    const nextNumber = (latestNumberRows[0]?.number ?? 0) + 1;
 
     const [rollRow] = await tx
       .insert(roll)
@@ -216,6 +352,7 @@ export async function createRollCore<TQueryResult extends PgQueryResultHKT>(
         stockId: finalStockRow.id,
         cameraBagItemId: input.cameraBagItemId,
         lensId: input.lensId ?? null,
+        number: nextNumber,
         name: input.name ?? null,
         canisterColor: finalStockRow.canisterColor ?? null,
         boxIso: input.boxIso ?? finalStockRow.iso ?? null,
@@ -223,13 +360,14 @@ export async function createRollCore<TQueryResult extends PgQueryResultHKT>(
         exposures: input.exposures ?? null,
         format: input.format ?? null,
         locations: input.locations ?? null,
-        shotFrom,
-        shotTo,
+        shotFrom: dates.shotFrom,
+        shotTo: dates.shotTo,
+        datePrecision: dates.datePrecision,
         version: 1,
       })
       .returning();
 
-    return { ok: true, rollId: rollRow.id };
+    return { ok: true, rollId: rollRow.id, number: nextNumber, remainingQty };
   });
 }
 
@@ -258,6 +396,14 @@ export interface IRollLensSummary {
 
 export interface IRollEntry {
   id: string;
+  /**
+   * R2-5: the per-user "Cuộn #N" — `null` only for a pre-migration row
+   * that somehow missed the backfill. Optional in the type (not just
+   * nullable) only so pre-Round-2 `IRollEntry` fixtures elsewhere
+   * (`roll-card-mapper.test.ts` and friends) keep type-checking without
+   * every one of them being touched; `hydrateRolls` always sets it.
+   */
+  number?: number | null;
   name: string | null;
   canisterColor: string | null;
   boxIso: number | null;
@@ -267,6 +413,13 @@ export interface IRollEntry {
   locations: string[] | null;
   shotFrom: Date | null;
   shotTo: Date | null;
+  /**
+   * R2-4: whether shotFrom/shotTo are exact (`"day"`), a picked month
+   * (`"month"`), or unknown/absent (`null`, "Không nhớ") —
+   * `formatRollDate`'s second argument. Optional for the same reason as
+   * `number` above.
+   */
+  datePrecision?: "day" | "month" | null;
   notes: string | null;
   memory: string | null;
   version: number;
@@ -323,6 +476,7 @@ async function hydrateRolls<TQueryResult extends PgQueryResultHKT>(
 
     return {
       id: row.id,
+      number: row.number,
       name: row.name,
       canisterColor: row.canisterColor,
       boxIso: row.boxIso,
@@ -332,6 +486,7 @@ async function hydrateRolls<TQueryResult extends PgQueryResultHKT>(
       locations: row.locations,
       shotFrom: row.shotFrom,
       shotTo: row.shotTo,
+      datePrecision: row.datePrecision,
       notes: row.notes,
       memory: row.memory,
       version: row.version,
