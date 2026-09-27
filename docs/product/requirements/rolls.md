@@ -51,6 +51,6 @@ No new-roll artboard yet ([wireframes](../../design/wireframes.md#mvp-screens-wi
 
 ## Open issues
 
-- The ADR `roll` table has no box ISO, shot-at ISO, exposures, format, lens or locations columns, yet ROLL-1 lists them as optional fields and computes push/pull from them. Settle the MVP columns before Phase 1.
-- PRD uses `camera_item_id` (a bag item); the ADR uses `camera_id` (the catalogue camera). This matters once one owner has two bodies of the same model.
+- ~~The ADR `roll` table has no box ISO, shot-at ISO, exposures, format, lens or locations columns, yet ROLL-1 lists them as optional fields and computes push/pull from them. Settle the MVP columns before Phase 1.~~ **Resolved 27.09.2026 (Trúc), Known conflict #6:** [migration `0002`](../../../drizzle/0002_abnormal_ser_duncan.sql) adds nullable `box_iso`, `shot_iso`, `exposures`, `format`, `lens_id`, `locations text[]`. Push/pull stays computed (`pushPullStops()`), never stored.
+- ~~PRD uses `camera_item_id` (a bag item); the ADR uses `camera_id` (the catalogue camera). This matters once one owner has two bodies of the same model.~~ **Resolved 27.09.2026 (Trúc), Phase 1 plan D2:** `roll.camera_bag_item_id` points at the bag item (the owner's specific body), not the catalogue `camera` row.
 - PRD Q7 (rolls shot by two people) is deferred until after launch.

@@ -30,5 +30,5 @@ No bag artboard yet ([wireframes](../../design/wireframes.md#mvp-screens-with-no
 
 ## Open issues
 
-- BAG-1 includes **lenses**, but the ADR `bag_item` only references stocks and cameras, and there is no lens table in either model. Decide whether lenses are in the MVP.
+- ~~BAG-1 includes **lenses**, but the ADR `bag_item` only references stocks and cameras, and there is no lens table in either model. Decide whether lenses are in the MVP.~~ **Resolved 27.09.2026 (Trúc), Known conflict #6, Phase 1 plan D3:** a `lens` table, custom entries only (no seeded lens catalogue in the MVP). `bag_item.kind` = `camera` \| `lens` \| `stock`, `ref_id` points into whichever table `kind` names (no foreign key, house rules).
 - The ADR drops `qty`, `expiry_year` and `nickname`. Fine for the MVP (BAG-2 is P1), but adding them later needs a migration.
