@@ -13,17 +13,24 @@ import { toSearchText } from "@/lib/search-text";
  */
 const FORMATS = ["35mm", "120"] as const;
 
+// gold | green | blue | mono | rose (design system `stock-*` colour
+// families, `stock.canister_color`): CustomEntryForm's "Loại film" chips
+// (D1) are this field, not the free-text `type` below.
+const CANISTER_COLORS = ["gold", "green", "blue", "mono", "rose"] as const;
+
 export const stockInputSchema = z.object({
   brand: z.string().trim().min(1),
   name: z.string().trim().min(1),
   iso: z.number().int().positive().optional(),
   formats: z.array(z.enum(FORMATS)).optional(),
   type: z.string().trim().min(1).optional(),
+  canisterColor: z.enum(CANISTER_COLORS).optional(),
 });
 
 export const cameraInputSchema = z.object({
   brand: z.string().trim().min(1),
   model: z.string().trim().min(1),
+  format: z.enum(FORMATS).optional(),
 });
 
 export const lensInputSchema = z.object({
@@ -69,6 +76,7 @@ export async function addCustomStockCore<TQueryResult extends PgQueryResultHKT>(
         iso: input.iso ?? null,
         formats: input.formats ?? null,
         type: input.type ?? null,
+        canisterColor: input.canisterColor ?? null,
         searchText: toSearchText(`${input.brand} ${input.name}`),
       })
       .returning();
@@ -94,6 +102,7 @@ export async function addCustomCameraCore<TQueryResult extends PgQueryResultHKT>
         ownerId: userId,
         brand: input.brand,
         model: input.model,
+        format: input.format ?? null,
         searchText: toSearchText(`${input.brand} ${input.model}`),
       })
       .returning();

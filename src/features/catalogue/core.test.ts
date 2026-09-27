@@ -37,6 +37,25 @@ describe("addCustomStockCore", () => {
     expect(bagRows[0]).toMatchObject({ userId: OWNER, kind: "stock", refId: stockRows[0].id });
   });
 
+  it("stores the canister colour (D1's 'Loại film' chips) when given, null otherwise", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+
+    const withColor = await addCustomStockCore(db, OWNER, {
+      brand: "Lomography",
+      name: "Color 400",
+      canisterColor: "rose",
+    });
+    expect(withColor.ok).toBe(true);
+
+    const withoutColor = await addCustomStockCore(db, OWNER, { brand: "Fomapan", name: "100" });
+    expect(withoutColor.ok).toBe(true);
+
+    const stockRows = await db.select().from(stock);
+    expect(stockRows.find((row) => row.name === "Color 400")).toMatchObject({ canisterColor: "rose" });
+    expect(stockRows.find((row) => row.name === "100")).toMatchObject({ canisterColor: null });
+  });
+
   it("rolls back the stock insert if the bag item insert fails — no orphan custom stock (D12)", async () => {
     const { db, client } = await createTestDb();
     cleanup = () => client.close();
@@ -97,6 +116,18 @@ describe("addCustomCameraCore", () => {
 
     const bagRows = await db.select().from(bagItem);
     expect(bagRows[0]).toMatchObject({ userId: OWNER, kind: "camera", refId: cameraRows[0].id });
+  });
+
+  it("stores the format (CustomEntry's 35mm/120 segment) when given, null otherwise", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+
+    await addCustomCameraCore(db, OWNER, { brand: "Yashica", model: "Mat-124G", format: "120" });
+    await addCustomCameraCore(db, OWNER, { brand: "Canon", model: "AE-1" });
+
+    const cameraRows = await db.select().from(camera);
+    expect(cameraRows.find((row) => row.model === "Mat-124G")).toMatchObject({ format: "120" });
+    expect(cameraRows.find((row) => row.model === "AE-1")).toMatchObject({ format: null });
   });
 });
 

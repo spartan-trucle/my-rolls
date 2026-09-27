@@ -11,6 +11,7 @@ import {
   stockInputSchema,
   type TAddCustomResult,
 } from "@/features/catalogue/core";
+import { searchCatalogue as searchCatalogueQuery, type TCatalogueEntry, type TCatalogueKind } from "@/features/catalogue/queries";
 import { getAuth } from "@/lib/auth";
 
 /**
@@ -61,4 +62,21 @@ export async function addCustomLens(input: unknown): Promise<TAddCustomResult> {
   if (!parsed.success) return { ok: false, error: "validation" };
 
   return addCustomLensCore(getDb(), userId, parsed.data);
+}
+
+export type TSearchCatalogueResult =
+  | { ok: true; entries: TCatalogueEntry[] }
+  | { ok: false; error: "unauthenticated" };
+
+/**
+ * D1's read side: `CataloguePicker`'s debounced search, session-checked
+ * like every write above, delegating the actual query (ranking, privacy)
+ * to `queries.ts`'s `searchCatalogue` (B4).
+ */
+export async function searchCatalogue(input: { kind: TCatalogueKind; q: string }): Promise<TSearchCatalogueResult> {
+  const userId = await requireUserId();
+  if (!userId) return { ok: false, error: "unauthenticated" };
+
+  const entries = await searchCatalogueQuery(getDb(), { kind: input.kind, q: input.q, userId });
+  return { ok: true, entries };
 }
