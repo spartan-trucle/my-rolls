@@ -26,7 +26,7 @@ Stand up the whole Cuộn stack from [ADR-001](../../docs/architecture/adr-001-t
 - [x] Stage C steps 12–13: `next-intl` 4.14.6 with `vi` only and no URL prefix, `messages/vi.json`; `theme` cookie → `data-theme` on `<html>`, `ThemeToggle` on `/dev/design-system`. 165 tests, `pnpm check` clean (25.09.2026)
 - [x] Stage B step 9 remote: first preview deploy of `5e82787` is Ready in `sin1`; `/api/health` returns `{"ok":true,"db":"up"}` and Neon created the preview branch, both checked by Trúc (25.09.2026). The first push had been **blocked** by Vercel Hobby because commits were authored by `spartan-trucle`; this repo now commits as `Truc Le <97326103+NganTrucLe@users.noreply.github.com>`
 - [x] PR split done: Stages A–F merged to `main` as PR #3; landing page as PR #2 (`main` at `689da35`, 25.09.2026)
-- [ ] Stage G on `feature/phase-0-storage-observability`: plan v5 below (G1–G5), approved by Trúc 25.09.2026 (OG font fetched from Google Fonts at render time, no font files, D31). R2 step 24 not done yet (Trúc, 25.09.2026); spike notes go in `docs/spikes/`
+- [ ] Stage G on `feature/phase-0-storage-observability`: plan v5 below (G1–G5), approved by Trúc 25.09.2026 (OG font fetched from Google Fonts at render time, no font files, D31). G1–G4 done and pushed; step 24 done 27.09.2026 with four buckets (D35), G5 in progress; spike notes in `docs/spikes/`
 - [x] `.env.development.local` with the Neon `dev` branch URLs (D23, Trúc). `next dev` loads it ahead of `.env.local`; local `/api/health` returns `{"ok":true,"db":"up"}` (25.09.2026)
 
 ### Found during Stages A and B
@@ -232,6 +232,7 @@ Branch `feature/phase-0-storage-observability` off `main` at `689da35` (PRs #1�
 | D31 | OG font | **No font files in the repo** (Trúc, 25.09.2026). Satori needs font bytes, not a CSS `@font-face` link, and can't read WOFF2 (the format `next/font` self-hosts). So the route fetches the Google Fonts CSS API (`css2?family=Be+Vietnam+Pro:wght@400;700&text=<exact text>`) with no browser user agent, which makes Google answer with TTF URLs; it then fetches those bytes and passes them to `ImageResponse`. `text=` subsets to the glyphs on the card. Font bytes memoised per text at module scope; the PNG response gets `Cache-Control: public, max-age=31536000, immutable`. The spike note records fetch time from `sin1` and what happens when Google is unreachable (route returns 503, no fallback font) |
 | D32 | Upload content types | `image/jpeg`, `image/png`, `image/webp` only: the suggested default of roadmap decision 2 / [Known conflict #2](../../docs/README.md#known-conflicts-between-sources), which is still open (due 01.11). It's one constant; TIFF is added there if decision 2 goes the other way |
 | D33 | Enforcing 10 MB on a presigned PUT | R2 has no presigned POST, so no `content-length-range`. The helper rejects `size > 10 MB` before signing **and** signs `ContentLength`, so R2 refuses a body of any other size |
+| D35 | R2 environments | Prod buckets `my-rolls-originals` / `my-rolls-public` with their own token; Preview and Development share `my-rolls-dev-*` and a dev token (Trúc, 27.09.2026) |
 | D34 | R2 client | `@aws-sdk/client-s3` + `@aws-sdk/s3-request-presigner`, endpoint `https://<account>.r2.cloudflarestorage.com`, region `auto`. PUT URLs expire in 10 min, GET in 5 min. Keys: `originals/<userId>/<uuid>.<ext>`. R2 env keys optional in `src/env.ts`, validated by a separate `getR2Env()` so the app still builds without them |
 
 **G1 · PostHog (~1.5 h)** — step 26
@@ -259,6 +260,14 @@ Branch `feature/phase-0-storage-observability` off `main` at `689da35` (PRs #1�
 - **You:** buckets, token, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_ORIGINALS`, `R2_BUCKET_PUBLIC`, `R2_PUBLIC_URL` with `vercel env add` (Production + Preview + Development) and into `.env.development.local`.
 - **Claude:** bucket CORS (`PUT`, `GET` from `http://localhost:3000`, `https://my-rolls-weld.vercel.app`, `https://my-rolls-*-ngantrucles-projects.vercel.app` if R2 takes the wildcard, else the branch alias), then `scripts/r2-smoke.ts`: presign → PUT 1 KB → GET via `r2.dev` (public bucket) and presigned GET (private) → delete.
 - If step 24 isn't done when G1–G4 are reviewed, the PR merges without G5 and G5 goes into Stage H's PR.
+- **As built (27.09.2026, Trúc):** four buckets instead of two, and two tokens, so previews and local dev never touch real photos (D35):
+
+  | Environment | `R2_BUCKET_ORIGINALS` | `R2_BUCKET_PUBLIC` | Token scoped to |
+  |---|---|---|---|
+  | Production | `my-rolls-originals` | `my-rolls-public` | the two prod buckets |
+  | Preview + Development | `my-rolls-dev-originals` | `my-rolls-dev-public` | the two dev buckets |
+
+  `R2_PUBLIC_URL` is the public bucket's `https://pub-<hash>.r2.dev` URL, never the `<account>.r2.cloudflarestorage.com` S3 endpoint (that one only takes signed requests). Object Read & Write tokens can't set CORS, so Trúc pastes the CORS JSON into each bucket's Settings. `scripts/r2-smoke.ts` refuses to run against buckets without `-dev-` unless given `--prod`.
 
 **Risks added for Stage G**
 - R2 has **no object versioning**, but [scans.md](../../docs/product/requirements/scans.md) wants originals restorable for 30 days. Not a Stage G problem; flag before Phase 2 (soft-delete + delayed purge instead).
