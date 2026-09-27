@@ -82,6 +82,47 @@
     "body": "Cuộn đầu tiên của bạn sắp có mặt ở đây.",
     "signOutButton": "Đăng xuất"
   },
+  "labs": {
+    "picker": {
+      "searchLabel": "Tìm lab",
+      "searchPlaceholder": "Tên lab hoặc thành phố",
+      "searchHint": "Gõ không dấu cũng được: da lat",
+      "allCities": "Tất cả",
+      "listTitleAll": "Lab trong danh bạ",
+      "listTitleCity": "Lab ở {city}",
+      "emptyState": "Không tìm thấy lab nào.",
+      "notFoundPrompt": "Không thấy lab của bạn?",
+      "addNewLink": "+ Thêm lab mới",
+      "chooseButton": "Chọn {lab}",
+      "loading": "Đang tìm lab…"
+    },
+    "add": {
+      "back": "‹ Quay lại",
+      "title": "Thêm lab mới",
+      "subtitle": "Lab của bạn chưa có trong danh bạ? Thêm vào đây.",
+      "nameLabel": "Tên lab",
+      "namePlaceholder": "VD: lab gần nhà mình",
+      "addressLabel": "Địa chỉ",
+      "addressPlaceholder": "Số nhà, đường, phường",
+      "districtLabel": "Phường (không bắt buộc)",
+      "districtPlaceholder": "VD: Bến Nghé",
+      "cityLabel": "Thành phố",
+      "cityOther": "Khác",
+      "cityOtherPlaceholder": "Nhập tên thành phố",
+      "linkLabel": "Link Facebook hoặc Google Maps",
+      "linkPlaceholder": "https://",
+      "linkHint": "Không bắt buộc",
+      "servicesLabel": "Dịch vụ",
+      "acceptsMailLabel": "Nhận phim gửi qua bưu điện",
+      "saveButton": "Lưu lab",
+      "savingButton": "Đang lưu…",
+      "errorNameRequired": "Đặt tên cho lab này với bạn nhé.",
+      "errorCityRequired": "Chọn hoặc gõ một thành phố nhé.",
+      "errorLinkInvalid": "Link này chưa đúng định dạng — thử dán lại xem sao.",
+      "errorUnauthenticated": "Đăng nhập lại rồi thêm lab nhé.",
+      "errorGeneric": "Có gì đó không ổn. Thử lại nhé."
+    }
+  },
   "demo": {
     "keeper": "tấm ưng"
   },
