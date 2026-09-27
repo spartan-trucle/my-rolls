@@ -65,33 +65,41 @@ function HomeContent({ name, rolls }: { name: string; rolls: IRollEntry[] }) {
 
   return (
     <div className="mx-auto flex max-w-[1440px] flex-col gap-6">
-      <div className="flex flex-col gap-1.5">
-        {/* No logo: the name is set in Fraunces at weight 600 (matches AuthLayout's wordmark). */}
-        <h1 className="font-display text-display-l font-semibold">{t("heading", { name: firstName(name) })}</h1>
-        <p className="font-mono text-meta uppercase text-ink-muted">{t("countLine", { count: rolls.length })}</p>
-      </div>
-      <div className="flex items-center justify-between gap-4">
-        <div className="inline-flex border border-ink" role="group" aria-label={t("viewLabel")}>
-          <button
-            type="button"
-            aria-pressed="true"
-            className="min-h-10 min-w-[72px] bg-ink px-4 font-sans text-body-sm font-semibold text-paper"
-          >
-            {t("viewShelf")}
-          </button>
-          <button
-            type="button"
-            disabled
-            aria-disabled="true"
-            className="min-h-10 min-w-[72px] px-4 font-sans text-body-sm font-semibold text-ink-muted disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {t("viewGrid")}
-          </button>
+      {/*
+       * H2 (full): phone stacks the heading block and the controls row
+       * (`Home`'s two separate blocks). From 1024px up they share one row,
+       * bottom-aligned — `HomeWeb`'s header: heading + count line on the
+       * left, sort label + Kệ/Lưới segment on the right.
+       */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
+        <div className="flex flex-col gap-1.5">
+          {/* No logo: the name is set in Fraunces at weight 600 (matches AuthLayout's wordmark). */}
+          <h1 className="font-display text-display-l font-semibold">{t("heading", { name: firstName(name) })}</h1>
+          <p className="font-mono text-meta uppercase text-ink-muted">{t("countLine", { count: rolls.length })}</p>
         </div>
-        {/* H2: "Mới nhất trước", beside the Kệ/Lưới toggle — after it on the
-            phone (`Home`'s justify-between row), before it from 1024px up
-            (`HomeWeb`'s `gap:16px` row, label first). */}
-        <span className="text-body-sm text-ink-muted lg:order-first">{t("sortLabel")}</span>
+        <div className="flex items-center justify-between gap-4">
+          <div className="inline-flex border border-ink" role="group" aria-label={t("viewLabel")}>
+            <button
+              type="button"
+              aria-pressed="true"
+              className="min-h-10 min-w-[72px] bg-ink px-4 font-sans text-body-sm font-semibold text-paper"
+            >
+              {t("viewShelf")}
+            </button>
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="min-h-10 min-w-[72px] px-4 font-sans text-body-sm font-semibold text-ink-muted disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {t("viewGrid")}
+            </button>
+          </div>
+          {/* H2: "Mới nhất trước", beside the Kệ/Lưới toggle — after it on
+              the phone (`Home`'s justify-between row), before it from
+              1024px up (`HomeWeb`'s `gap:16px` row, label first). */}
+          <span className="text-body-sm text-ink-muted lg:order-first">{t("sortLabel")}</span>
+        </div>
       </div>
       {rolls.length > 0 ? <RollList rolls={rolls} t={t} /> : <EmptyShelf t={t} />}
     </div>

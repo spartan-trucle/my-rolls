@@ -145,6 +145,25 @@ describe("Home (/)", () => {
     expect(screen.getByText("Mới nhất trước")).toBeInTheDocument();
   });
 
+  it("H2 (full): groups the heading+count and the sort label+segment into one row, sharing a common flex parent (HomeWeb's bottom-aligned header)", async () => {
+    getSessionCookie.mockReturnValue("a-session-token");
+    getSession.mockResolvedValue(signedInSession);
+    listRolls.mockResolvedValue([]);
+
+    renderHome(await Home());
+
+    const heading = screen.getByRole("heading", { level: 1, name: "Kệ của Trúc" });
+    const headingBlock = heading.parentElement;
+    const sortLabel = screen.getByText("Mới nhất trước");
+    const controlsBlock = sortLabel.parentElement;
+
+    expect(headingBlock).not.toBeNull();
+    expect(controlsBlock).not.toBeNull();
+    // Both blocks are direct children of the same header row (`HomeWeb`'s
+    // `justify-content: space-between; align-items: flex-end` row).
+    expect(headingBlock?.parentElement).toBe(controlsBlock?.parentElement);
+  });
+
   it("N1: names an unnamed roll 'Cuộn #{number}' instead of the stock name", async () => {
     getSessionCookie.mockReturnValue("a-session-token");
     getSession.mockResolvedValue(signedInSession);
