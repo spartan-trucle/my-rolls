@@ -437,7 +437,6 @@
       "pushPullLabel": "Đẩy / kéo",
       "locationsLabel": "Nơi chụp",
       "locationsPlaceholder": "Thêm nơi, VD: Hội An",
-      "locationsHint": "Gõ rồi nhấn Enter. Thêm mấy nơi cũng được.",
       "removeLocation": "Bỏ {location}",
       "errorGeneric": "Có gì đó không ổn. Thử lại nhé.",
       "saveNew": "Lưu cuộn",

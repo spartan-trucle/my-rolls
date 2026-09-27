@@ -501,7 +501,6 @@ export function RollForm({ mode }: RollFormProps) {
               onChange={(event) => setLocationDraft(event.target.value)}
               onKeyDown={addLocation}
             />
-            <span className={styles.fieldHint}>{t("locationsHint")}</span>
           </div>
         </div>
       ) : null}
