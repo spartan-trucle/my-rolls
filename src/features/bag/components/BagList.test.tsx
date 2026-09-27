@@ -123,6 +123,15 @@ describe("BagList", () => {
     expect(screen.getByText("Pentax SMC Pentax-M 50mm f/1.7")).toBeInTheDocument();
   });
 
+  it("shows the stock and camera type as Vietnamese labels, never the raw slug", () => {
+    setup([stockEntry(), cameraEntry()]);
+
+    expect(screen.getByText(/Màu âm/)).toBeInTheDocument();
+    expect(screen.getByText(/Máy cơ SLR/)).toBeInTheDocument();
+    expect(screen.queryByText(/color-negative/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/\bslr\b/)).not.toBeInTheDocument();
+  });
+
   it("shows a custom entry's own stamp", () => {
     setup([stockEntry({ ownerId: "user-1", slug: null })]);
 

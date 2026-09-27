@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Field, Icon, Stamp } from "@/design-system";
 import { addToBag } from "@/features/bag/actions";
 import { searchCatalogue } from "@/features/catalogue/actions";
+import { cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
 import type { TCatalogueEntry, TCatalogueKind } from "@/features/catalogue/queries";
 import styles from "./CataloguePicker.module.css";
 
@@ -53,6 +54,7 @@ export function CataloguePicker({
   className,
 }: CataloguePickerProps) {
   const t = useTranslations("catalogue.picker");
+  const tTypes = useTranslations("catalogue.types");
   const generatedTitleId = useId();
   const headingId = titleId ?? generatedTitleId;
   const [kind, setKind] = useState<TCatalogueKind>(initialKind);
@@ -151,10 +153,12 @@ export function CataloguePicker({
                   entry.kind === "stock"
                     ? `${entry.brand} ${entry.name}`
                     : `${entry.brand} ${entry.model}`;
+                const typeKey = entry.kind === "stock" ? stockTypeLabelKey(entry.type) : cameraTypeLabelKey(entry.type);
+                const typeLabel = typeKey ? tTypes(typeKey) : null;
                 const meta =
                   entry.kind === "stock"
-                    ? joinMeta([entry.iso != null && `ISO ${entry.iso}`, entry.brand, entry.type, entry.formats?.join(", ")])
-                    : joinMeta([entry.brand, entry.type, entry.format]);
+                    ? joinMeta([entry.iso != null && `ISO ${entry.iso}`, entry.brand, typeLabel, entry.formats?.join(", ")])
+                    : joinMeta([entry.brand, typeLabel, entry.format]);
 
                 return (
                   <li key={entry.id}>

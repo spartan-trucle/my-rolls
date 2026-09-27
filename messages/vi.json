@@ -299,6 +299,22 @@
       "saveLens": "Thêm ống kính vào túi",
       "errorRequired": "Điền cái này với bạn nhé.",
       "errorGeneric": "Có gì đó không ổn. Thử lại nhé."
+    },
+    "types": {
+      "colorNegative": "Màu âm",
+      "slide": "Dương bản",
+      "bw": "Đen trắng",
+      "cine": "Phim điện ảnh",
+      "specialEffect": "Hiệu ứng",
+      "instant": "Lấy liền",
+      "slr": "Máy cơ SLR",
+      "rangefinder": "Máy đo khoảng cách",
+      "pointAndShoot": "Máy du lịch",
+      "halfFrame": "Máy nửa khung",
+      "tlr": "Máy TLR",
+      "mediumFormat": "Máy khổ trung",
+      "toy": "Máy đồ chơi",
+      "singleUse": "Máy dùng một lần"
     }
   },
   "bag": {

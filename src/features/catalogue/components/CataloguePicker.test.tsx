@@ -18,7 +18,7 @@ const GOLD_200 = {
   name: "Gold 200",
   iso: 200,
   formats: ["35mm"],
-  type: "MÀU",
+  type: "color-negative",
   canisterColor: "gold",
 };
 
@@ -27,7 +27,7 @@ const K1000 = {
   id: "cam-1",
   brand: "Pentax",
   model: "K1000",
-  type: "SLR",
+  type: "slr",
   format: "35mm",
 };
 
@@ -88,6 +88,16 @@ describe("CataloguePicker", () => {
     expect(await screen.findByText("Trong túi")).toBeInTheDocument();
   });
 
+  it("shows the stock type as a Vietnamese label, never the raw slug", async () => {
+    searchCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
+    const { user } = setup();
+
+    await user.type(screen.getByLabelText("Tìm trong danh mục"), "gold");
+
+    expect(await screen.findByText(/Màu âm/)).toBeInTheDocument();
+    expect(screen.queryByText(/color-negative/)).not.toBeInTheDocument();
+  });
+
   it("doesn't call addToBag again for an item already in the bag", async () => {
     searchCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
     addToBag.mockResolvedValue({ ok: true, bagItemId: "bag-1" });
@@ -112,6 +122,7 @@ describe("CataloguePicker", () => {
 
     expect(await screen.findByRole("button", { name: "Pentax K1000" })).toBeInTheDocument();
     expect(screen.getByText("Không thấy máy của bạn?")).toBeInTheDocument();
+    expect(screen.getByText(/Máy cơ SLR/)).toBeInTheDocument();
   });
 
   it("shows the no-match state and opens the custom form prefilled with the typed text", async () => {

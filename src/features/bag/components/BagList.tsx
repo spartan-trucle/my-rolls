@@ -8,6 +8,7 @@ import { addToBag, listBag, removeFromBag } from "@/features/bag/actions";
 import type { TBagEntry } from "@/features/bag/queries";
 import { CataloguePicker } from "@/features/catalogue/components/CataloguePicker";
 import { CustomEntryForm, type TCustomEntryKind } from "@/features/catalogue/components/CustomEntryForm";
+import { cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
 import type { TCatalogueKind } from "@/features/catalogue/queries";
 import styles from "./BagList.module.css";
 
@@ -83,6 +84,8 @@ function RemoveIcon() {
  */
 export function BagList({ initialEntries }: BagListProps) {
   const t = useTranslations("bag");
+  const tTypes = useTranslations("catalogue.types");
+  const typeLabel = (key: Parameters<typeof tTypes>[0] | null) => (key ? tTypes(key) : null);
   const dialogTitleId = useId();
   const [entries, setEntries] = useState<TBagEntry[]>(initialEntries);
   const [dialog, setDialog] = useState<TDialogMode>({ view: "closed" });
@@ -205,7 +208,7 @@ export function BagList({ initialEntries }: BagListProps) {
                     <span className={styles.itemMeta}>
                       {joinMeta([
                         entry.stock.iso != null && `ISO ${entry.stock.iso}`,
-                        entry.stock.type,
+                        typeLabel(stockTypeLabelKey(entry.stock.type)),
                         entry.stock.formats?.join(", "),
                       ])}
                     </span>
@@ -243,7 +246,9 @@ export function BagList({ initialEntries }: BagListProps) {
                       {entryName(entry)}
                       {isCustom(entry) ? <Stamp tone="ink">{t("own")}</Stamp> : null}
                     </span>
-                    <span className={styles.itemMeta}>{joinMeta([entry.camera.type, entry.camera.format])}</span>
+                    <span className={styles.itemMeta}>
+                      {joinMeta([typeLabel(cameraTypeLabelKey(entry.camera.type)), entry.camera.format])}
+                    </span>
                     {entry.fixedStock ? (
                       <span className={styles.itemMeta}>
                         {t("fixedStockNote", { name: `${entry.fixedStock.brand} ${entry.fixedStock.name}` })}
