@@ -383,11 +383,14 @@
   "bag": {
     "title": "Túi",
     "counts": "{films} loại film · {cameras} máy · {lenses} ống kính",
+    "countsLine": "{rolls} cuộn chưa chụp · {films} loại film · {cameras} máy · {lenses} ống kính",
     "searchPrompt": "Tìm máy, film trong danh mục",
     "own": "Riêng",
     "sectionFilm": "Film · {count} loại",
+    "sectionFilmWithRolls": "Film · {count} loại · {rolls} cuộn",
     "sectionCamera": "Máy ảnh · {count}",
     "sectionLens": "Ống kính · {count}",
+    "sectionLensHint": "Bạn tự thêm, chỉ mình bạn thấy",
     "addFilm": "+ Thêm film từ danh mục",
     "addCamera": "+ Thêm máy từ danh mục",
     "addLens": "+ Thêm ống kính",
@@ -399,7 +402,22 @@
     "emptyTitle": "Túi trống trơn.",
     "emptyBody": "Thêm máy và film bạn hay dùng, lần ghi cuộn sau chọn được luôn.",
     "emptyAddCamera": "+ Thêm máy",
-    "emptyAddFilm": "+ Thêm film"
+    "emptyAddFilm": "+ Thêm film",
+    "canisterStripNote": "{count} cuộn chờ nạp",
+    "rollsShotFilm": "Đã chụp {count} cuộn",
+    "rollsShotFilmZero": "Chưa chụp cuộn nào",
+    "rollsShotCamera": "{count} cuộn",
+    "rollsShotLens": "{count} cuộn",
+    "qtyGroupLabel": "Số cuộn {name} còn lại",
+    "qtyDecrement": "Giảm số cuộn {name}",
+    "qtyIncrement": "Tăng số cuộn {name}",
+    "qtyEmpty": "Hết",
+    "expiryAdd": "+ Hạn dùng",
+    "expirySet": "Hết hạn {year}",
+    "expiryLabel": "Năm hết hạn",
+    "expirySave": "Lưu",
+    "expiryClear": "Bỏ hạn dùng",
+    "expiryCancel": "Huỷ"
   },
   "rolls": {
     "form": {

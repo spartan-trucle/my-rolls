@@ -7,11 +7,13 @@ import type { TBagEntry } from "@/features/bag/queries";
 const addToBag = vi.hoisted(() => vi.fn());
 const removeFromBag = vi.hoisted(() => vi.fn());
 const listBag = vi.hoisted(() => vi.fn());
+const setStockQty = vi.hoisted(() => vi.fn());
+const setStockExpiryYear = vi.hoisted(() => vi.fn());
 const addCustomLens = vi.hoisted(() => vi.fn());
 const searchCatalogue = vi.hoisted(() => vi.fn());
 const listCatalogue = vi.hoisted(() => vi.fn());
 
-vi.mock("@/features/bag/actions", () => ({ addToBag, removeFromBag, listBag }));
+vi.mock("@/features/bag/actions", () => ({ addToBag, removeFromBag, listBag, setStockQty, setStockExpiryYear }));
 vi.mock("@/features/catalogue/actions", () => ({
   searchCatalogue,
   listCatalogue,
@@ -114,6 +116,8 @@ describe("BagList", () => {
     addToBag.mockReset();
     removeFromBag.mockReset();
     listBag.mockReset();
+    setStockQty.mockReset();
+    setStockExpiryYear.mockReset();
     addCustomLens.mockReset();
     searchCatalogue.mockReset();
     listCatalogue.mockReset();
@@ -122,7 +126,7 @@ describe("BagList", () => {
   it("groups entries by kind, with a lens section (design finding 1)", () => {
     setup([stockEntry(), cameraEntry(), lensEntry()]);
 
-    expect(screen.getByRole("heading", { name: "Film · 1 loại" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Film · 1 loại · 0 cuộn" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Máy ảnh · 1" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Ống kính · 1" })).toBeInTheDocument();
     expect(screen.getByText("Kodak Gold 200")).toBeInTheDocument();
@@ -221,5 +225,32 @@ describe("BagList", () => {
     expect(screen.getByRole("button", { name: "+ Thêm máy" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "+ Thêm film" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: /Film/ })).not.toBeInTheDocument();
+  });
+
+  it("BAG-2: shows the counts line, the canister strip, and per-item roll counts", () => {
+    setup([
+      stockEntry({ id: "stock-1" }), // qty undefined → not counted, no strip canister
+      { ...stockEntry(), bagItemId: "bag-stock-2", qty: 2, stock: { ...stockEntry().stock, id: "stock-2" } },
+      { ...cameraEntry(), rollsShot: 3 },
+      { ...lensEntry(), rollsShot: 1 },
+    ]);
+
+    expect(screen.getByText("2 cuộn chưa chụp · 2 loại film · 1 máy · 1 ống kính")).toBeInTheDocument();
+    // one canister per unloaded roll (2), drawn from the counted stock only
+    const strip = screen.getByRole("list", { name: "2 cuộn chờ nạp" });
+    expect(strip.querySelectorAll("li")).toHaveLength(2);
+    expect(screen.getByText("3 cuộn")).toBeInTheDocument(); // camera BAG-3
+    expect(screen.getByText("1 cuộn")).toBeInTheDocument(); // lens
+    expect(screen.getAllByText("Chưa chụp cuộn nào")).toHaveLength(2); // neither stock has any rolls shot
+  });
+
+  it("BAG-2: stepping the stock qty calls setStockQty and updates the displayed count", async () => {
+    setStockQty.mockResolvedValue({ ok: true, qty: 1 });
+    const { user } = setup([stockEntry()]);
+
+    await user.click(screen.getByRole("button", { name: /Tăng số cuộn/ }));
+
+    expect(setStockQty).toHaveBeenCalledWith({ bagItemId: "bag-stock-1", qty: 1 });
+    await waitFor(() => expect(screen.getByText("1")).toBeInTheDocument());
   });
 });

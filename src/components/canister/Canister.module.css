@@ -1,0 +1,51 @@
+.canister {
+  --can-w: 26px;
+  --can-h: 44px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--can-w);
+  flex: 0 0 auto;
+}
+
+.canister.md {
+  --can-w: 40px;
+  --can-h: 70px;
+}
+
+.cap {
+  box-sizing: border-box;
+  width: 100%;
+  height: calc(var(--can-h) * 0.22);
+  background: var(--film);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.body {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: calc(var(--can-h) * 0.78);
+  background: var(--rc-stock, var(--stock-gold));
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+.label {
+  box-sizing: border-box;
+  width: 88%;
+  padding: 1px 0;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1.4;
+  font-weight: 600;
+  text-align: center;
+}
+
+.canister.md .label {
+  font-size: 13px;
+}
