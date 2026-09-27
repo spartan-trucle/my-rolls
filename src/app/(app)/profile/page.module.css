@@ -121,8 +121,89 @@
   width: 100%;
 }
 
+.statTile {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.statValue {
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+.statLabel {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
 .right {
-  display: none;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 8px;
+}
+
+.bagHeadingRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bagEditLink {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cobalt);
+  text-decoration: none;
+}
+
+.bagCameraList {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.bagCameraRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.bagCameraName {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+}
+
+.bagCameraCount {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.bagFilmSwatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bagFilmSwatch {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-pill);
+  background: var(--rc-stock, var(--stock-gold));
 }
 
 @media (min-width: 1024px) {
@@ -150,9 +231,5 @@
   .name {
     font-size: 40px;
     line-height: 44px;
-  }
-
-  .right {
-    display: block;
   }
 }

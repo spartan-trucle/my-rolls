@@ -1,9 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Button } from "@/design-system";
+import type { CSSProperties } from "react";
+import { Button, Icon } from "@/design-system";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { ThemeSegmented } from "@/components/theme/ThemeSegmented";
+import type { IProfileSummary } from "@/features/bag/queries";
 import { signOutAction } from "@/lib/sign-out-action";
 import { formatJoinedDate } from "./format-joined-date";
 import styles from "./page.module.css";
@@ -13,6 +15,16 @@ export interface ProfileContentProps {
   email: string;
   image: string | null | undefined;
   createdAt: Date;
+  /**
+   * PR1/PR3/PR4 (Round 2): the roll-count stat tile and "Túi của tôi"
+   * preview. Optional and `undefined` renders neither — used by every
+   * existing caller/test that only exercises identity + settings, and by
+   * an unauthenticated edge case `getProfileSummary` itself can't hit
+   * (this component doesn't fetch). Stats this task has no data for yet
+   * (tấm ưng, oops, share links, delete account) stay hidden rather than
+   * faked, per the task brief.
+   */
+  summary?: IProfileSummary | null;
 }
 
 /** Decorative Google "G" mark next to the email (board: `Profile`/`ProfileWeb`). */
@@ -57,7 +69,7 @@ function GoogleGIcon() {
  * render one — the segmented control (present at every width) is what
  * keeps the theme reachable on desktop without it.
  */
-export function ProfileContent({ name, email, image, createdAt }: ProfileContentProps) {
+export function ProfileContent({ name, email, image, createdAt, summary }: ProfileContentProps) {
   const t = useTranslations("profile");
   const initial = name.trim().charAt(0).toUpperCase() || "?";
 
@@ -93,6 +105,13 @@ export function ProfileContent({ name, email, image, createdAt }: ProfileContent
           </div>
         </div>
 
+        {summary ? (
+          <div className={styles.statTile}>
+            <span className={styles.statValue}>{summary.rollCount}</span>
+            <span className={styles.statLabel}>{t("statRolls", { count: summary.rollCount })}</span>
+          </div>
+        ) : null}
+
         <section aria-labelledby="profile-settings-heading">
           <h2 id="profile-settings-heading" className={styles.settingsHeading}>
             {t("settingsHeading")}
@@ -115,8 +134,52 @@ export function ProfileContent({ name, email, image, createdAt }: ProfileContent
         </section>
       </div>
 
-      {/* Reserved for the bag and keepers, once their own tasks land. */}
-      <div className={styles.right} aria-hidden="true" />
+      {/* PR3/PR4/PR5/PR7/PR8: "Túi của tôi" is real; the rest (recent
+          keepers, share links, delete account) wait for their own tasks
+          and stay hidden rather than faked. */}
+      {summary && (summary.cameras.length > 0 || summary.stocks.length > 0) ? (
+        <div className={styles.right}>
+          <section aria-labelledby="profile-bag-heading">
+            <div className={styles.bagHeadingRow}>
+              <h2 id="profile-bag-heading" className={styles.settingsHeading}>
+                {t("bagHeading")}
+              </h2>
+              <Link href="/bag" className={styles.bagEditLink}>
+                {t("bagEditLink")}
+              </Link>
+            </div>
+
+            {summary.cameras.length > 0 ? (
+              <ul className={styles.bagCameraList}>
+                {summary.cameras.map((camera) => (
+                  <li key={camera.bagItemId} className={styles.bagCameraRow}>
+                    <Icon name="camera" size={16} />
+                    <span className={styles.bagCameraName}>
+                      {camera.brand} {camera.model}
+                    </span>
+                    <span className={styles.bagCameraCount}>
+                      {t("bagCameraRolls", { count: camera.rollsShot })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+
+            {summary.stocks.length > 0 ? (
+              <ul className={styles.bagFilmSwatches} aria-label={t("bagFilmSwatchesLabel")}>
+                {summary.stocks.map((stock) => (
+                  <li
+                    key={stock.stockId}
+                    className={styles.bagFilmSwatch}
+                    style={{ "--rc-stock": `var(--stock-${stock.canisterColor ?? "gold"})` } as CSSProperties}
+                    title={`${stock.brand} ${stock.name}`}
+                  />
+                ))}
+              </ul>
+            ) : null}
+          </section>
+        </div>
+      ) : null}
     </div>
   );
 }
