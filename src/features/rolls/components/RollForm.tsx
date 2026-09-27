@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { Field, Icon } from "@/design-system";
 import { ResponsiveDialog } from "@/components/overlay/ResponsiveDialog";
+import { DatePicker, parseDateValue } from "@/components/ui/date-picker";
 import { listBag } from "@/features/bag/actions";
 import type { TBagEntry, TCameraRow, TLensRow, TStockRow } from "@/features/bag/queries";
 import { CataloguePicker } from "@/features/catalogue/components/CataloguePicker";
@@ -249,6 +250,16 @@ export function RollForm({ mode }: RollFormProps) {
 
   const canSave = effectiveStockId !== null && selectedCameraBagItemId !== null && !saving;
 
+  // D3/D14 owner feedback: the calendar itself blocks what `validatePastDates`
+  // would reject anyway — a future day (Vietnam calendar, reusing
+  // `isFutureVnDay`), or for "đến", a day before "từ".
+  function isDisabledFutureVnDay(date: Date): boolean {
+    const ms = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+    return isFutureVnDay(ms, Date.now());
+  }
+  const shotFromDate = parseDateValue(shotFromInput);
+  const shotToDisabled = shotFromDate ? [isDisabledFutureVnDay, { before: shotFromDate }] : isDisabledFutureVnDay;
+
   return (
     <div className={styles.page}>
       <div className={styles.headingBlock}>
@@ -353,22 +364,8 @@ export function RollForm({ mode }: RollFormProps) {
         <fieldset className={styles.fieldset}>
           <legend className={styles.legendLabel}>{t("pastDatesLegend")}</legend>
           <div className={styles.two}>
-            <Field
-              label={t("shotFromLabel")}
-              type="date"
-              mono
-              value={shotFromInput}
-              onChange={(event) => setShotFromInput(event.target.value)}
-              error={shotFromError}
-            />
-            <Field
-              label={t("shotToLabel")}
-              type="date"
-              mono
-              value={shotToInput}
-              onChange={(event) => setShotToInput(event.target.value)}
-              error={shotToError}
-            />
+            <DatePicker label={t("shotFromLabel")} value={shotFromInput} onChange={setShotFromInput} error={shotFromError} disabled={isDisabledFutureVnDay} />
+            <DatePicker label={t("shotToLabel")} value={shotToInput} onChange={setShotToInput} error={shotToError} disabled={shotToDisabled} />
           </div>
           <p className={styles.fieldHint}>{t("pastDatesHint")}</p>
         </fieldset>

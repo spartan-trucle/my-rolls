@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/i18n/test-utils";
@@ -111,6 +111,7 @@ describe("RollForm", () => {
     createRoll.mockReset();
     push.mockReset();
     posthogCapture.mockReset();
+    vi.useRealTimers();
   });
 
   it("fires roll_form_opened once on mount, with the current mode", async () => {
@@ -208,18 +209,73 @@ describe("RollForm", () => {
     expect(await screen.findByText("+1")).toBeInTheDocument();
   });
 
-  it("blocks a future shotFrom in past mode with a human-voice error, and never calls createRoll", async () => {
+  it("requires both past dates before saving, with a human-voice error, and never calls createRoll", async () => {
     listBag.mockResolvedValue([GOLD, K1000]);
     const { user } = setup("past");
 
     await screen.findByText("Kodak Gold 200", { exact: false });
-    const farFuture = "2099-01-01";
-    await user.type(screen.getByLabelText("Ngày bắt đầu"), farFuture);
-    await user.type(screen.getByLabelText("Ngày chụp xong"), farFuture);
     await user.click(screen.getByRole("button", { name: "Lưu, rồi tải scan lên" }));
 
-    expect(await screen.findAllByText("Không chọn được ngày trong tương lai.")).not.toHaveLength(0);
+    expect(await screen.findAllByText("Điền cái này với bạn nhé.")).toHaveLength(2);
     expect(createRoll).not.toHaveBeenCalled();
+  });
+
+  it("disables a future day in the shotFrom calendar (Vietnam day, D14)", async () => {
+    vi.setSystemTime(new Date("2026-09-15T04:00:00Z")); // ~11:00 in Asia/Ho_Chi_Minh
+    listBag.mockResolvedValue([GOLD, K1000]);
+    const { user } = setup("past");
+
+    await screen.findByText("Kodak Gold 200", { exact: false });
+    await user.click(screen.getByLabelText("Ngày bắt đầu"));
+    const grid = await screen.findByRole("grid");
+
+    expect(within(grid).getByRole("button", { name: /ngày 20 tháng 09/ })).toBeDisabled();
+    expect(within(grid).getByRole("button", { name: /ngày 10 tháng 09/ })).toBeEnabled();
+
+    vi.useRealTimers();
+  });
+
+  it("in shotTo's calendar, disables a day before the picked shotFrom", async () => {
+    vi.setSystemTime(new Date("2026-09-25T04:00:00Z"));
+    listBag.mockResolvedValue([GOLD, K1000]);
+    const { user } = setup("past");
+
+    await screen.findByText("Kodak Gold 200", { exact: false });
+    await user.click(screen.getByLabelText("Ngày bắt đầu"));
+    await user.click(within(await screen.findByRole("grid")).getByRole("button", { name: /ngày 10 tháng 09/ }));
+
+    await user.click(screen.getByLabelText("Ngày chụp xong"));
+    const toGrid = await screen.findByRole("grid");
+    expect(within(toGrid).getByRole("button", { name: /ngày 5 tháng 09/ })).toBeDisabled();
+    expect(within(toGrid).getByRole("button", { name: /ngày 12 tháng 09/ })).toBeEnabled();
+
+    vi.useRealTimers();
+  });
+
+  it("picking dates in the calendar shows them as dd/mm/yyyy and saves shotFrom/shotTo", async () => {
+    vi.setSystemTime(new Date("2026-09-25T04:00:00Z"));
+    listBag.mockResolvedValue([GOLD, K1000]);
+    createRoll.mockResolvedValue({ ok: true, rollId: "roll-past" });
+    const { user } = setup("past");
+
+    await screen.findByText("Kodak Gold 200", { exact: false });
+    await user.click(screen.getByLabelText("Ngày bắt đầu"));
+    await user.click(within(await screen.findByRole("grid")).getByRole("button", { name: /ngày 10 tháng 09/ }));
+    expect(screen.getByLabelText("Ngày bắt đầu")).toHaveTextContent("10/09/2026");
+
+    await user.click(screen.getByLabelText("Ngày chụp xong"));
+    await user.click(within(await screen.findByRole("grid")).getByRole("button", { name: /ngày 12 tháng 09/ }));
+    expect(screen.getByLabelText("Ngày chụp xong")).toHaveTextContent("12/09/2026");
+
+    await user.click(screen.getByRole("button", { name: "Lưu, rồi tải scan lên" }));
+
+    await waitFor(() => expect(createRoll).toHaveBeenCalledTimes(1));
+    const [input] = createRoll.mock.calls[0];
+    expect(typeof input.shotFrom).toBe("number");
+    expect(typeof input.shotTo).toBe("number");
+    expect(push).toHaveBeenCalledWith("/rolls/roll-past");
+
+    vi.useRealTimers();
   });
 
   it("saves with formOpenedAt and routes to the new roll's page", async () => {
