@@ -25,6 +25,11 @@ export const stockInputSchema = z.object({
   formats: z.array(z.enum(FORMATS)).optional(),
   type: z.string().trim().min(1).optional(),
   canisterColor: z.enum(CANISTER_COLORS).optional(),
+  // BAG-2 (Round 2, audit E2): CustomEntryForm's "Đang có" stepper — how
+  // many rolls of this new stock the caller already owns. Omitted means
+  // "not counted" (`bag_item.qty` stays `null`), same as the catalogue
+  // picker's `addToBag`.
+  qty: z.number().int().min(0).optional(),
 });
 
 export const cameraInputSchema = z.object({
@@ -83,7 +88,7 @@ export async function addCustomStockCore<TQueryResult extends PgQueryResultHKT>(
 
     const [bagItemRow] = await tx
       .insert(bagItem)
-      .values({ userId, kind: "stock", refId: stockRow.id })
+      .values({ userId, kind: "stock", refId: stockRow.id, qty: input.qty ?? null })
       .returning();
 
     return { ok: true, refId: stockRow.id, bagItemId: bagItemRow.id };

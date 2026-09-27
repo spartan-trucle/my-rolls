@@ -22,7 +22,7 @@ The bag is the first step of [Log a roll](rolls.md#flows): pick the film from th
 | Source | Shape |
 |---|---|
 | PRD | `BagItem`: id, user_id, kind (camera \| lens \| stock), ref_id, nickname, qty, expiry_year, notes |
-| [ADR-001](../../architecture/adr-001-tech-stack.md#data-model-mvp) | `bag_item`: user_id, stock_id?, camera_id? |
+| [ADR-001](../../architecture/adr-001-tech-stack.md#data-model-mvp) | `bag_item`: id, user_id, kind (camera \| lens \| stock), ref_id, qty?, expiry_year? |
 
 ## Design
 
@@ -31,5 +31,5 @@ No bag artboard yet ([wireframes](../../design/wireframes.md#mvp-screens-with-no
 ## Open issues
 
 - ~~BAG-1 includes **lenses**, but the ADR `bag_item` only references stocks and cameras, and there is no lens table in either model. Decide whether lenses are in the MVP.~~ **Resolved 27.09.2026 (Trúc), Known conflict #6, Phase 1 plan D3:** a `lens` table, custom entries only (no seeded lens catalogue in the MVP). `bag_item.kind` = `camera` \| `lens` \| `stock`, `ref_id` points into whichever table `kind` names (no foreign key, house rules).
-- BAG-2 and BAG-3 were raised to P0 and moved into Phase 1 on 27.09.2026 (Trúc), so `bag_item` gains `qty` and `expiry_year` in a Phase 1 migration. `nickname` is still not stored.
+- ~~BAG-2 and BAG-3 were raised to P0 and moved into Phase 1 on 27.09.2026 (Trúc), so `bag_item` gains `qty` and `expiry_year` in a Phase 1 migration.~~ **Resolved (Round 2, migration `0003`):** `bag_item.qty`/`expiry_year` (stock only), `setStockQtyCore`/`setStockExpiryYearCore`, and per-camera/stock/lens `rollsShot` counts from `listBag`. `nickname` is still not stored.
 - BAG-3's mistake count ("2 lần lọt sáng") needs mistake tags (NOTE-2, Phase 2). Until then the camera card shows rolls shot only.

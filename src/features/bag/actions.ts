@@ -5,12 +5,25 @@ import { getDb } from "@/db/client";
 import {
   addToBagCore,
   removeFromBagCore,
+  setStockExpiryYearCore,
+  setStockQtyCore,
   type IAddToBagInput,
   type IRemoveFromBagInput,
+  type ISetStockExpiryYearInput,
+  type ISetStockQtyInput,
   type TAddToBagResult,
   type TRemoveFromBagResult,
+  type TSetStockExpiryYearResult,
+  type TSetStockQtyResult,
 } from "@/features/bag/core";
-import { listBag as listBagQuery, type TBagEntry } from "@/features/bag/queries";
+import {
+  getProfileSummary as getProfileSummaryQuery,
+  listBag as listBagQuery,
+  summarizeBag,
+  type IBagSummary,
+  type IProfileSummary,
+  type TBagEntry,
+} from "@/features/bag/queries";
 import { getAuth } from "@/lib/auth";
 
 /**
@@ -58,4 +71,43 @@ export async function listBag(): Promise<TBagEntry[]> {
   if (!userId) return [];
 
   return listBagQuery(getDb(), userId);
+}
+
+/** BAG-2 (Round 2): sets how many rolls of a stock bag item are left, or `null` to stop counting. */
+export async function setStockQty(input: ISetStockQtyInput): Promise<TSetStockQtyResult> {
+  const userId = await requireUserId();
+  if (!userId) return { ok: false, error: "unauthenticated" };
+
+  return setStockQtyCore(getDb(), userId, input);
+}
+
+/** BAG-2 (Round 2): sets a stock bag item's expiry year, or `null` to clear it. */
+export async function setStockExpiryYear(input: ISetStockExpiryYearInput): Promise<TSetStockExpiryYearResult> {
+  const userId = await requireUserId();
+  if (!userId) return { ok: false, error: "unauthenticated" };
+
+  return setStockExpiryYearCore(getDb(), userId, input);
+}
+
+/**
+ * B7/B1 (Round 2): the bag's summary counts and canister strip, computed
+ * from the same `listBag` read `/bag` already does — a second Server
+ * Action rather than folding into `listBag`'s own return, so existing
+ * callers of `listBag()` (the picker flows, onboarding) keep their
+ * `TBagEntry[]` shape unchanged.
+ */
+export async function getBagSummary(): Promise<IBagSummary> {
+  const userId = await requireUserId();
+  if (!userId) return { unloadedRolls: 0, filmTypeCount: 0, cameraCount: 0, lensCount: 0, canisters: [] };
+
+  const entries = await listBagQuery(getDb(), userId);
+  return summarizeBag(entries);
+}
+
+/** PR1/PR4 (Round 2): Profile's roll count, bag preview and join date. `null` for an unauthenticated caller. */
+export async function getProfileSummary(): Promise<IProfileSummary | null> {
+  const userId = await requireUserId();
+  if (!userId) return null;
+
+  return getProfileSummaryQuery(getDb(), userId);
 }

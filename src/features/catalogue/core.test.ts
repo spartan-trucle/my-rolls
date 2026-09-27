@@ -56,6 +56,21 @@ describe("addCustomStockCore", () => {
     expect(stockRows.find((row) => row.name === "100")).toMatchObject({ canisterColor: null });
   });
 
+  it("sets the bag item's initial qty when given (BAG-2, Round 2), null otherwise", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+
+    const withQty = await addCustomStockCore(db, OWNER, { brand: "Fomapan", name: "200", qty: 4 });
+    expect(withQty.ok).toBe(true);
+    const withoutQty = await addCustomStockCore(db, OWNER, { brand: "Fomapan", name: "100" });
+    expect(withoutQty.ok).toBe(true);
+
+    const bagRows = await db.select().from(bagItem);
+    if (!withQty.ok || !withoutQty.ok) throw new Error("expected both adds to succeed");
+    expect(bagRows.find((row) => row.id === withQty.bagItemId)?.qty).toBe(4);
+    expect(bagRows.find((row) => row.id === withoutQty.bagItemId)?.qty).toBeNull();
+  });
+
   it("rolls back the stock insert if the bag item insert fails — no orphan custom stock (D12)", async () => {
     const { db, client } = await createTestDb();
     cleanup = () => client.close();

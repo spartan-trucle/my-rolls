@@ -133,3 +133,95 @@ export async function removeFromBagCore<TQueryResult extends PgQueryResultHKT>(
 
   return { ok: true };
 }
+
+export interface ISetStockQtyInput {
+  bagItemId: string;
+  /** `null` stops counting; otherwise a non-negative integer ("Đang có" stepper, audit E2/B2). */
+  qty: number | null;
+}
+
+export type TSetStockQtyErrorCode = "unauthenticated" | "not_found" | "validation";
+export type TSetStockQtyResult =
+  | { ok: true; qty: number | null }
+  | { ok: false; error: TSetStockQtyErrorCode };
+
+/**
+ * BAG-2 (Round 2): sets how many rolls of a stock bag item are left. Only
+ * the caller's own, live, `kind: "stock"` bag item — never another
+ * user's, never a camera/lens row (D9: no foreign key, so `kind` has to
+ * be checked explicitly, same as every other bag write).
+ */
+export async function setStockQtyCore<TQueryResult extends PgQueryResultHKT>(
+  db: TDb<TQueryResult>,
+  userId: string,
+  input: ISetStockQtyInput,
+): Promise<TSetStockQtyResult> {
+  if (input.qty !== null && (!Number.isInteger(input.qty) || input.qty < 0)) {
+    return { ok: false, error: "validation" };
+  }
+
+  const [row] = await db
+    .update(bagItem)
+    .set({ qty: input.qty })
+    .where(
+      and(
+        eq(bagItem.id, input.bagItemId),
+        eq(bagItem.userId, userId),
+        eq(bagItem.kind, "stock"),
+        isNull(bagItem.deletedAt),
+      ),
+    )
+    .returning({ qty: bagItem.qty });
+
+  if (!row) return { ok: false, error: "not_found" };
+
+  return { ok: true, qty: row.qty };
+}
+
+export interface ISetStockExpiryYearInput {
+  bagItemId: string;
+  /** `null` clears it. */
+  expiryYear: number | null;
+}
+
+export type TSetStockExpiryYearErrorCode = "unauthenticated" | "not_found" | "validation";
+export type TSetStockExpiryYearResult =
+  | { ok: true; expiryYear: number | null }
+  | { ok: false; error: TSetStockExpiryYearErrorCode };
+
+/**
+ * BAG-2 (Round 2): sets a stock bag item's expiry year, for expired film.
+ * `now` defaults to `Date.now()` and is only ever overridden by tests, so
+ * the "next year" bound stays deterministic — same pattern as
+ * `createRollCore`'s `now` parameter.
+ */
+export async function setStockExpiryYearCore<TQueryResult extends PgQueryResultHKT>(
+  db: TDb<TQueryResult>,
+  userId: string,
+  input: ISetStockExpiryYearInput,
+  now: number = Date.now(),
+): Promise<TSetStockExpiryYearResult> {
+  if (input.expiryYear !== null) {
+    const nextYear = new Date(now).getUTCFullYear() + 1;
+    if (!Number.isInteger(input.expiryYear) || input.expiryYear < 1950 || input.expiryYear > nextYear) {
+      return { ok: false, error: "validation" };
+    }
+  }
+
+  const [row] = await db
+    .update(bagItem)
+    .set({ expiryYear: input.expiryYear })
+    .where(
+      and(
+        eq(bagItem.id, input.bagItemId),
+        eq(bagItem.userId, userId),
+        eq(bagItem.kind, "stock"),
+        isNull(bagItem.deletedAt),
+      ),
+    )
+    .returning({ expiryYear: bagItem.expiryYear });
+
+  if (!row) return { ok: false, error: "not_found" };
+
+  return { ok: true, expiryYear: row.expiryYear };
+}
