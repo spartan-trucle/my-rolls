@@ -42,7 +42,7 @@ Each deep-dive pulls its requirements from the PRD, its phase from the roadmap, 
 |---|---|---|
 | [Sign-in](product/requirements/auth.md) | AUTH-1 | 0 |
 | [Rolls](product/requirements/rolls.md) | ROLL-1, ROLL-2 | 1 |
-| [Bag](product/requirements/bag.md) | BAG-1 | 1 |
+| [Bag](product/requirements/bag.md) | BAG-1, BAG-2, BAG-3 | 1 |
 | [Catalogue](product/requirements/catalogue.md) | CAT-1, CAT-2 | 1 |
 | [Labs](product/requirements/labs.md) | LAB-1, LAB-2, LAB-3 | 1–2 |
 | [Scans & storage](product/requirements/scans.md) | SCAN-1 – SCAN-4 | 2 |

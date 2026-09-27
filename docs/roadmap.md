@@ -1,7 +1,7 @@
 # Cuộn roadmap
 
 > **Mirror — the artifact is the source of truth:** [Cuộn roadmap](https://claude.ai/artifact/Lsq7MWHNCVanpBWQ2D4XTo)
-> Last synced: 27.09.2026 · doc revision 30 · by Claude for Trúc (revisions 16–23 by Trúc: waitlist page in Phase 1, landing page in Phase 5, 139 h build + 21 h buffer; revision 24 ticks "Repo, Next.js + Tailwind mapped to design tokens", landed in PR #1; revisions 25–26 remove the Phase 1 waitlist page at Trúc's request: sign-up stays open through the landing page; revision 27 ticks `next-intl`, Neon + Drizzle, Vercel `sin1` and PostHog, landed in PRs #3 and #5; revision 28 ticks R2 buckets (`pnpm r2:smoke` passes) and Google sign-in (phone check), both confirmed by Trúc; revision 29 ticks both spikes, passed on production, see docs/spikes/; revision 30 ticks the Phase 0 exit: phone sign-in on a preview URL and the story PNG both confirmed by Trúc).
+> Last synced: 27.09.2026 · doc revision 33 · by Claude for Trúc (revisions 16–23 by Trúc: waitlist page in Phase 1, landing page in Phase 5, 139 h build + 21 h buffer; revision 24 ticks "Repo, Next.js + Tailwind mapped to design tokens", landed in PR #1; revisions 25–26 remove the Phase 1 waitlist page at Trúc's request: sign-up stays open through the landing page; revision 27 ticks `next-intl`, Neon + Drizzle, Vercel `sin1` and PostHog, landed in PRs #3 and #5; revision 28 ticks R2 buckets (`pnpm r2:smoke` passes) and Google sign-in (phone check), both confirmed by Trúc; revision 29 ticks both spikes, passed on production, see docs/spikes/; revision 30 ticks the Phase 0 exit: phone sign-in on a preview URL and the story PNG both confirmed by Trúc; revisions 31–33 move BAG-2 (film pocket counts, with the bag canister strip) and BAG-3 (camera card) into Phase 1 and raise the P0 count to 28, at Trúc's request; the PRD artifact raised both to P0 in version 6).
 > Before editing, re-read the artifact. Make changes in the artifact and copy them here in the same session (see [CLAUDE.md](../CLAUDE.md#sync-rules)).
 
 Related: [PRD overview](product/prd.md) · [Requirements index](product/requirements/README.md) · [ADR-001](architecture/adr-001-tech-stack.md) · [Design system](design/design-system.md)
@@ -10,7 +10,7 @@ Related: [PRD overview](product/prd.md) · [Requirements index](product/requirem
 
 Soft launch on **18.01.2027**. That is 16 weeks from now and about three weeks before Tết (6 Feb 2027), when Vietnamese shooters shoot and share the most.
 
-- **Scope:** the 26 P0 requirements in [PRD v0.4](product/prd.md), on the stack in [ADR-001](architecture/adr-001-tech-stack.md), styled with the [design system](design/design-system.md).
+- **Scope:** the 28 P0 requirements in [PRD v0.4](product/prd.md), on the stack in [ADR-001](architecture/adr-001-tech-stack.md), styled with the [design system](design/design-system.md).
 - **Capacity:** one engineer at about 10 h/week, so 160 h. The plan books 139 h of build and keeps 21 h as buffer for day-job crunch weeks.
 - **Shape:** six phases, each ending in something deployed and usable. Your own rolls go in from week 8.
 - **After launch:** four weeks of fixing and measuring, then v1.1 in two drops (Feb–May), then Compare once enough lab data exists.
@@ -37,6 +37,8 @@ Tick items as they land; a phase is done when its last item (the exit check) is 
 - [ ] Seeded catalogue + accent-free search ([CAT-1](product/requirements/catalogue.md))
 - [ ] Custom stock or camera ([CAT-2](product/requirements/catalogue.md))
 - [ ] Bag ([BAG-1](product/requirements/bag.md))
+- [ ] Film pocket counts + bag canister strip ([BAG-2](product/requirements/bag.md))
+- [ ] Camera card: rolls per camera ([BAG-3](product/requirements/bag.md))
 - [ ] New roll ([ROLL-1](product/requirements/rolls.md))
 - [ ] Past roll ([ROLL-2](product/requirements/rolls.md))
 - [ ] Lab directory ([LAB-1](product/requirements/labs.md))
@@ -119,7 +121,7 @@ Six phases, 28 Sep 2026 – 17 Jan 2027. Hours are build estimates; the 21 h buf
 | Phase | Weeks · dates | Build hours | What ships (PRD IDs) | Done when |
 |---|---|---|---|---|
 | 0. Foundations | W1–2 · 28 Sep – 11 Oct | 16 | Repo, Next.js + Tailwind mapped to design tokens, `next-intl` (vi), Neon + Drizzle schema, R2 buckets, Vercel `sin1`, PostHog for analytics and errors, Google sign-in ([AUTH-1](product/requirements/auth.md)). Spikes: `next/og` with Be Vietnam Pro, Web Share with files | You sign in on a phone on a preview URL, and a test story PNG renders "tấm ưng" correctly |
-| 1. Log a roll | W3–5 · 12 Oct – 1 Nov | 27 | Seeded catalogue + accent-free search ([CAT-1](product/requirements/catalogue.md)), custom stock/camera (CAT-2), bag ([BAG-1](product/requirements/bag.md)), new and past roll ([ROLL-1, ROLL-2](product/requirements/rolls.md)), lab directory + custom lab ([LAB-1, LAB-2](product/requirements/labs.md)) | A roll is logged from the bag in under 60 s on a phone |
+| 1. Log a roll | W3–5 · 12 Oct – 1 Nov | 27 | Seeded catalogue + accent-free search ([CAT-1](product/requirements/catalogue.md)), custom stock/camera (CAT-2), bag ([BAG-1](product/requirements/bag.md)), film pocket counts + canister strip (BAG-2), camera card (BAG-3), new and past roll ([ROLL-1, ROLL-2](product/requirements/rolls.md)), lab directory + custom lab ([LAB-1, LAB-2](product/requirements/labs.md)) | A roll is logged from the bag in under 60 s on a phone |
 | 2. Scans & notes | W6–8 · 2 – 22 Nov | 26 | Presigned upload, bulk upload, browser-made WebP copies, nightly cleanup ([SCAN-1–3](product/requirements/scans.md)), scan set with lab + branch (LAB-3), tấm ưng / blank (SCAN-4), notes, memory, mistakes ([NOTE-1, NOTE-2](product/requirements/notes.md)) | **M1 — dogfood:** 5 of your real rolls uploaded, 0 failed files |
 | 3. Shelf & collection | W9–11 · 23 Nov – 13 Dec | 24 | Canister shelf + drawn canister ([CAN-1, CAN-2](product/requirements/canister.md)), film strip / grid switch, filters, lightbox ([COL-1, COL-2](product/requirements/collection.md)), library grid (COL-3), bulk marking (COL-4) | Your shelf shows every roll; marking 36 frames takes under a minute on desktop |
 | 4. Sharing | W12–14 · 14 Dec – 3 Jan | 26 | Share link + revoke ([SHARE-1](product/requirements/sharing.md)), friend view in both views (SHARE-2, COL-5), link preview (SHARE-3), story cards Dải phim + Phiếu cuộn (SHARE-4), north-star events in PostHog | **M2 — feature complete:** a link pasted in Zalo and Messenger shows the cover; a story posts to Instagram from iPhone and Android |
@@ -191,7 +193,7 @@ v1.1 ships in two drops ordered by the metrics they move; Compare waits until th
 | Release | When | What ships (PRD IDs) | Why now |
 |---|---|---|---|
 | v1.1a — Fill the shelf, share more | 15 Feb – 21 Mar 2027 (5 wks) | Bulk import of old rolls (ROLL-3), resumable uploads + duplicate skip (SCAN-5), TIFF + server-made copies, Ảnh dán and Oops cards (SHARE-5), share settings + expiry (SHARE-6), cover frame + "load the same again" (ROLL-5), delete account (AUTH-2), anything cut from the MVP | Moves "first shelf" and the north star directly |
-| v1.1b — Community and bag | 22 Mar – 2 May 2027 (6 wks) | Submissions + one review queue (CAT-3, CAT-4), film pocket and camera cards (BAG-2, BAG-3), roll status (ROLL-4), rescans (LAB-4), private lab ratings (LAB-5), library filters (COL-6), note search (NOTE-3), mistake summaries (NOTE-4) | Lets Vietnamese shooters grow the catalogue and labs themselves |
+| v1.1b — Community and bag | 22 Mar – 2 May 2027 (6 wks) | Submissions + one review queue (CAT-3, CAT-4), roll status (ROLL-4), rescans (LAB-4), private lab ratings (LAB-5), library filters (COL-6), note search (NOTE-3), mistake summaries (NOTE-4) | Lets Vietnamese shooters grow the catalogue and labs themselves |
 | v1.2 — Compare | May – Jun 2027 | Library filters by lab and process (CMP-1), side by side (CMP-2), split slider (CMP-3) | Starts only when 200+ scan sets exist and 60%+ have lab and branch |
 | Later (P2) | H2 2027 | Colour profiles and lab/stock views (CMP-4–6), collections (COL-7), comments and reactions (SHARE-7), Drive/WeTransfer import (SCAN-6), exposure log (ROLL-6), bag card (BAG-4), pooled mistake stats (CAT-5), pinned notes (NOTE-5) | Pick from what users ask for most after v1.1 |
 

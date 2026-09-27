@@ -91,6 +91,21 @@ flowchart LR
 
 **Suggested order:** B1 → B2 → B3 (one PR) → B4 → B5 → B6, with F4 alongside at any point. F1, F2 and F3 follow as their data lands. Track D starts the moment D0 is approved. If design is still not ready once Track B and F are done, D1–D3 are about 6 h of work, which fits the last week (26 Oct – 1 Nov).
 
+## Round 2: design parity, BAG-2 and BAG-3 (27.09.2026)
+
+Decided by Trúc after the owner review of PR #20 and the [design audit](../reviews/phase-1-design-audit.md) against canvas `1790516511-f125`:
+
+| # | Decision |
+|---|---|
+| R2-1 | **All 45 class-A audit items** go into PR #20 (~25 h). The buffer absorbs it; Phase 1 slips a few days |
+| R2-2 | **BAG-2 and BAG-3 move into Phase 1 as P0** (PRD artifact version 6, roadmap rev 33). BAG-3 shows rolls shot per camera; its mistake count waits for NOTE-2 (Phase 2). Per-film and per-lens roll counts from the Bag board come along, since they need no new data |
+| R2-3 | **Bag canister strip** (Bag board, "N cuộn chờ nạp") ships with BAG-2. Home keeps the roll-card list; CAN-1 and CAN-2 stay in Phase 3. The frame grid "Lưới" stays in Phase 3 |
+| R2-4 | **Past-roll dates are month + year** as on `PastRoll`, with "Không nhớ" leaving them empty; stored as the month's first and last day. The day picker stays for a new roll's optional dates |
+| R2-5 | **Roll numbers are stored** (`roll.number`, next per user at save, never reused) |
+| R2-6 | **Desktop "Lab" nav item hidden** until the scan-set flow (Phase 2) |
+
+Work order: **W1** data (migration `0003`: `bag_item.qty`, `bag_item.expiry_year`, `roll.number`; nullable past-mode dates; decrement on load; counts per camera, film and lens), then **W2** roll form, past roll, roll page; **W3** bag, catalogue, custom entry, onboarding, profile; **W4** shell, home, labs, in parallel, each owning its files and working from the audit's item IDs.
+
 ## Decisions this plan assumes
 
 Change any of these before approving.
