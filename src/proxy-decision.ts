@@ -8,11 +8,9 @@ const PUBLIC_PATHS = new Set(["/", "/sign-in", "/sign-up", "/terms", "/privacy"]
 
 /**
  * Public path prefixes — Better Auth's own routes, health checks, dev
- * tools, and the two Stage G spike routes (D30). `/dev` alone doesn't cover
- * `/api/dev` (a different first segment), so `/api/dev/boom` (D29) needs
- * its own entry.
+ * tools, and the two Stage G spike routes (D30).
  */
-const PUBLIC_PREFIXES = ["/api/auth", "/api/health", "/api/dev", "/dev", "/spike"];
+const PUBLIC_PREFIXES = ["/api/auth", "/api/health", "/dev", "/spike"];
 
 function isPublicPath(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) return true;

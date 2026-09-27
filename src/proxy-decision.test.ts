@@ -28,9 +28,12 @@ describe("decideProxyAccess", () => {
     });
 
     it.each(["/api/dev/boom", "/api/dev/anything"])(
-      "allows %s under /api/dev (G1: /api/dev isn't covered by /dev alone)",
+      "sends %s to /sign-in (not a public route)",
       (pathname) => {
-        expect(decideProxyAccess(pathname, signedIn)).toEqual({ type: "allow" });
+        expect(decideProxyAccess(pathname, signedIn)).toEqual({
+          type: "redirect",
+          to: "/sign-in",
+        });
       },
     );
 
