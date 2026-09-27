@@ -1,0 +1,230 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4) 0;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-display-l);
+  font-weight: 600;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4) 0;
+}
+
+.seg {
+  display: inline-flex;
+  align-self: flex-start;
+  border: 1.5px solid var(--ink);
+}
+
+.seg button {
+  appearance: none;
+  border: 0;
+  min-height: 40px;
+  min-width: 72px;
+  padding: 0 var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: transparent;
+  color: var(--ink);
+  font: 600 14px/1 var(--font-sans);
+  cursor: pointer;
+}
+
+.seg button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.seg button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.results {
+  flex-grow: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-2) var(--space-4) var(--space-4);
+}
+
+.hint {
+  margin: var(--space-4) 0 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-muted);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.result {
+  appearance: none;
+  width: 100%;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  min-height: 60px;
+  padding: var(--space-2) 4px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.result:disabled {
+  cursor: default;
+}
+
+.result:not(:disabled):hover {
+  background: var(--paper);
+}
+
+.result:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.canSm {
+  width: 18px;
+  height: 30px;
+  margin: 0 auto;
+  border-radius: var(--radius-sm);
+  background: var(--rc-stock, var(--stock-gold));
+  box-shadow:
+    inset 0 4px 0 var(--film),
+    inset 0 -4px 0 var(--film);
+}
+
+.cameraIcon {
+  width: 36px;
+  height: 36px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.resultText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.resultName {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+}
+
+.resultMeta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ink-muted);
+}
+
+.pick {
+  font: 600 14px/20px var(--font-sans);
+  color: var(--cobalt);
+  white-space: nowrap;
+}
+
+.addCustomLink {
+  appearance: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 52px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1.5px dashed var(--line);
+  color: var(--cobalt);
+  font: 600 14px/20px var(--font-sans);
+  cursor: pointer;
+}
+
+.notFound {
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+
+.footerHint {
+  margin: var(--space-2) 0 0;
+  text-align: center;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-muted);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-2) var(--space-2);
+}
+
+.emptyTitle {
+  margin: var(--space-2) 0 0;
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+.emptyBody {
+  margin: 0;
+  max-width: 340px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-muted);
+}
+
+.emptyAdd {
+  appearance: none;
+  min-height: 48px;
+  padding: 0 var(--space-8);
+  margin-top: var(--space-2);
+  background: var(--cobalt);
+  color: var(--on-cobalt);
+  border: 0;
+  font: 600 15px/1 var(--font-sans);
+  cursor: pointer;
+}
+
+.clearSearch {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--cobalt);
+  font: 500 14px/20px var(--font-sans);
+  min-height: 44px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
