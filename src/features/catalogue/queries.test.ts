@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { camera, stock } from "@/db/schema";
 import { createTestDb } from "@/db/test-db";
 import { toSearchText } from "@/lib/search-text";
-import { searchCatalogue, type TStockEntry } from "./queries";
+import { getCatalogueBySlugs, searchCatalogue, type TStockEntry } from "./queries";
 
 const OWNER = "user-1";
 const OTHER_USER = "user-2";
@@ -142,5 +142,93 @@ describe("searchCatalogue", () => {
     })) as TStockEntry[];
 
     expect(results[0]?.name).toBe("Portra 400");
+  });
+});
+
+describe("getCatalogueBySlugs", () => {
+  let cleanup: (() => Promise<void>) | undefined;
+
+  afterEach(async () => {
+    await cleanup?.();
+    cleanup = undefined;
+  });
+
+  it("returns seeded stocks matching the given slugs, in slug order", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+
+    await db.insert(stock).values([
+      { slug: "kodak-portra-400-400", brand: "Kodak", name: "Portra 400", searchText: toSearchText("Kodak Portra 400") },
+      { slug: "kodak-gold-200-200", brand: "Kodak", name: "Gold 200", searchText: toSearchText("Kodak Gold 200") },
+    ]);
+
+    const results = await getCatalogueBySlugs(db, {
+      kind: "stock",
+      slugs: ["kodak-gold-200-200", "kodak-portra-400-400"],
+    });
+
+    expect(results.map((entry) => entry.kind === "stock" && entry.name)).toEqual(["Gold 200", "Portra 400"]);
+  });
+
+  it("returns seeded cameras matching the given slugs", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+
+    await db.insert(camera).values({ slug: "pentax-k1000", brand: "Pentax", model: "K1000", searchText: toSearchText("Pentax K1000") });
+
+    const results = await getCatalogueBySlugs(db, { kind: "camera", slugs: ["pentax-k1000"] });
+
+    expect(results).toHaveLength(1);
+    expect(results[0]).toMatchObject({ kind: "camera", model: "K1000" });
+  });
+
+  it("drops a slug the catalogue doesn't have, rather than a gap", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+
+    const results = await getCatalogueBySlugs(db, { kind: "stock", slugs: ["not-a-real-slug"] });
+
+    expect(results).toEqual([]);
+  });
+
+  it("never returns a user's private entry, even if its slug matches", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+
+    await db.insert(stock).values({
+      ownerId: OWNER,
+      slug: "kodak-portra-400-400",
+      brand: "Kodak",
+      name: "Portra 400 (private)",
+      searchText: toSearchText("Kodak Portra 400 private"),
+    });
+
+    const results = await getCatalogueBySlugs(db, { kind: "stock", slugs: ["kodak-portra-400-400"] });
+
+    expect(results).toEqual([]);
+  });
+
+  it("excludes a soft-deleted seeded row", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+
+    await db.insert(stock).values({
+      slug: "kodak-portra-400-400",
+      brand: "Kodak",
+      name: "Portra 400",
+      searchText: toSearchText("Kodak Portra 400"),
+      deletedAt: new Date(),
+    });
+
+    const results = await getCatalogueBySlugs(db, { kind: "stock", slugs: ["kodak-portra-400-400"] });
+
+    expect(results).toEqual([]);
+  });
+
+  it("returns nothing for an empty slugs array", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+
+    expect(await getCatalogueBySlugs(db, { kind: "stock", slugs: [] })).toEqual([]);
   });
 });

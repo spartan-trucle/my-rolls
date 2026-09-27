@@ -11,7 +11,12 @@ import {
   stockInputSchema,
   type TAddCustomResult,
 } from "@/features/catalogue/core";
-import { searchCatalogue as searchCatalogueQuery, type TCatalogueEntry, type TCatalogueKind } from "@/features/catalogue/queries";
+import {
+  getCatalogueBySlugs as getCatalogueBySlugsQuery,
+  searchCatalogue as searchCatalogueQuery,
+  type TCatalogueEntry,
+  type TCatalogueKind,
+} from "@/features/catalogue/queries";
 import { getAuth } from "@/lib/auth";
 
 /**
@@ -78,5 +83,25 @@ export async function searchCatalogue(input: { kind: TCatalogueKind; q: string }
   if (!userId) return { ok: false, error: "unauthenticated" };
 
   const entries = await searchCatalogueQuery(getDb(), { kind: input.kind, q: input.q, userId });
+  return { ok: true, entries };
+}
+
+export type TGetCatalogueBySlugsResult =
+  | { ok: true; entries: TCatalogueEntry[] }
+  | { ok: false; error: "unauthenticated" };
+
+/**
+ * F1's curated onboarding chips (`POPULAR_CAMERA_SLUGS` /
+ * `POPULAR_STOCK_SLUGS`): session-checked like every other action here,
+ * delegating the actual lookup to `queries.ts`'s `getCatalogueBySlugs`.
+ */
+export async function getCatalogueBySlugs(input: {
+  kind: TCatalogueKind;
+  slugs: readonly string[];
+}): Promise<TGetCatalogueBySlugsResult> {
+  const userId = await requireUserId();
+  if (!userId) return { ok: false, error: "unauthenticated" };
+
+  const entries = await getCatalogueBySlugsQuery(getDb(), { kind: input.kind, slugs: input.slugs });
   return { ok: true, entries };
 }

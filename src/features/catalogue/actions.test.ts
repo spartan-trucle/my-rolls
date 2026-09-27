@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 const getSession = vi.hoisted(() => vi.fn());
 const searchCatalogueQuery = vi.hoisted(() => vi.fn());
+const getCatalogueBySlugsQuery = vi.hoisted(() => vi.fn());
 const getDb = vi.hoisted(() => vi.fn().mockReturnValue({ __brand: "fake-db" }));
 const fakeRequestHeaders = vi.hoisted(() => ({ __brand: "fake-headers" }));
 
@@ -11,6 +12,7 @@ vi.mock("@/db/client", () => ({ getDb }));
 vi.mock("@/features/catalogue/queries", async (importOriginal) => ({
   ...(await importOriginal<object>()),
   searchCatalogue: searchCatalogueQuery,
+  getCatalogueBySlugs: getCatalogueBySlugsQuery,
 }));
 
 import * as actions from "./actions";
@@ -27,7 +29,13 @@ describe("catalogue actions module", () => {
     const exportNames = Object.keys(actions);
 
     expect(exportNames).toEqual(
-      expect.arrayContaining(["addCustomStock", "addCustomCamera", "addCustomLens", "searchCatalogue"]),
+      expect.arrayContaining([
+        "addCustomStock",
+        "addCustomCamera",
+        "addCustomLens",
+        "searchCatalogue",
+        "getCatalogueBySlugs",
+      ]),
     );
 
     for (const name of exportNames) {
@@ -64,5 +72,34 @@ describe("searchCatalogue action", () => {
       { kind: "stock", q: "gold", userId: "user-1" },
     );
     expect(result).toEqual({ ok: true, entries: [{ kind: "stock", id: "s1" }] });
+  });
+});
+
+describe("getCatalogueBySlugs action", () => {
+  afterEach(() => {
+    getSession.mockReset();
+    getCatalogueBySlugsQuery.mockReset();
+  });
+
+  it("rejects an unauthenticated caller without querying the catalogue", async () => {
+    getSession.mockResolvedValue(null);
+
+    const result = await actions.getCatalogueBySlugs({ kind: "camera", slugs: ["pentax-k1000"] });
+
+    expect(result).toEqual({ ok: false, error: "unauthenticated" });
+    expect(getCatalogueBySlugsQuery).not.toHaveBeenCalled();
+  });
+
+  it("passes the kind/slugs through to the query", async () => {
+    getSession.mockResolvedValue({ user: { id: "user-1" } });
+    getCatalogueBySlugsQuery.mockResolvedValue([{ kind: "camera", id: "cam-1" }]);
+
+    const result = await actions.getCatalogueBySlugs({ kind: "camera", slugs: ["pentax-k1000"] });
+
+    expect(getCatalogueBySlugsQuery).toHaveBeenCalledWith(
+      { __brand: "fake-db" },
+      { kind: "camera", slugs: ["pentax-k1000"] },
+    );
+    expect(result).toEqual({ ok: true, entries: [{ kind: "camera", id: "cam-1" }] });
   });
 });

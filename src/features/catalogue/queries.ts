@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, ilike, isNull, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { camera, stock } from "@/db/schema";
 import type { TDb } from "@/features/shared/db";
@@ -99,4 +99,48 @@ export async function searchCatalogue<TQueryResult extends PgQueryResultHKT>(
   return input.kind === "stock"
     ? searchStocks(db, normalizedQ, input.userId, limit)
     : searchCameras(db, normalizedQ, input.userId, limit);
+}
+
+export interface IGetCatalogueBySlugsInput {
+  kind: TCatalogueKind;
+  slugs: readonly string[];
+}
+
+/**
+ * F1's curated onboarding chips (`POPULAR_CAMERA_SLUGS` /
+ * `POPULAR_STOCK_SLUGS`): the seeded rows (`owner_id IS NULL`, never a
+ * private entry) matching `slugs`, excluding soft-deleted rows — in the
+ * same order as `slugs` itself, so the board's curated order survives a
+ * DB round trip; a slug the seed data doesn't have (yet) is silently
+ * dropped rather than shown as a gap.
+ */
+export async function getCatalogueBySlugs<TQueryResult extends PgQueryResultHKT>(
+  db: TDb<TQueryResult>,
+  input: IGetCatalogueBySlugsInput,
+): Promise<TCatalogueEntry[]> {
+  if (input.slugs.length === 0) return [];
+
+  if (input.kind === "stock") {
+    const rows = await db
+      .select()
+      .from(stock)
+      .where(and(isNull(stock.deletedAt), isNull(stock.ownerId), inArray(stock.slug, input.slugs)));
+
+    const bySlug = new Map(rows.map((row) => [row.slug, row]));
+    return input.slugs.flatMap((slug) => {
+      const row = bySlug.get(slug);
+      return row ? [{ kind: "stock" as const, ...row }] : [];
+    });
+  }
+
+  const rows = await db
+    .select()
+    .from(camera)
+    .where(and(isNull(camera.deletedAt), isNull(camera.ownerId), inArray(camera.slug, input.slugs)));
+
+  const bySlug = new Map(rows.map((row) => [row.slug, row]));
+  return input.slugs.flatMap((slug) => {
+    const row = bySlug.get(slug);
+    return row ? [{ kind: "camera" as const, ...row }] : [];
+  });
 }
