@@ -8,7 +8,9 @@ vi.mock("@/lib/sign-out-action", () => ({ signOutAction }));
 
 import { ProfileContent } from "./ProfileContent";
 
-const CREATED_AT = new Date(2026, 8, 25);
+// A fixed instant, not a local-time `Date`, so this stays "25.09.26" in
+// Asia/Ho_Chi_Minh regardless of the machine/CI runner's own timezone.
+const CREATED_AT = new Date("2026-09-24T18:30:00Z");
 
 describe("ProfileContent", () => {
   afterEach(() => {
