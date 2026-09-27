@@ -195,7 +195,7 @@ describe("RollForm", () => {
     const { user } = setup();
 
     await findFilmChip("Kodak Gold 200");
-    expect(await screen.findByText("CUỘN #16")).toBeInTheDocument();
+    expect((await screen.findAllByText("CUỘN #16")).length).toBeGreaterThan(0);
 
     await user.click(screen.getByRole("button", { name: /^Thêm chi tiết/ }));
     expect(screen.getByText("Để trống thì gọi là Cuộn #16.")).toBeInTheDocument();
@@ -287,7 +287,7 @@ describe("RollForm", () => {
     expect(screen.getByText("Điền ISO chụp để tính")).toBeInTheDocument();
 
     await user.type(screen.getByLabelText("ISO chụp"), "400");
-    expect(await screen.findByText("+1")).toBeInTheDocument();
+    expect((await screen.findAllByText("+1")).length).toBeGreaterThan(0);
     expect(screen.getByText("stop · đẩy khi tráng")).toBeInTheDocument();
 
     await user.clear(screen.getByLabelText("ISO chụp"));
@@ -361,7 +361,7 @@ describe("RollForm", () => {
     setup();
 
     await findFilmChip("Kodak Gold 200");
-    expect(screen.getByText("KODAK GOLD 200 · PENTAX K1000 · ISO 200")).toBeInTheDocument();
+    expect(screen.getAllByText("KODAK GOLD 200 · PENTAX K1000 · ISO 200").length).toBeGreaterThan(0);
   });
 
   it("prefills format 35mm and exposures 36, still editable, and submits them uncut when left alone", async () => {
@@ -455,7 +455,7 @@ describe("RollForm", () => {
       updateRoll.mockResolvedValue({ ok: true });
       const { user } = setup("new", existingRoll);
 
-      expect(await screen.findByText("CUỘN #5")).toBeInTheDocument();
+      expect((await screen.findAllByText("CUỘN #5")).length).toBeGreaterThan(0);
       expect(screen.queryByRole("link", { name: "Đang trong máy" })).not.toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Lưu thay đổi" })).toBeInTheDocument();
 
@@ -473,7 +473,7 @@ describe("RollForm", () => {
       updateRoll.mockResolvedValue({ ok: false, error: "stale_version" });
       const { user } = setup("new", existingRoll);
 
-      await screen.findByText("CUỘN #5");
+      await screen.findAllByText("CUỘN #5");
       await user.click(screen.getByRole("button", { name: "Lưu thay đổi" }));
 
       expect(await screen.findByText("Cuộn này vừa được sửa ở nơi khác. Tải lại rồi thử lại nhé.")).toBeInTheDocument();

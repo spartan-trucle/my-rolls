@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
-import { Field, Icon } from "@/design-system";
+import { Field, Icon, Scribble } from "@/design-system";
 import { ResponsiveDialog } from "@/components/overlay/ResponsiveDialog";
 import { DatePicker } from "@/components/ui/date-picker";
 import { listBag } from "@/features/bag/actions";
@@ -497,6 +497,7 @@ export function RollForm({ mode, roll }: RollFormProps) {
         {t("backDesktop")}
       </Link>
 
+      <div className={styles.layout}>
       <div className={styles.body}>
         <div className={styles.headingBlock}>
           <h1 className={styles.heading}>{heading}</h1>
@@ -890,6 +891,22 @@ export function RollForm({ mode, roll }: RollFormProps) {
         ) : null}
 
         <div className={styles.footerSpacer} />
+      </div>
+
+      {/*
+        N12 (desktop only): a simplified stand-in for the `NewRollWeb`
+        board's live `RollCard` preview aside — the summary line, not the
+        full canister/print artwork, to keep this pass's scope in check.
+      */}
+      <aside className={styles.preview} aria-hidden="true">
+        <span className={styles.previewHeading}>{kickerNumber !== null ? t("kicker", { number: kickerNumber }) : t("previewHeading")}</span>
+        <CanisterChipSwatch color={selectedStock?.canisterColor ?? null} />
+        {summary ? <p className={styles.previewSummary}>{summary}</p> : null}
+        {pushPull ? <span className={styles.previewPushPull}>{pushPull}</span> : null}
+        <Scribble arrow="left" size="sm">
+          {t("previewScribble")}
+        </Scribble>
+      </aside>
       </div>
 
       <div className={styles.footer}>
