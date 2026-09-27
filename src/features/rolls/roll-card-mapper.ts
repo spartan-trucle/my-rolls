@@ -14,10 +14,19 @@ function toStockFamily(canisterColor: string | null): Stock | undefined {
  * `name` falls back to "{brand} {stock name}" (e.g. "Kodak Gold 200") when
  * the roll itself has no name, matching ROLL-1's "the stock's name" and
  * `RollCard.film`'s own "never a logo" rule.
+ *
+ * The design system's `RollCard` (docs/design/design-system.md) has no
+ * push/pull slot of its own, so the badge rides along in `date` — its
+ * `cameraLine` already joins `camera` and `date` with " · ", giving
+ * "Pentax K1000 · 12.10.25 · +1" without a new prop needing a design-system
+ * sync. Left out entirely at "0": no push or pull is nothing to flag.
  */
 export function toRollCardProps(entry: IRollEntry): RollCardProps {
   const stockLabel = entry.stock ? `${entry.stock.brand} ${entry.stock.name}` : undefined;
   const cameraLabel = entry.camera ? `${entry.camera.brand} ${entry.camera.model}` : undefined;
+  const dateLabel = formatRollDate(entry.shotFrom);
+  const showPushPull = entry.pushPull !== null && entry.pushPull !== "0";
+  const date = showPushPull ? [dateLabel, entry.pushPull].filter(Boolean).join(" · ") : (dateLabel ?? undefined);
 
   return {
     href: `/rolls/${entry.id}`,
@@ -27,6 +36,6 @@ export function toRollCardProps(entry: IRollEntry): RollCardProps {
     film: stockLabel,
     exposures: entry.exposures ?? undefined,
     camera: cameraLabel,
-    date: formatRollDate(entry.shotFrom) ?? undefined,
+    date,
   };
 }

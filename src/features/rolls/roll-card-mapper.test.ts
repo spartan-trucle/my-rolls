@@ -47,6 +47,16 @@ describe("toRollCardProps", () => {
     expect(toRollCardProps({ ...baseEntry, canisterColor: "chartreuse" }).stock).toBeUndefined();
   });
 
+  it("folds a non-zero push/pull into the date, since RollCard has no badge slot of its own", () => {
+    expect(toRollCardProps({ ...baseEntry, pushPull: "+1" }).date).toBe("12.10.25 · +1");
+    expect(toRollCardProps({ ...baseEntry, pushPull: "−⅓" }).date).toBe("12.10.25 · −⅓");
+  });
+
+  it("leaves the date alone at 0 stops (nothing to flag) or when push/pull can't be computed", () => {
+    expect(toRollCardProps({ ...baseEntry, pushPull: "0" }).date).toBe("12.10.25");
+    expect(toRollCardProps({ ...baseEntry, pushPull: null }).date).toBe("12.10.25");
+  });
+
   it("leaves out camera and film when there's no stock or camera joined", () => {
     const entry = { ...baseEntry, name: "Cuộn bí ẩn", boxIso: null, stock: null, camera: null };
     const props = toRollCardProps(entry);
