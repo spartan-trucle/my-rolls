@@ -13,6 +13,12 @@ import { toSearchText } from "@/lib/search-text";
  */
 const FORMATS = ["35mm", "120"] as const;
 
+// E3 (audit, approved by the owner 27.09.2026): camera's own format list
+// adds "other" ("Khác") — `camera.format` is free `text` already, so no
+// migration. Stock's `formats` stays 35mm/120 only; the board's "Khác"
+// chip is camera-only.
+const CAMERA_FORMATS = [...FORMATS, "other"] as const;
+
 // gold | green | blue | mono | rose (design system `stock-*` colour
 // families, `stock.canister_color`): CustomEntryForm's "Loại film" chips
 // (D1) are this field, not the free-text `type` below.
@@ -35,7 +41,7 @@ export const stockInputSchema = z.object({
 export const cameraInputSchema = z.object({
   brand: z.string().trim().min(1),
   model: z.string().trim().min(1),
-  format: z.enum(FORMATS).optional(),
+  format: z.enum(CAMERA_FORMATS).optional(),
 });
 
 export const lensInputSchema = z.object({

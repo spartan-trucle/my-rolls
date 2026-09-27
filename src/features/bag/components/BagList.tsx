@@ -12,7 +12,7 @@ import { StockQtyStepper } from "@/features/bag/components/StockQtyStepper";
 import { summarizeBag, type TBagEntry } from "@/features/bag/queries";
 import { CataloguePicker } from "@/features/catalogue/components/CataloguePicker";
 import { CustomEntryForm, type TCustomEntryKind } from "@/features/catalogue/components/CustomEntryForm";
-import { cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
+import { cameraFormatLabelKey, cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
 import type { TCatalogueKind } from "@/features/catalogue/queries";
 import styles from "./BagList.module.css";
 
@@ -183,29 +183,35 @@ export function BagList({ initialEntries }: BagListProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="font-display text-display-l font-semibold">{t("title")}</h1>
-        <p className={styles.countsLine}>
-          {t("countsLine", {
-            rolls: summary.unloadedRolls,
-            films: films.length,
-            cameras: cameras.length,
-            lenses: lenses.length,
-          })}
-        </p>
+      {/* B9 (audit, BagWeb): title + counts on the left, search in a 380px
+          right column at desktop; stacked (search below) on phone. */}
+      <div className={styles.header}>
+        <div className="flex flex-col gap-2">
+          <h1 className="font-display text-display-l font-semibold">{t("title")}</h1>
+          <p className={styles.countsLine}>
+            {t("countsLine", {
+              rolls: summary.unloadedRolls,
+              films: films.length,
+              cameras: cameras.length,
+              lenses: lenses.length,
+            })}
+          </p>
+        </div>
+
+        {!isEmpty ? (
+          <div className={styles.headerSearch}>
+            <button type="button" className={styles.search} onClick={() => openPicker("stock")}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" />
+                <path d="M20 20l-3.5-3.5" />
+              </svg>
+              <span>{t("searchPrompt")}</span>
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <BagCanisterStrip canisters={summary.canisters} unloadedRolls={summary.unloadedRolls} />
-
-      {!isEmpty ? (
-        <button type="button" className={styles.search} onClick={() => openPicker("stock")}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="7" />
-            <path d="M20 20l-3.5-3.5" />
-          </svg>
-          <span>{t("searchPrompt")}</span>
-        </button>
-      ) : null}
 
       {isEmpty ? (
         <div className={styles.empty}>
@@ -296,7 +302,10 @@ export function BagList({ initialEntries }: BagListProps) {
                       {isCustom(entry) ? <Stamp tone="ink">{t("own")}</Stamp> : null}
                     </span>
                     <span className={styles.itemMeta}>
-                      {joinMeta([typeLabel(cameraTypeLabelKey(entry.camera.type)), entry.camera.format])}
+                      {joinMeta([
+                        typeLabel(cameraTypeLabelKey(entry.camera.type)),
+                        typeLabel(cameraFormatLabelKey(entry.camera.format)) ?? entry.camera.format,
+                      ])}
                     </span>
                     {entry.fixedStock ? (
                       <span className={styles.itemMeta}>

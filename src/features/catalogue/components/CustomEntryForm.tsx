@@ -7,13 +7,18 @@ import { cx } from "@/design-system/cx";
 import { Canister } from "@/components/canister/Canister";
 import { DialogCloseButton } from "@/components/overlay/DialogCloseButton";
 import { addCustomCamera, addCustomLens, addCustomStock } from "@/features/catalogue/actions";
+import { cameraFormatLabelKey } from "@/features/catalogue/labels";
 import styles from "./CustomEntryForm.module.css";
 
 export type TCustomEntryKind = "stock" | "camera" | "lens";
 type TFormat = "35mm" | "120";
+// E3 (Round 2, audit): camera's own format list adds "other" ("Khác") —
+// stock's `formats` stays 35mm/120 only, matching `core.ts`'s schemas.
+type TCameraFormat = TFormat | "other";
 type TCanisterColor = "gold" | "green" | "blue" | "mono" | "rose";
 
 const FORMATS: TFormat[] = ["35mm", "120"];
+const CAMERA_FORMATS: TCameraFormat[] = ["35mm", "120", "other"];
 const CANISTER_COLORS: TCanisterColor[] = ["gold", "green", "blue", "mono", "rose"];
 
 // Maps each colour to its own vi.json key (t()'s keys must be literal, not
@@ -71,6 +76,7 @@ export function CustomEntryForm({
   className,
 }: CustomEntryFormProps) {
   const t = useTranslations("catalogue.customEntry");
+  const tTypes = useTranslations("catalogue.types");
   const generatedTitleId = useId();
   const headingId = titleId ?? generatedTitleId;
 
@@ -85,7 +91,7 @@ export function CustomEntryForm({
   const [qty, setQty] = useState(0);
   const [canisterColor, setCanisterColor] = useState<TCanisterColor>("gold");
   const [formats, setFormats] = useState<ReadonlySet<TFormat>>(new Set(["35mm"]));
-  const [cameraFormat, setCameraFormat] = useState<TFormat>("35mm");
+  const [cameraFormat, setCameraFormat] = useState<TCameraFormat>("35mm");
   const [focalLength, setFocalLength] = useState("");
   const [brandError, setBrandError] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
@@ -276,16 +282,19 @@ export function CustomEntryForm({
             <div className={styles.field}>
               <span className={styles.legend}>{t("cameraFormatLabel")}</span>
               <div className={styles.seg} role="group" aria-label={t("cameraFormatLabel")}>
-                {FORMATS.map((format) => (
-                  <button
-                    key={format}
-                    type="button"
-                    aria-pressed={cameraFormat === format}
-                    onClick={() => setCameraFormat(format)}
-                  >
-                    {format}
-                  </button>
-                ))}
+                {CAMERA_FORMATS.map((format) => {
+                  const labelKey = cameraFormatLabelKey(format);
+                  return (
+                    <button
+                      key={format}
+                      type="button"
+                      aria-pressed={cameraFormat === format}
+                      onClick={() => setCameraFormat(format)}
+                    >
+                      {labelKey ? tTypes(labelKey) : format}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>

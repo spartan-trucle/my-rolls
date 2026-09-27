@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import messages from "../../../messages/vi.json";
-import { cameraTypeLabelKey, stockTypeLabelKey } from "./labels";
+import { cameraFormatLabelKey, cameraTypeLabelKey, stockTypeLabelKey } from "./labels";
 
 interface IStockSeed {
   type?: string | null;
@@ -68,5 +68,19 @@ describe("cameraTypeLabelKey", () => {
     expect(cameraTypeLabelKey(null)).toBeNull();
     expect(cameraTypeLabelKey(undefined)).toBeNull();
     expect(cameraTypeLabelKey("not-a-real-type")).toBeNull();
+  });
+});
+
+describe("cameraFormatLabelKey", () => {
+  it("E3 (Round 2): maps 'other' to 'formatOther', with a vi.json label", () => {
+    expect(cameraFormatLabelKey("other")).toBe("formatOther");
+    expect(messages.catalogue.types.formatOther).toBeTruthy();
+  });
+
+  it("returns null for every literal format (rendered as-is) and for null/undefined", () => {
+    expect(cameraFormatLabelKey("35mm")).toBeNull();
+    expect(cameraFormatLabelKey("120")).toBeNull();
+    expect(cameraFormatLabelKey(null)).toBeNull();
+    expect(cameraFormatLabelKey(undefined)).toBeNull();
   });
 });

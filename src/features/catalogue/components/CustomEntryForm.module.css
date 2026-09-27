@@ -99,6 +99,24 @@
   gap: var(--space-4);
 }
 
+/* E6 (audit, CustomEntryWeb): desktop pairs the fields two-up (brand |
+   name, ISO | qty stepper, type | format) — DOM order already matches,
+   so a plain 2-col grid auto-places them without a rewrite. The preview
+   spans both columns. */
+@media (min-width: 1024px) {
+  .section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    column-gap: var(--space-6);
+    row-gap: var(--space-6);
+  }
+
+  .canisterPreview {
+    grid-column: 1 / -1;
+  }
+}
+
 .field {
   display: flex;
   flex-direction: column;

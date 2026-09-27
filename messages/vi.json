@@ -396,7 +396,8 @@
       "tlr": "Máy TLR",
       "mediumFormat": "Máy khổ trung",
       "toy": "Máy đồ chơi",
-      "singleUse": "Máy dùng một lần"
+      "singleUse": "Máy dùng một lần",
+      "formatOther": "Khác"
     }
   },
   "bag": {

@@ -57,3 +57,14 @@ export function cameraTypeLabelKey(type: string | null | undefined): TCameraType
   if (!type) return null;
   return CAMERA_TYPE_LABEL_KEYS[type] ?? null;
 }
+
+/**
+ * E3 (Round 2): `camera.format` is shown as-is ("35mm", "120") except for
+ * the "other" ("Khác") value CustomEntryForm's format segment now offers
+ * — the only format that needs translating, so this returns just that
+ * one `catalogue.types` key, or `null` for every other value (meaning:
+ * render `format` literally).
+ */
+export function cameraFormatLabelKey(format: string | null | undefined): "formatOther" | null {
+  return format === "other" ? "formatOther" : null;
+}

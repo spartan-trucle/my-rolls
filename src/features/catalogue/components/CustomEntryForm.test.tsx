@@ -84,6 +84,22 @@ describe("CustomEntryForm", () => {
     expect(onCreated).toHaveBeenCalledWith({ kind: "camera", refId: "cam-1", bagItemId: "bag-2" });
   });
 
+  it("E3 (Round 2): shows a 'Khác' format chip for camera and submits 'other'", async () => {
+    addCustomCamera.mockResolvedValue({ ok: true, refId: "cam-2", bagItemId: "bag-4" });
+    const { user, onCreated } = setup();
+
+    await user.click(screen.getByRole("button", { name: "Máy ảnh" }));
+    await user.type(screen.getByLabelText("Hãng"), "Diana");
+    await user.type(screen.getByLabelText("Tên máy"), "Mini");
+    await user.click(screen.getByRole("button", { name: "Khác" }));
+    await user.click(screen.getByRole("button", { name: "Thêm máy vào túi" }));
+
+    await waitFor(() =>
+      expect(addCustomCamera).toHaveBeenCalledWith({ brand: "Diana", model: "Mini", format: "other" }),
+    );
+    expect(onCreated).toHaveBeenCalledWith({ kind: "camera", refId: "cam-2", bagItemId: "bag-4" });
+  });
+
   it("switches to the lens section and submits", async () => {
     addCustomLens.mockResolvedValue({ ok: true, refId: "lens-1", bagItemId: "bag-3" });
     const { user, onCreated } = setup();
