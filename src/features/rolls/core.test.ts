@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { bagItem, camera, lens, roll, stock } from "@/db/schema";
 import { createTestDb } from "@/db/test-db";
 import { toSearchText } from "@/lib/search-text";
-import { createRollCore, getRollCore, listRollsCore } from "./core";
+import { createRollCore, getRollCore, listRollsCore, peekNextRollNumberCore, updateRollCore } from "./core";
 
 const OWNER = "user-1";
 const OTHER_USER = "user-2";
@@ -935,5 +935,219 @@ describe("createRollCore — past-mode month-precision dates (R2-4)", () => {
     if (!result.ok) return;
     const [rollRow] = await db.select().from(roll).where(eq(roll.id, result.rollId));
     expect(rollRow.datePrecision).toBe("day");
+  });
+});
+
+describe("createRollCore — N4 addStockToBag opt-out", () => {
+  let cleanup: (() => Promise<void>) | undefined;
+
+  afterEach(async () => {
+    await cleanup?.();
+    cleanup = undefined;
+  });
+
+  it("does not bag a freshly-picked stock when addStockToBag is false", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    const result = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id, addStockToBag: false },
+      NOW,
+    );
+
+    expect(result.ok).toBe(true);
+    const bagRows = await db
+      .select()
+      .from(bagItem)
+      .where(and(eq(bagItem.userId, OWNER), eq(bagItem.refId, stockRow.id)));
+    expect(bagRows).toHaveLength(0);
+  });
+
+  it("still bags it when addStockToBag is omitted (backward compatible)", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+
+    const bagRows = await db
+      .select()
+      .from(bagItem)
+      .where(and(eq(bagItem.userId, OWNER), eq(bagItem.refId, stockRow.id)));
+    expect(bagRows).toHaveLength(1);
+  });
+});
+
+describe("peekNextRollNumberCore", () => {
+  let cleanup: (() => Promise<void>) | undefined;
+
+  afterEach(async () => {
+    await cleanup?.();
+    cleanup = undefined;
+  });
+
+  it("returns 1 for a user with no rolls yet", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+
+    expect(await peekNextRollNumberCore(db, OWNER)).toBe(1);
+  });
+
+  it("returns one past the highest number already saved", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    await createRollCore(db, OWNER, { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id }, NOW);
+    await createRollCore(db, OWNER, { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id }, NOW);
+
+    expect(await peekNextRollNumberCore(db, OWNER)).toBe(3);
+  });
+
+  it("never counts another user's rolls", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+    await db.insert(bagItem).values({ userId: OTHER_USER, kind: "camera", refId: cameraBagItemRow.refId });
+
+    await createRollCore(db, OWNER, { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id }, NOW);
+
+    expect(await peekNextRollNumberCore(db, OTHER_USER)).toBe(1);
+  });
+});
+
+describe("updateRollCore (R4)", () => {
+  let cleanup: (() => Promise<void>) | undefined;
+
+  afterEach(async () => {
+    await cleanup?.();
+    cleanup = undefined;
+  });
+
+  it("updates the roll's fields and bumps version", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+    const created = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+    if (!created.ok) throw new Error("setup failed");
+
+    const result = await updateRollCore(
+      db,
+      OWNER,
+      {
+        rollId: created.rollId,
+        expectedVersion: 1,
+        stockId: stockRow.id,
+        cameraBagItemId: cameraBagItemRow.id,
+        name: "Đà Lạt",
+        shotIso: 800,
+      },
+      NOW,
+    );
+
+    expect(result).toEqual({ ok: true });
+    const [rollRow] = await db.select().from(roll).where(eq(roll.id, created.rollId));
+    expect(rollRow.name).toBe("Đà Lạt");
+    expect(rollRow.shotIso).toBe(800);
+    expect(rollRow.version).toBe(2);
+  });
+
+  it("rejects a stale expectedVersion", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+    const created = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+    if (!created.ok) throw new Error("setup failed");
+
+    const result = await updateRollCore(
+      db,
+      OWNER,
+      {
+        rollId: created.rollId,
+        expectedVersion: 99,
+        stockId: stockRow.id,
+        cameraBagItemId: cameraBagItemRow.id,
+      },
+      NOW,
+    );
+
+    expect(result).toEqual({ ok: false, error: "stale_version" });
+  });
+
+  it("rejects another user's roll (owner isolation)", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+    const created = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+    if (!created.ok) throw new Error("setup failed");
+
+    const result = await updateRollCore(
+      db,
+      OTHER_USER,
+      {
+        rollId: created.rollId,
+        expectedVersion: 1,
+        stockId: stockRow.id,
+        cameraBagItemId: cameraBagItemRow.id,
+      },
+      NOW,
+    );
+
+    expect(result).toEqual({ ok: false, error: "not_found" });
+  });
+
+  it("accepts month-precision dates on edit, same as create (R2-4)", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+    const created = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+    if (!created.ok) throw new Error("setup failed");
+
+    const result = await updateRollCore(
+      db,
+      OWNER,
+      {
+        rollId: created.rollId,
+        expectedVersion: 1,
+        stockId: stockRow.id,
+        cameraBagItemId: cameraBagItemRow.id,
+        shotFromMonth: { month: 10, year: 2025 },
+        shotToMonth: null,
+      },
+      NOW,
+    );
+
+    expect(result).toEqual({ ok: true });
+    const [rollRow] = await db.select().from(roll).where(eq(roll.id, created.rollId));
+    expect(rollRow.datePrecision).toBe("month");
+    expect(rollRow.shotTo).toBeNull();
   });
 });

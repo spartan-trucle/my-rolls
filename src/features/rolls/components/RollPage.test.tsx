@@ -17,6 +17,7 @@ import { RollPage } from "./RollPage";
 function makeRoll(overrides: Partial<IRollEntry>): IRollEntry {
   return {
     id: "roll-1",
+    number: 16,
     name: null,
     canisterColor: "gold",
     boxIso: 200,
@@ -26,6 +27,7 @@ function makeRoll(overrides: Partial<IRollEntry>): IRollEntry {
     locations: null,
     shotFrom: new Date("2025-10-12T12:00:00Z"),
     shotTo: null,
+    datePrecision: "day",
     notes: null,
     memory: null,
     version: 1,
@@ -42,11 +44,32 @@ describe("RollPage", () => {
   it("shows the stock, camera and \"chờ scan\" state", async () => {
     render(await RollPage({ roll: makeRoll({}) }));
 
-    expect(screen.getByRole("heading", { name: "Kodak Gold 200" })).toBeInTheDocument();
     expect(screen.getByText("Kodak Gold 200 · Màu âm")).toBeInTheDocument();
     expect(screen.getByText("Pentax K1000 · Máy cơ SLR")).toBeInTheDocument();
     expect(screen.getAllByText("Chờ scan").length).toBeGreaterThan(0);
     expect(screen.getByText("Sắp có")).toBeInTheDocument();
+  });
+
+  it("R2/N1: an unnamed roll shows 'Cuộn #N' as its title and offers to name it", async () => {
+    render(await RollPage({ roll: makeRoll({ name: null, number: 16 }) }));
+
+    expect(screen.getByRole("heading", { name: "Cuộn #16" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Đặt tên cho cuộn" })).toHaveAttribute("href", "/rolls/roll-1/edit");
+  });
+
+  it("R1: shows the just-saved banner only when justSaved is true", async () => {
+    const { rerender } = render(await RollPage({ roll: makeRoll({}) }));
+    expect(screen.queryByText("Đã lên kệ.")).not.toBeInTheDocument();
+
+    rerender(await RollPage({ roll: makeRoll({}), justSaved: true }));
+    expect(screen.getByText("Đã lên kệ.")).toBeInTheDocument();
+  });
+
+  it("R4: links to the edit route from the details heading", async () => {
+    render(await RollPage({ roll: makeRoll({}) }));
+
+    const editLinks = screen.getAllByRole("link", { name: "Sửa" });
+    expect(editLinks.some((link) => link.getAttribute("href") === "/rolls/roll-1/edit")).toBe(true);
   });
 
   it("shows the stock and camera type as a Vietnamese label, never the raw slug", async () => {
@@ -76,10 +99,16 @@ describe("RollPage", () => {
     expect(screen.getByRole("heading", { name: "Đà Lạt" })).toBeInTheDocument();
   });
 
-  it("shows the push/pull badge when it isn't 0", async () => {
+  it("shows the push/pull badge when it isn't 0 (R8: 'Đẩy +1', not just '+1')", async () => {
     render(await RollPage({ roll: makeRoll({ boxIso: 200, shotIso: 400, pushPull: "+1" }) }));
 
-    expect(screen.getByText("+1")).toBeInTheDocument();
+    expect(screen.getByText("Đẩy +1")).toBeInTheDocument();
+  });
+
+  it("R8: a pull shows 'Kéo', not 'Đẩy'", async () => {
+    render(await RollPage({ roll: makeRoll({ boxIso: 400, shotIso: 200, pushPull: "−1" }) }));
+
+    expect(screen.getByText("Kéo −1")).toBeInTheDocument();
   });
 
   it("shows shot-from and shot-to dates, formatted dd.mm.yy", async () => {

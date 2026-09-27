@@ -49,6 +49,12 @@ export const createRollInputSchema = z
     // D16: when the form was opened, so the action can derive
     // `duration_ms` for the `roll_created` event.
     formOpenedAt: z.number().int().optional(),
+    // Round 2 audit N4: "Thêm {film} vào túi cho lần sau" — whether a
+    // stock picked from the inline catalogue search (not already in the
+    // bag) should be kept there after this roll. Defaults to `true`
+    // (omitted) so every caller that predates N4 keeps today's behaviour
+    // of always bagging a new stock.
+    addStockToBag: z.boolean().optional(),
   })
   .superRefine((value, ctx) => {
     if (value.mode !== "past") return;
@@ -326,7 +332,12 @@ async function attemptCreateRoll<TQueryResult extends PgQueryResultHKT>(
     // negative or being silently turned into a count.
     let remainingQty: number | null = null;
     if (!existingBagItem[0]) {
-      await tx.insert(bagItem).values({ userId, kind: "stock", refId: finalStockRow.id });
+      // N4: a caller can opt out (the "Thêm ... vào túi cho lần sau"
+      // checkbox, unchecked) of leaving a freshly-picked stock in the bag.
+      // Omitted/`true` keeps the pre-N4 behaviour of always bagging it.
+      if (input.addStockToBag !== false) {
+        await tx.insert(bagItem).values({ userId, kind: "stock", refId: finalStockRow.id });
+      }
     } else if (existingBagItem[0].qty !== null && existingBagItem[0].qty > 0) {
       remainingQty = existingBagItem[0].qty - 1;
       await tx.update(bagItem).set({ qty: remainingQty }).where(eq(bagItem.id, existingBagItem[0].id));
@@ -429,6 +440,16 @@ export interface IRollEntry {
   stock: IRollStockSummary | null;
   camera: IRollCameraSummary | null;
   lens: IRollLensSummary | null;
+  /**
+   * R4: raw referenced ids, so `RollForm`'s edit mode can preselect the
+   * same bag entries `attemptCreateRoll` stored — `IRollStockSummary` /
+   * `IRollCameraSummary` / `IRollLensSummary` above are display-only and
+   * don't carry these. Optional for the same "old fixture" reason as
+   * `number` above.
+   */
+  stockId?: string;
+  cameraBagItemId?: string;
+  lensId?: string | null;
 }
 
 type TRollRow = typeof roll.$inferSelect;
@@ -477,6 +498,9 @@ async function hydrateRolls<TQueryResult extends PgQueryResultHKT>(
     return {
       id: row.id,
       number: row.number,
+      stockId: row.stockId,
+      cameraBagItemId: row.cameraBagItemId,
+      lensId: row.lensId,
       name: row.name,
       canisterColor: row.canisterColor,
       boxIso: row.boxIso,
@@ -539,4 +563,159 @@ export async function getRollCore<TQueryResult extends PgQueryResultHKT>(
 
   const [entry] = await hydrateRolls(db, [rollRow]);
   return entry;
+}
+
+/**
+ * N1: a read-only peek at the "Cuộn #N" `createRollCore` would assign if
+ * `userId` saved a roll right now — the form's header kicker and the
+ * "Để trống thì gọi là Cuộn #N" name hint. Not locked (no `FOR UPDATE`,
+ * unlike the real insert): it's a hint only, and can drift by one if
+ * another roll is saved in between, same trade-off the audit's "Decisions
+ * for the owner" table calls out for computed roll numbers.
+ */
+export async function peekNextRollNumberCore<TQueryResult extends PgQueryResultHKT>(
+  db: TDb<TQueryResult>,
+  userId: string,
+): Promise<number> {
+  const rows = await db
+    .select({ number: roll.number })
+    .from(roll)
+    .where(eq(roll.userId, userId))
+    .orderBy(desc(roll.number))
+    .limit(1);
+
+  return (rows[0]?.number ?? 0) + 1;
+}
+
+/**
+ * R4: fields an owner can change on an already-saved roll — everything
+ * `createRollInputSchema` accepts except `mode` (a roll doesn't switch
+ * between new/past after the fact) and the create-only knobs
+ * (`addStockToBag`, `formOpenedAt`). `expectedVersion` guards against a
+ * stale edit clobbering a newer one (optimistic concurrency over
+ * `roll.version`, D9's no-FK world already leaning on this pattern).
+ */
+export const updateRollInputSchema = z
+  .object({
+    rollId: z.string().uuid(),
+    expectedVersion: z.number().int().positive(),
+    stockId: z.string().uuid(),
+    cameraBagItemId: z.string().uuid(),
+    lensId: z.string().uuid().optional(),
+    name: z.string().trim().min(1).optional(),
+    boxIso: z.number().int().positive().optional(),
+    shotIso: z.number().int().positive().optional(),
+    exposures: z.number().int().positive().optional(),
+    format: z.enum(FORMATS).optional(),
+    locations: z.array(z.string().trim().min(1)).optional(),
+    shotFrom: z.number().int().optional(),
+    shotTo: z.number().int().optional(),
+    shotFromMonth: monthYearSchema.nullable().optional(),
+    shotToMonth: monthYearSchema.nullable().optional(),
+  })
+  .superRefine((value, ctx) => {
+    const hasExact = value.shotFrom !== undefined && value.shotTo !== undefined;
+    if (hasExact && !value.shotFromMonth && !value.shotToMonth && value.shotFrom! > value.shotTo!) {
+      ctx.addIssue({ code: "custom", path: ["shotTo"], message: "shotFrom must be at or before shotTo" });
+    }
+  });
+
+export type TUpdateRollInput = z.infer<typeof updateRollInputSchema>;
+
+export type TUpdateRollErrorCode =
+  | "unauthenticated"
+  | "validation"
+  | "not_found"
+  | "stale_version"
+  | "fixed_stock_mismatch";
+export type TUpdateRollResult = { ok: true } | { ok: false; error: TUpdateRollErrorCode };
+
+/**
+ * R4: updates `rollId` in place — owner-checked (D9) both on the roll row
+ * itself and on every referenced stock/camera/lens (same helpers
+ * `createRollCore` uses), and bumps `version`. Dates go through the same
+ * month/day resolution as create (R2-4), but always in "past"-mode shape
+ * since an edit never has a "no dates yet, loaded now" state to fall back
+ * to — a roll with no dates at all simply keeps `shotFrom`/`shotTo` `null`
+ * (`resolveDates` only requires *something* when `mode` is `"past"`).
+ */
+export async function updateRollCore<TQueryResult extends PgQueryResultHKT>(
+  db: TDb<TQueryResult>,
+  userId: string,
+  input: TUpdateRollInput,
+  now: number = Date.now(),
+): Promise<TUpdateRollResult> {
+  const stockRow = await findUsableStock(db, input.stockId, userId);
+  if (!stockRow) return { ok: false, error: "not_found" };
+
+  const cameraRow = await findUsableCamera(db, input.cameraBagItemId, userId);
+  if (!cameraRow) return { ok: false, error: "not_found" };
+
+  if (input.lensId !== undefined) {
+    const lensRow = await findUsableLens(db, input.lensId, userId);
+    if (!lensRow) return { ok: false, error: "not_found" };
+  }
+
+  let finalStockRow = stockRow;
+  if (cameraRow.fixedStockId !== null) {
+    if (cameraRow.fixedStockId !== stockRow.id) {
+      return { ok: false, error: "fixed_stock_mismatch" };
+    }
+    finalStockRow = stockRow;
+  }
+
+  const hasMonthKeys = input.shotFromMonth !== undefined || input.shotToMonth !== undefined;
+  const resolvedDates = resolveDates(
+    { ...input, mode: hasMonthKeys || input.shotFrom !== undefined ? "past" : "new" } as TCreateRollInput,
+    now,
+  );
+  // An edit with no dates at all (never had any, still doesn't) is valid —
+  // `resolveDates` only rejects "past" mode when nothing was sent, which a
+  // synthetic `mode: "new"` never triggers when both date keys are absent.
+  const dates =
+    resolvedDates.ok
+      ? resolvedDates
+      : { shotFrom: null, shotTo: null, datePrecision: null as "day" | "month" | null };
+  if (!resolvedDates.ok && (hasMonthKeys || input.shotFrom !== undefined)) {
+    return { ok: false, error: "validation" };
+  }
+
+  const existingRows = await db
+    .select({ id: roll.id, version: roll.version })
+    .from(roll)
+    .where(and(eq(roll.id, input.rollId), eq(roll.userId, userId), isNull(roll.deletedAt)))
+    .limit(1);
+  const existing = existingRows[0];
+  if (!existing) return { ok: false, error: "not_found" };
+  if (existing.version !== input.expectedVersion) return { ok: false, error: "stale_version" };
+
+  const result = await db
+    .update(roll)
+    .set({
+      stockId: finalStockRow.id,
+      cameraBagItemId: input.cameraBagItemId,
+      lensId: input.lensId ?? null,
+      name: input.name ?? null,
+      canisterColor: finalStockRow.canisterColor ?? null,
+      boxIso: input.boxIso ?? finalStockRow.iso ?? null,
+      shotIso: input.shotIso ?? null,
+      exposures: input.exposures ?? null,
+      format: input.format ?? null,
+      locations: input.locations ?? null,
+      shotFrom: dates.shotFrom,
+      shotTo: dates.shotTo,
+      datePrecision: dates.datePrecision,
+      version: existing.version + 1,
+    })
+    .where(and(eq(roll.id, input.rollId), eq(roll.userId, userId), eq(roll.version, input.expectedVersion)));
+
+  // `rowCount` (drizzle-orm / pg / PGlite all expose it): a concurrent
+  // edit could have bumped the version between the read above and this
+  // write, in which case the `eq(roll.version, ...)` guard matches zero
+  // rows rather than the SELECT's own stale read.
+  if ((result as { rowCount?: number }).rowCount === 0) {
+    return { ok: false, error: "stale_version" };
+  }
+
+  return { ok: true };
 }
