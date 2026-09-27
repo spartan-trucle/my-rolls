@@ -82,7 +82,10 @@ export function RollForm({ mode }: RollFormProps) {
   // selected stock's box ISO, same reasoning as the selections above.
   const [boxIsoOverride, setBoxIsoOverride] = useState<string | null>(null);
   const [shotIso, setShotIso] = useState("");
-  const [exposures, setExposures] = useState("");
+  // `null` means "not edited yet" — falls back to `defaultExposures` below
+  // (owner feedback: 36 prefilled for 35mm, empty for a 120-only stock),
+  // same override pattern as `boxIsoOverride`/`format`.
+  const [exposuresOverride, setExposuresOverride] = useState<string | null>(null);
   const [format, setFormat] = useState<TFormat | null>(null);
   const [locations, setLocations] = useState<string[]>([]);
   const [locationDraft, setLocationDraft] = useState("");
@@ -133,6 +136,18 @@ export function RollForm({ mode }: RollFormProps) {
   const boxIsoNumber = boxIso.trim() === "" ? null : Number(boxIso);
   const shotIsoNumber = shotIso.trim() === "" ? null : Number(shotIso);
   const pushPull = formatPushPull(pushPullStops(boxIsoNumber, shotIsoNumber));
+
+  // Owner feedback: format defaults to 35mm; exposures defaults to 36 — but
+  // if the selected stock only comes in 120, format defaults to 120 and
+  // exposures is left empty instead (120 frame counts vary by camera).
+  // Both stay editable (the `format`/`exposuresOverride` state above wins
+  // once the shooter picks their own).
+  const stockFormats = selectedStock?.formats ?? [];
+  const stockOnly120 = stockFormats.length > 0 && stockFormats.every((value) => value === "120");
+  const defaultFormat: TFormat = stockOnly120 ? "120" : "35mm";
+  const effectiveFormat = format ?? defaultFormat;
+  const defaultExposures = effectiveFormat === "35mm" ? "36" : "";
+  const exposures = exposuresOverride ?? defaultExposures;
 
   async function refreshBag(): Promise<TBagEntry[]> {
     const entries = await listBag();
@@ -233,7 +248,7 @@ export function RollForm({ mode }: RollFormProps) {
       boxIso: boxIsoNumber ?? undefined,
       shotIso: shotIsoNumber ?? undefined,
       exposures: exposures.trim() ? Number(exposures) : undefined,
-      format: format ?? undefined,
+      format: effectiveFormat,
       locations: locations.length > 0 ? locations : undefined,
       shotFrom: pastDates?.shotFrom,
       shotTo: pastDates?.shotTo,
@@ -430,7 +445,7 @@ export function RollForm({ mode }: RollFormProps) {
               <span className={styles.fieldLabel}>{t("formatLabel")}</span>
               <div className={styles.seg} role="group" aria-label={t("formatLabel")}>
                 {FORMATS.map((value) => (
-                  <button key={value} type="button" aria-pressed={format === value} onClick={() => setFormat(value)}>
+                  <button key={value} type="button" aria-pressed={effectiveFormat === value} onClick={() => setFormat(value)}>
                     {value}
                   </button>
                 ))}
@@ -441,7 +456,7 @@ export function RollForm({ mode }: RollFormProps) {
               mono
               inputMode="numeric"
               value={exposures}
-              onChange={(event) => setExposures(event.target.value)}
+              onChange={(event) => setExposuresOverride(event.target.value)}
             />
           </div>
 

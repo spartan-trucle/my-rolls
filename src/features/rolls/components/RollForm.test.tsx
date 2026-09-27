@@ -72,9 +72,20 @@ const hp5Stock = makeStock({
   type: "bw",
 });
 
+const portra120Stock = makeStock({
+  id: "stock-portra-120",
+  brand: "Kodak",
+  name: "Portra 400",
+  iso: 400,
+  formats: ["120"],
+  type: "color-negative",
+});
+
 const GOLD: TBagEntry = { bagItemId: "bag-stock-gold", kind: "stock", createdAt: new Date("2026-09-01"), stock: goldStock };
 
 const HP5: TBagEntry = { bagItemId: "bag-stock-hp5", kind: "stock", createdAt: new Date("2026-09-02"), stock: hp5Stock };
+
+const PORTRA_120: TBagEntry = { bagItemId: "bag-stock-portra-120", kind: "stock", createdAt: new Date("2026-09-03"), stock: portra120Stock };
 
 const k1000Camera = makeCamera({});
 
@@ -291,5 +302,46 @@ describe("RollForm", () => {
     expect(input).toMatchObject({ mode: "new", stockId: "stock-gold", cameraBagItemId: "bag-cam-k1000" });
     expect(typeof input.formOpenedAt).toBe("number");
     expect(push).toHaveBeenCalledWith("/rolls/roll-1");
+  });
+
+  it("prefills format 35mm and exposures 36, still editable, and submits them uncut when left alone", async () => {
+    listBag.mockResolvedValue([GOLD, K1000]);
+    createRoll.mockResolvedValue({ ok: true, rollId: "roll-2" });
+    const { user } = setup();
+
+    await screen.findByText("Kodak Gold 200", { exact: false });
+    await user.click(screen.getByRole("button", { name: /^Thêm chi tiết/ }));
+
+    const format35 = screen.getByRole("button", { name: "35mm" });
+    expect(format35).toHaveAttribute("aria-pressed", "true");
+    const exposuresField = screen.getByLabelText("Số kiểu");
+    expect(exposuresField).toHaveValue("36");
+
+    await user.clear(exposuresField);
+    await user.type(exposuresField, "24");
+    await user.click(screen.getByRole("button", { name: "Lưu cuộn" }));
+
+    await waitFor(() => expect(createRoll).toHaveBeenCalledTimes(1));
+    const [input] = createRoll.mock.calls[0];
+    expect(input).toMatchObject({ format: "35mm", exposures: 24 });
+  });
+
+  it("defaults format to 120 and leaves exposures empty for a 120-only stock", async () => {
+    listBag.mockResolvedValue([PORTRA_120, K1000]);
+    createRoll.mockResolvedValue({ ok: true, rollId: "roll-3" });
+    const { user } = setup();
+
+    await screen.findByText("Kodak Portra 400", { exact: false });
+    await user.click(screen.getByRole("button", { name: /^Thêm chi tiết/ }));
+
+    expect(screen.getByRole("button", { name: "120" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByLabelText("Số kiểu")).toHaveValue("");
+
+    await user.click(screen.getByRole("button", { name: "Lưu cuộn" }));
+
+    await waitFor(() => expect(createRoll).toHaveBeenCalledTimes(1));
+    const [input] = createRoll.mock.calls[0];
+    expect(input).toMatchObject({ format: "120" });
+    expect(input.exposures).toBeUndefined();
   });
 });
