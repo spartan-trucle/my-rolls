@@ -38,9 +38,12 @@ describe("decideProxyAccess", () => {
     );
 
     it.each(["/spike/og", "/spike/share"])(
-      "allows %s under /spike (D30: device tests can't pass preview protection or Google sign-in)",
+      "sends %s to /sign-in (spike routes removed after Phase 0)",
       (pathname) => {
-        expect(decideProxyAccess(pathname, signedIn)).toEqual({ type: "allow" });
+        expect(decideProxyAccess(pathname, signedIn)).toEqual({
+          type: "redirect",
+          to: "/sign-in",
+        });
       },
     );
 
