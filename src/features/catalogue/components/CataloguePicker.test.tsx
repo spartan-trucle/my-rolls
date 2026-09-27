@@ -1,5 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ComponentProps } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/i18n/test-utils";
 
@@ -32,11 +33,11 @@ const K1000 = {
   format: "35mm",
 };
 
-function setup() {
+function setup(extraProps: Partial<ComponentProps<typeof CataloguePicker>> = {}) {
   const user = userEvent.setup();
   const onPicked = vi.fn();
   const onAddCustom = vi.fn();
-  renderWithIntl(<CataloguePicker onPicked={onPicked} onAddCustom={onAddCustom} />);
+  renderWithIntl(<CataloguePicker onPicked={onPicked} onAddCustom={onAddCustom} {...extraProps} />);
   return { user, onPicked, onAddCustom };
 }
 
@@ -198,5 +199,28 @@ describe("CataloguePicker", () => {
 
     await waitFor(() => expect(input).toHaveValue(""));
     expect(await screen.findByRole("button", { name: "Kodak Gold 200" })).toBeInTheDocument();
+  });
+
+  it("C1: shows the result count above a search's hits", async () => {
+    searchCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
+    const { user } = setup();
+
+    await user.type(screen.getByLabelText("Tìm trong danh mục"), "gold");
+
+    expect(await screen.findByText("1 kết quả cho “gold”")).toBeInTheDocument();
+  });
+
+  it("BAG-2 (N6): shows '×N' for a stock already counted in the bag", async () => {
+    listCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
+    setup({ bagQtyByKey: new Map([["stock:stock-1", 3]]) });
+
+    expect(await screen.findByText("×3")).toBeInTheDocument();
+  });
+
+  it("BAG-2 (N6): shows 'hết' for a stock counted at 0 in the bag", async () => {
+    listCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
+    setup({ bagQtyByKey: new Map([["stock:stock-1", 0]]) });
+
+    expect(await screen.findByText("hết")).toBeInTheDocument();
   });
 });

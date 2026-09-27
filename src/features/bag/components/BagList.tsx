@@ -99,6 +99,15 @@ export function BagList({ initialEntries }: BagListProps) {
     [entries],
   );
 
+  // BAG-2 (N6): the catalogue picker's "×N"/"hết" chips for a stock already in this bag.
+  const bagQtyByKey = useMemo(
+    () =>
+      new Map(
+        entries.filter((entry) => entry.kind === "stock").map((entry) => [`stock:${entry.stock.id}`, entry.qty ?? null]),
+      ),
+    [entries],
+  );
+
   // BAG-2 (R2-2/R2-3): the counts line, film heading, and canister strip
   // all come from the same pure summary over `entries` — no extra fetch.
   const summary = useMemo(() => summarizeBag(entries), [entries]);
@@ -360,6 +369,7 @@ export function BagList({ initialEntries }: BagListProps) {
             titleId={dialogTitleId}
             initialKind={dialog.kind}
             bagRefIds={bagRefIds}
+            bagQtyByKey={bagQtyByKey}
             onPicked={handlePicked}
             onAddCustom={(kind, query) => setDialog({ view: "custom", kind, query })}
             onClose={closeDialog}

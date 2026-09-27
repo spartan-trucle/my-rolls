@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { useTranslations } from "next-intl";
-import { Field, Icon, Stamp } from "@/design-system";
+import { Field, Icon, Scribble, Stamp } from "@/design-system";
 import { cx } from "@/design-system/cx";
 import { DialogCloseButton } from "@/components/overlay/DialogCloseButton";
 import { addToBag } from "@/features/bag/actions";
@@ -18,6 +18,13 @@ export interface CataloguePickerProps {
   initialKind?: TCatalogueKind;
   /** Composite `${kind}:${id}` keys already in the bag, so a repeat pick shows "Trong túi" from the start. */
   bagRefIds?: ReadonlySet<string>;
+  /**
+   * BAG-2 (R2-2, audit N6): `stock:${id}` → the bag's qty for that stock
+   * (`null`/`undefined` counted as "not counted"), so a film already in
+   * the bag shows "×3" or "hết" instead of the plain "Trong túi" stamp.
+   * Omitted where the caller (e.g. the roll form) doesn't track quantity.
+   */
+  bagQtyByKey?: ReadonlyMap<string, number | null>;
   /** Fires once `addToBag` succeeds for a chosen catalogue entry. */
   onPicked: (entry: TCatalogueEntry) => void;
   /** The no-match state's action, and the results list's "không thấy?" link — opens `CustomEntryForm` prefilled with what was typed. */
@@ -53,6 +60,7 @@ function CanisterSwatch({ color }: { color: string | null }) {
 export function CataloguePicker({
   initialKind = "stock",
   bagRefIds,
+  bagQtyByKey,
   onPicked,
   onAddCustom,
   onClose,
@@ -175,20 +183,30 @@ export function CataloguePicker({
       <div className={styles.results}>
         {hasHits ? (
           <>
+            {isSearching ? (
+              <p className={styles.resultCount}>{t("resultCount", { count: entries.length, query: debouncedQuery })}</p>
+            ) : null}
             <ul className={styles.list}>
               {displayEntries.map((entry) => {
                 const key = entryKey(entry.kind, entry.id);
                 const inBag = addedKeys.has(key);
+                // C3 (audit): the board drops the brand from the row name
+                // (it's already first in `meta`) for stock. Left as
+                // `brand + name` here instead — RollForm (W2) asserts on
+                // the full "Kodak Gold 200" label, and this component is
+                // shared between the two; flagged for W2 to decide.
                 const label =
-                  entry.kind === "stock"
-                    ? `${entry.brand} ${entry.name}`
-                    : `${entry.brand} ${entry.model}`;
+                  entry.kind === "stock" ? `${entry.brand} ${entry.name}` : `${entry.brand} ${entry.model}`;
                 const typeKey = entry.kind === "stock" ? stockTypeLabelKey(entry.type) : cameraTypeLabelKey(entry.type);
                 const typeLabel = typeKey ? tTypes(typeKey) : null;
                 const meta =
                   entry.kind === "stock"
                     ? joinMeta([entry.iso != null && `ISO ${entry.iso}`, entry.brand, typeLabel, entry.formats?.join(", ")])
                     : joinMeta([entry.brand, typeLabel, entry.format]);
+                // BAG-2 (N6): a stock already counted in the bag shows
+                // "×N" (or "hết" at 0) instead of the plain "Trong túi" stamp.
+                const bagQty = entry.kind === "stock" ? bagQtyByKey?.get(key) : undefined;
+                const qtyBadge = bagQty != null ? (bagQty > 0 ? `×${bagQty}` : t("stockOut")) : null;
 
                 return (
                   <li key={entry.id}>
@@ -210,7 +228,9 @@ export function CataloguePicker({
                         <span className={styles.resultName}>{label}</span>
                         {meta ? <span className={styles.resultMeta}>{meta}</span> : null}
                       </span>
-                      {inBag ? (
+                      {qtyBadge ? (
+                        <Stamp tone="ink">{qtyBadge}</Stamp>
+                      ) : inBag ? (
                         <Stamp tone="ink">{t("inBag")}</Stamp>
                       ) : (
                         <span className={styles.pick} aria-hidden="true">
@@ -231,6 +251,10 @@ export function CataloguePicker({
 
         {noHits ? (
           <div className={styles.empty} data-testid={`${noun}-empty`}>
+            <span className={styles.emptyCanister} aria-hidden="true">
+              ?
+            </span>
+            <Scribble size="sm">{t("emptyScribble")}</Scribble>
             <p className={styles.emptyTitle}>{t("emptyTitle", { query: debouncedQuery })}</p>
             <p className={styles.emptyBody}>{t(kind === "stock" ? "emptyBodyStock" : "emptyBodyCamera")}</p>
             <button type="button" className={styles.emptyAdd} onClick={() => onAddCustom(kind, rawQuery.trim())}>

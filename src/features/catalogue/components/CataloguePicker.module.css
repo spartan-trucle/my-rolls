@@ -115,6 +115,16 @@
   }
 }
 
+.resultCount {
+  margin: 0 0 var(--space-2);
+  padding: 0 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
 .list {
   list-style: none;
   margin: 0;
@@ -238,6 +248,20 @@
   text-align: center;
   gap: var(--space-3);
   padding: var(--space-8) var(--space-2) var(--space-2);
+}
+
+.emptyCanister {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  border: 2px dashed var(--line-strong);
+  color: var(--ink-muted);
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
 }
 
 .emptyTitle {
