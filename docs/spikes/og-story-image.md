@@ -41,9 +41,11 @@ tiên", and every Vietnamese tone mark on a/e/o/u/y. Public and `noindex`
 
 | Check | Result | Notes |
 |---|---|---|
-| Diacritics render correctly (by eye) | | |
-| Font fetch time from `sin1` (cold) | | Vercel function logs / `Server-Timing`, or time the request by hand |
-| Font fetch time from `sin1` (warm, same text) | | Module-scope memoisation (D31) should make this ~0 |
+| Diacritics render correctly (by eye) | Pass | Trúc, 27.09.2026, on production |
+| First request, new cache key (cold) | 2.08 s total, 1.74 s to first byte | Timed by hand from Vietnam, 27.09.2026 (`curl`, cache-busting query); includes the Google Fonts fetch and the render |
+| Repeat requests (warm) | 0.58–0.84 s total, 0.40–0.48 s to first byte | Fonts memoised in the function (D31); the PNG is still rendered each time, not served from the CDN |
 | Google Fonts unreachable behaviour | 503, confirmed in `route.test.ts` | No fallback font, by design (D31) |
 
-_Filled in by Trúc after this PR merges._
+**Output size: 3.1 MB** (1080 × 1920 RGBA PNG with a photo). Too heavy to render per share tap on a phone connection. Before Phase 4 (SHARE-4), render once per roll version and cache in R2 as ADR-001 already plans, and try JPEG output or a smaller photo.
+
+Result: **passed** (27.09.2026). Roadmap box ticked.

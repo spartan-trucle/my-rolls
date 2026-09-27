@@ -9,10 +9,9 @@ export interface IGoogleFontFile {
 }
 
 /**
- * Google Fonts is unreachable, or its CSS2 response can't be parsed. Typed
- * so `spike/og/route.tsx` can catch it specifically and answer 503 instead
- * of letting `ImageResponse` fail on undefined font data (D31: no fallback
- * font).
+ * Google Fonts is unreachable, or its CSS2 response can't be parsed. Kept
+ * for Phase 4 story cards (SHARE-4) to render with custom fonts. Allows
+ * callers to handle the error specifically when needed.
  */
 export class GoogleFontError extends Error {
   constructor(message: string, options?: { cause?: unknown }) {
@@ -86,11 +85,11 @@ const cache = new Map<string, Promise<IGoogleFontFile[]>>();
 
 /**
  * Fetches Be Vietnam Pro 400 and 700 from Google Fonts, subset to the exact
- * `text` on the card (D31), and returns their raw TTF bytes for
- * `ImageResponse`'s `fonts` option. Memoised per `text` at module scope, so
- * repeat renders of the same card don't refetch. Throws `GoogleFontError`
- * — never a fallback font — when Google is unreachable or the response
- * can't be parsed; `spike/og/route.tsx` turns that into a 503.
+ * `text` on the card, and returns their raw TTF bytes for `ImageResponse`'s
+ * `fonts` option. Memoised per `text` at module scope, so repeat renders of
+ * the same card don't refetch. Throws `GoogleFontError` when Google is
+ * unreachable or the response can't be parsed; callers must handle this
+ * instead of using a fallback font.
  */
 export function loadGoogleFontFiles(text: string): Promise<IGoogleFontFile[]> {
   const cached = cache.get(text);

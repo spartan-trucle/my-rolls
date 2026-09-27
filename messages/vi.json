@@ -214,21 +214,5 @@
       "terms": "Điều khoản",
       "privacy": "Quyền riêng tư"
     }
-  },
-  "spike": {
-    "og": {
-      "title": "Cuộn phim đầu tiên",
-      "keeperLabel": "tấm ưng",
-      "toneMarks": "ả ạ ằ ẵ ặ ề ễ ệ ổ ỗ ộ ờ ợ ử ữ ự ỳ ỷ ỹ ỵ"
-    },
-    "share": {
-      "heading": "Thử chia sẻ story",
-      "userAgentLabel": "User agent",
-      "shareButton": "Chia sẻ",
-      "shareSuccess": "Đã gửi đi",
-      "errorPrefix": "Lỗi",
-      "downloadFallback": "Tải ảnh xuống",
-      "openInBrowserHint": "Không chia sẻ file được ở đây — tải xuống rồi mở trong trình duyệt để thử lại"
-    }
   }
 }
