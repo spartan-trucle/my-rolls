@@ -29,7 +29,8 @@ Stand up the whole Cuộn stack from [ADR-001](../../docs/architecture/adr-001-t
 - [x] Stage G merged as PR #5 (`b65c245`, 27.09.2026). Roadmap rev 27 ticks `next-intl`, Neon + Drizzle, Vercel `sin1`, PostHog; R2 buckets, Google sign-in and both spikes stay open until their checks below hold. Stage G on `feature/phase-0-storage-observability`: plan v5 below (G1–G5), approved by Trúc 25.09.2026 (OG font fetched from Google Fonts at render time, no font files, D31). G1–G4 done; PostHog browser + server errors confirmed in project `my-rolls` by Trúc and the test triggers removed (27.09.2026); step 24 done with four buckets (D35); G5: private-bucket smoke passes, public bucket waits on `R2_PUBLIC_URL` (r2.dev URL) and bucket CORS; spike notes in `docs/spikes/` wait for the device test on production
 - [x] R2 public URL + CORS fixed and `pnpm r2:smoke` passes all steps; phone sign-in done (both Trúc, 27.09.2026). Roadmap rev 28 ticks "R2 buckets" and "Google sign-in"
 - [x] Production unblocked by fast-forwarding `main` to owner-authored `ec20d20` (Trúc). Both spikes passed on production (Trúc, 27.09.2026), results in `docs/spikes/`; roadmap rev 29 ticks them. Story PNG is 3.1 MB: cache in R2 and try JPEG before Phase 4. Merge PRs with "Rebase and merge" so Vercel Hobby deploys them
-- [ ] **Open:** `.env.example` gets the `NEXT_PUBLIC_POSTHOG_*` and `R2_*` names (Trúc); Stage H: exit check, then delete `/spike/*`
+- [x] Stage H step 29: exit check holds: phone sign-in on a preview URL (Trúc) and the story PNG renders "tấm ưng" (Trúc). Roadmap rev 30 ticks the Phase 0 exit (27.09.2026)
+- [ ] **Open:** Stage H: delete `/spike/*` and its public prefix, README status; `.env.example` gets the `NEXT_PUBLIC_POSTHOG_*` and `R2_*` names (Trúc)
 - [x] `.env.development.local` with the Neon `dev` branch URLs (D23, Trúc). `next dev` loads it ahead of `.env.local`; local `/api/health` returns `{"ok":true,"db":"up"}` (25.09.2026)
 
 ### Found during Stages A and B
