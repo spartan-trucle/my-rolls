@@ -27,6 +27,23 @@ describe("decideProxyAccess", () => {
       expect(decideProxyAccess(pathname, signedIn)).toEqual({ type: "allow" });
     });
 
+    it.each(["/api/dev/boom", "/api/dev/anything"])(
+      "sends %s to /sign-in (not a public route)",
+      (pathname) => {
+        expect(decideProxyAccess(pathname, signedIn)).toEqual({
+          type: "redirect",
+          to: "/sign-in",
+        });
+      },
+    );
+
+    it.each(["/spike/og", "/spike/share"])(
+      "allows %s under /spike (D30: device tests can't pass preview protection or Google sign-in)",
+      (pathname) => {
+        expect(decideProxyAccess(pathname, signedIn)).toEqual({ type: "allow" });
+      },
+    );
+
     it("sends /sign-up/profile to /sign-in (it's not public)", () => {
       expect(decideProxyAccess("/sign-up/profile", signedIn)).toEqual({
         type: "redirect",
