@@ -402,5 +402,36 @@
       "detailLocations": "Nơi chụp",
       "backToShelf": "Về kệ"
     }
+  },
+  "onboarding": {
+    "stepLabel": "Làm quen · {step} / 2",
+    "progressLabel": "Bước {step} trên 2",
+    "skip": "Bỏ qua",
+    "bag": {
+      "title": "Trong túi bạn có gì?",
+      "subtitle": "Chọn máy và film bạn hay dùng. Lúc ghi cuộn, túi hiện ra trước nên chỉ mất vài giây.",
+      "searchLabel": "Tìm trong danh mục",
+      "searchHint": "Gõ không dấu cũng tìm được.",
+      "searchPlaceholder": "VD: portra, fm2, k1000",
+      "cameraGroupLabel": "Máy ảnh",
+      "stockGroupLabel": "Film",
+      "addCustomCamera": "+ Máy khác",
+      "addCustomStock": "+ Film khác",
+      "footerHint": "Sửa túi lúc nào cũng được trong mục Túi.",
+      "continue": "Tiếp tục"
+    },
+    "firstRoll": {
+      "title": "Lên kệ cuộn đầu tiên",
+      "subtitle": "Có scan cũ trong máy? Thêm một cuộn đã chụp để kệ không trống ngay hôm nay.",
+      "emptyShelfNote": "kệ còn trống trơn ≧ω≦",
+      "modeLegend": "Bạn muốn bắt đầu thế nào?",
+      "modePastLabel": "Thêm cuộn đã chụp",
+      "modePastRecommended": "nên thử",
+      "modePastBody": "Có sẵn scan từ lab. Chọn film, máy rồi tải ảnh lên.",
+      "modeCurrentLabel": "Ghi cuộn đang chụp",
+      "modeCurrentBody": "Film còn nằm trong máy. Scan về thì thêm sau.",
+      "start": "Bắt đầu",
+      "later": "Để sau, xem kệ trước"
+    }
   }
 }
