@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "tokens": "tsx scripts/build-tokens.ts",
+    "r2:smoke": "tsx --conditions=react-server scripts/r2-smoke.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "vercel-build": "pnpm db:migrate && next build",
