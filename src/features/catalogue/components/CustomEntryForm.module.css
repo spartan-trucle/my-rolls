@@ -93,6 +93,12 @@
   gap: var(--space-6);
 }
 
+.canisterPreview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
 .field {
   display: flex;
   flex-direction: column;

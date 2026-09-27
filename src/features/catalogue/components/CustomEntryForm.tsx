@@ -2,8 +2,9 @@
 
 import { useId, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
-import { Field, Icon } from "@/design-system";
+import { Field, Icon, Scribble } from "@/design-system";
 import { cx } from "@/design-system/cx";
+import { Canister } from "@/components/canister/Canister";
 import { DialogCloseButton } from "@/components/overlay/DialogCloseButton";
 import { addCustomCamera, addCustomLens, addCustomStock } from "@/features/catalogue/actions";
 import styles from "./CustomEntryForm.module.css";
@@ -173,6 +174,12 @@ export function CustomEntryForm({
 
         {kind === "stock" ? (
           <div className={styles.section}>
+            <div className={styles.canisterPreview}>
+              <Canister color={canisterColor} iso={iso.trim() === "" ? null : Number(iso)} size="md" />
+              <Scribble arrow="left" size="sm">
+                {t("canisterPreviewScribble")}
+              </Scribble>
+            </div>
             <Field
               label={t("stockBrandLabel")}
               placeholder={t("stockBrandPlaceholder")}

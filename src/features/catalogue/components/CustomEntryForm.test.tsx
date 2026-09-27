@@ -129,6 +129,12 @@ describe("CustomEntryForm", () => {
     await waitFor(() => expect(addCustomStock).toHaveBeenCalledWith(expect.objectContaining({ qty: 2 })));
   });
 
+  it("E1: shows a live canister preview scribble for the stock section", () => {
+    setup();
+
+    expect(screen.getByText("vỏ cuộn của bạn")).toBeInTheDocument();
+  });
+
   it("E5: shows '‹ Quay lại' instead of the close ✕ when onBack is given", async () => {
     const onBack = vi.fn();
     const user = userEvent.setup();
