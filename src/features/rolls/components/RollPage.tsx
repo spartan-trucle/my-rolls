@@ -1,8 +1,7 @@
-import type { CSSProperties } from "react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Icon, Scribble, Stamp } from "@/design-system";
-import { cx } from "@/design-system/cx";
+import { Canister } from "@/components/canister/Canister";
 import { cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
 import type { IRollEntry } from "@/features/rolls/core";
 import { formatRollDate } from "@/features/rolls/format-date";
@@ -27,28 +26,6 @@ function DetailRow({ label, value }: { label: string; value: string | null }) {
 function joinMeta(parts: Array<string | false | null | undefined>): string | null {
   const joined = parts.filter(Boolean).join(" · ");
   return joined === "" ? null : joined;
-}
-
-/**
- * R6: a static drawn canister in the stock's colour, ISO on the label —
- * customising it (a photo, a pattern) stays Phase 3 (CAN-2).
- *
- * A local stand-in for W3's `src/components/canister/Canister.tsx`
- * (same props: `color`, `iso`, `size`, `className`), which isn't on this
- * branch yet — swapping the import in at merge is then a one-line change,
- * no call-site edits.
- */
-function Canister({ color, iso, size = "md", className }: { color: string | null; iso?: number | null; size?: "sm" | "md"; className?: string }) {
-  const style = { "--rc-stock": `var(--stock-${color ?? "gold"})` } as CSSProperties;
-  return (
-    <div className={cx(styles.can, size === "sm" && styles.canSm, className)} style={style} aria-hidden="true">
-      <div className={styles.canCap} />
-      <div className={styles.canBody}>
-        <span className={styles.canLabel}>{iso ?? ""}</span>
-      </div>
-      <div className={styles.canLeader} />
-    </div>
-  );
 }
 
 /**
@@ -187,7 +164,7 @@ export async function RollPage({ roll, justSaved = false }: RollPageProps) {
         </div>
 
         <aside className={styles.aside} aria-hidden="true">
-          <Canister color={roll.canisterColor} iso={roll.boxIso} />
+          <Canister color={roll.canisterColor} iso={roll.boxIso} size="md" />
           <Scribble arrow="left" size="sm">
             {t("canisterScribble")}
           </Scribble>

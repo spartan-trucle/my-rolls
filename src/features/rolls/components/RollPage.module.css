@@ -129,60 +129,6 @@
   color: var(--ink-muted);
 }
 
-/* R6: the board's `.rc-can` — a static drawn canister, stock-coloured. */
-.can {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.canCap {
-  width: 52px;
-  height: 8px;
-  background: var(--film);
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-}
-
-.canBody {
-  width: 70px;
-  height: 92px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--rc-stock, var(--stock-gold));
-  border-radius: var(--radius-sm);
-}
-
-.canLabel {
-  font: 700 18px/1 var(--font-mono);
-  color: var(--paper);
-}
-
-.canLeader {
-  width: 14px;
-  height: 20px;
-  background: var(--film);
-}
-
-.canSm .canCap {
-  width: 34px;
-  height: 6px;
-}
-
-.canSm .canBody {
-  width: 44px;
-  height: 60px;
-}
-
-.canSm .canLabel {
-  font-size: 13px;
-}
-
-.canSm .canLeader {
-  width: 10px;
-  height: 14px;
-}
-
 .heading {
   margin: 0;
   font-family: var(--font-display);
