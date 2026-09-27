@@ -1,5 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ComponentProps } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/i18n/test-utils";
 
@@ -32,11 +33,11 @@ const K1000 = {
   format: "35mm",
 };
 
-function setup() {
+function setup(extraProps: Partial<ComponentProps<typeof CataloguePicker>> = {}) {
   const user = userEvent.setup();
   const onPicked = vi.fn();
   const onAddCustom = vi.fn();
-  renderWithIntl(<CataloguePicker onPicked={onPicked} onAddCustom={onAddCustom} />);
+  renderWithIntl(<CataloguePicker onPicked={onPicked} onAddCustom={onAddCustom} {...extraProps} />);
   return { user, onPicked, onAddCustom };
 }
 
@@ -55,7 +56,7 @@ describe("CataloguePicker", () => {
     listCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
     setup();
 
-    expect(await screen.findByRole("button", { name: "Kodak Gold 200" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Gold 200" })).toBeInTheDocument();
     expect(listCatalogue).toHaveBeenCalledWith({ kind: "stock" });
     expect(searchCatalogue).not.toHaveBeenCalled();
   });
@@ -65,12 +66,12 @@ describe("CataloguePicker", () => {
     searchCatalogue.mockResolvedValue({ ok: true, entries: [K1000] });
     const { user } = setup();
 
-    await screen.findByRole("button", { name: "Kodak Gold 200" });
+    await screen.findByRole("button", { name: "Gold 200" });
 
     await user.type(screen.getByLabelText("Tìm trong danh mục"), "k1000");
 
     expect(await screen.findByRole("button", { name: "Pentax K1000" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Kodak Gold 200" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Gold 200" })).not.toBeInTheDocument();
   });
 
   it("clearing the search box brings the list back", async () => {
@@ -84,7 +85,7 @@ describe("CataloguePicker", () => {
 
     await user.clear(input);
 
-    expect(await screen.findByRole("button", { name: "Kodak Gold 200" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Gold 200" })).toBeInTheDocument();
   });
 
   it("only the results list scrolls, not the whole dialog (fix 2's constant-height box)", () => {
@@ -128,7 +129,7 @@ describe("CataloguePicker", () => {
 
     await user.type(screen.getByLabelText("Tìm trong danh mục"), "gold");
 
-    const result = await screen.findByRole("button", { name: "Kodak Gold 200" });
+    const result = await screen.findByRole("button", { name: "Gold 200" });
     await user.click(result);
 
     expect(addToBag).toHaveBeenCalledWith({ kind: "stock", refId: "stock-1" });
@@ -142,7 +143,7 @@ describe("CataloguePicker", () => {
 
     await user.type(screen.getByLabelText("Tìm trong danh mục"), "gold");
 
-    expect(await screen.findByText(/Màu âm/)).toBeInTheDocument();
+    expect((await screen.findAllByText(/Màu âm/)).length).toBeGreaterThan(0);
     expect(screen.queryByText(/color-negative/)).not.toBeInTheDocument();
   });
 
@@ -153,7 +154,7 @@ describe("CataloguePicker", () => {
 
     await user.type(screen.getByLabelText("Tìm trong danh mục"), "gold");
 
-    const result = await screen.findByRole("button", { name: "Kodak Gold 200" });
+    const result = await screen.findByRole("button", { name: "Gold 200" });
     await user.click(result);
     await waitFor(() => expect(result).toBeDisabled());
 
@@ -170,7 +171,7 @@ describe("CataloguePicker", () => {
 
     expect(await screen.findByRole("button", { name: "Pentax K1000" })).toBeInTheDocument();
     expect(screen.getByText("Không thấy máy của bạn?")).toBeInTheDocument();
-    expect(screen.getByText(/Máy cơ SLR/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Máy cơ SLR/).length).toBeGreaterThan(0);
   });
 
   it("shows the no-match state and opens the custom form prefilled with the typed text", async () => {
@@ -197,6 +198,67 @@ describe("CataloguePicker", () => {
     await user.click(screen.getByRole("button", { name: "Xoá ô tìm, xem cả danh mục" }));
 
     await waitFor(() => expect(input).toHaveValue(""));
-    expect(await screen.findByRole("button", { name: "Kodak Gold 200" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Gold 200" })).toBeInTheDocument();
+  });
+
+  it("C1: shows the result count above a search's hits", async () => {
+    searchCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
+    const { user } = setup();
+
+    await user.type(screen.getByLabelText("Tìm trong danh mục"), "gold");
+
+    expect(await screen.findByText("1 kết quả cho “gold”")).toBeInTheDocument();
+  });
+
+  it("BAG-2 (N6): shows '×N' for a stock already counted in the bag", async () => {
+    listCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
+    setup({ bagQtyByKey: new Map([["stock:stock-1", 3]]) });
+
+    expect(await screen.findByText("×3")).toBeInTheDocument();
+  });
+
+  it("BAG-2 (N6): shows 'hết' for a stock counted at 0 in the bag", async () => {
+    listCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
+    setup({ bagQtyByKey: new Map([["stock:stock-1", 0]]) });
+
+    expect(await screen.findByText("hết")).toBeInTheDocument();
+  });
+
+  it("C5: renders the desktop table header row with Tên/Hãng/Loại/ISO/Định dạng", async () => {
+    listCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
+    setup();
+
+    await screen.findByRole("button", { name: "Gold 200" });
+
+    expect(screen.getByText("Tên")).toBeInTheDocument();
+    expect(screen.getByText("Hãng")).toBeInTheDocument();
+    expect(screen.getByText("Loại")).toBeInTheDocument();
+    expect(screen.getByText("ISO")).toBeInTheDocument();
+    expect(screen.getByText("Định dạng")).toBeInTheDocument();
+  });
+
+  it("C6: shows a caller-supplied back link in the pinned footer, next to '+ Thêm film riêng'", async () => {
+    listCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
+    const onGoBack = vi.fn();
+    const user = userEvent.setup();
+    renderWithIntl(
+      <CataloguePicker onPicked={vi.fn()} onAddCustom={vi.fn()} onGoBack={onGoBack} backLabel="‹ Quay lại cuộn" />,
+    );
+
+    await screen.findByRole("button", { name: "Gold 200" });
+    const back = screen.getByRole("button", { name: "‹ Quay lại cuộn" });
+    expect(screen.getByText("+ Thêm film riêng")).toBeInTheDocument();
+
+    await user.click(back);
+    expect(onGoBack).toHaveBeenCalled();
+  });
+
+  it("C6: omits the pinned footer's back link when onGoBack isn't given", async () => {
+    listCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
+    setup();
+
+    await screen.findByRole("button", { name: "Gold 200" });
+
+    expect(screen.queryByRole("button", { name: "‹ Quay lại cuộn" })).not.toBeInTheDocument();
   });
 });

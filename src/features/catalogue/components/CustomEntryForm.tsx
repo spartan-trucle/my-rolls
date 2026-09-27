@@ -2,17 +2,23 @@
 
 import { useId, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
-import { Field, Icon } from "@/design-system";
+import { Field, Icon, Scribble } from "@/design-system";
 import { cx } from "@/design-system/cx";
+import { Canister } from "@/components/canister/Canister";
 import { DialogCloseButton } from "@/components/overlay/DialogCloseButton";
 import { addCustomCamera, addCustomLens, addCustomStock } from "@/features/catalogue/actions";
+import { cameraFormatLabelKey } from "@/features/catalogue/labels";
 import styles from "./CustomEntryForm.module.css";
 
 export type TCustomEntryKind = "stock" | "camera" | "lens";
 type TFormat = "35mm" | "120";
+// E3 (Round 2, audit): camera's own format list adds "other" ("Khác") —
+// stock's `formats` stays 35mm/120 only, matching `core.ts`'s schemas.
+type TCameraFormat = TFormat | "other";
 type TCanisterColor = "gold" | "green" | "blue" | "mono" | "rose";
 
 const FORMATS: TFormat[] = ["35mm", "120"];
+const CAMERA_FORMATS: TCameraFormat[] = ["35mm", "120", "other"];
 const CANISTER_COLORS: TCanisterColor[] = ["gold", "green", "blue", "mono", "rose"];
 
 // Maps each colour to its own vi.json key (t()'s keys must be literal, not
@@ -39,6 +45,14 @@ export interface CustomEntryFormProps {
   onCreated: (entry: ICustomEntryCreated) => void;
   /** The heading row's close button (the board's `.xbtn`) — omitted when there's nothing for it to call. */
   onClose?: () => void;
+  /**
+   * E5 (audit): "‹ Quay lại" — shown instead of the close ✕ when this form
+   * was opened from `CataloguePicker`'s "không thấy?" flow, so cancelling
+   * returns to the search rather than closing the whole dialog. Omitted
+   * when there's no picker to go back to (e.g. the bag's "+ Thêm ống
+   * kính", which opens this form directly).
+   */
+  onBack?: () => void;
   /** Same id as the host `ResponsiveDialog`'s `labelledBy`. Falls back to a generated id when rendered standalone. */
   titleId?: string;
   className?: string;
@@ -57,10 +71,12 @@ export function CustomEntryForm({
   initialQuery,
   onCreated,
   onClose,
+  onBack,
   titleId,
   className,
 }: CustomEntryFormProps) {
   const t = useTranslations("catalogue.customEntry");
+  const tTypes = useTranslations("catalogue.types");
   const generatedTitleId = useId();
   const headingId = titleId ?? generatedTitleId;
 
@@ -68,9 +84,14 @@ export function CustomEntryForm({
   const [brand, setBrand] = useState("");
   const [name, setName] = useState(initialQuery ?? "");
   const [iso, setIso] = useState("");
+  // BAG-2 (E2): "Đang có" — how many rolls of this new stock the caller
+  // already owns. `0` (not `null`) so the stepper always shows a number;
+  // the server keeps `qty: 0` as an explicit "counted, none left", same
+  // as the bag's own stepper once it reaches zero.
+  const [qty, setQty] = useState(0);
   const [canisterColor, setCanisterColor] = useState<TCanisterColor>("gold");
   const [formats, setFormats] = useState<ReadonlySet<TFormat>>(new Set(["35mm"]));
-  const [cameraFormat, setCameraFormat] = useState<TFormat>("35mm");
+  const [cameraFormat, setCameraFormat] = useState<TCameraFormat>("35mm");
   const [focalLength, setFocalLength] = useState("");
   const [brandError, setBrandError] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
@@ -107,6 +128,7 @@ export function CustomEntryForm({
           iso: iso.trim() === "" ? undefined : Number(iso),
           formats: formats.size > 0 ? Array.from(formats) : undefined,
           canisterColor,
+          qty,
         })
       : kind === "camera"
         ? addCustomCamera({ brand: trimmedBrand, model: trimmedName, format: cameraFormat })
@@ -135,7 +157,13 @@ export function CustomEntryForm({
             </h2>
             <p className={styles.lead}>{lead}</p>
           </div>
-          {onClose ? <DialogCloseButton onClose={onClose} /> : null}
+          {onBack ? (
+            <button type="button" className={styles.backButton} onClick={onBack}>
+              {t("back")}
+            </button>
+          ) : onClose ? (
+            <DialogCloseButton onClose={onClose} />
+          ) : null}
         </div>
 
         <div className={styles.seg} role="group" aria-label={t("segmentLabel")}>
@@ -152,6 +180,12 @@ export function CustomEntryForm({
 
         {kind === "stock" ? (
           <div className={styles.section}>
+            <div className={styles.canisterPreview}>
+              <Canister color={canisterColor} iso={iso.trim() === "" ? null : Number(iso)} size="md" />
+              <Scribble arrow="left" size="sm">
+                {t("canisterPreviewScribble")}
+              </Scribble>
+            </div>
             <Field
               label={t("stockBrandLabel")}
               placeholder={t("stockBrandPlaceholder")}
@@ -174,6 +208,24 @@ export function CustomEntryForm({
               value={iso}
               onChange={(event) => setIso(event.target.value)}
             />
+            <div className={styles.field}>
+              <span className={styles.legend}>{t("stockQtyLabel")}</span>
+              <div className={styles.qtyStepper}>
+                <button
+                  type="button"
+                  aria-label={t("stockQtyDecrement")}
+                  onClick={() => setQty((prev) => Math.max(0, prev - 1))}
+                  disabled={qty <= 0}
+                >
+                  −
+                </button>
+                <span aria-live="polite">{qty}</span>
+                <button type="button" aria-label={t("stockQtyIncrement")} onClick={() => setQty((prev) => prev + 1)}>
+                  +
+                </button>
+              </div>
+              <p className={styles.fieldHint}>{t("stockQtyHint")}</p>
+            </div>
             <fieldset className={styles.fieldset}>
               <legend className={styles.legend}>{t("stockTypeLegend")}</legend>
               <div className={styles.chips}>
@@ -230,16 +282,19 @@ export function CustomEntryForm({
             <div className={styles.field}>
               <span className={styles.legend}>{t("cameraFormatLabel")}</span>
               <div className={styles.seg} role="group" aria-label={t("cameraFormatLabel")}>
-                {FORMATS.map((format) => (
-                  <button
-                    key={format}
-                    type="button"
-                    aria-pressed={cameraFormat === format}
-                    onClick={() => setCameraFormat(format)}
-                  >
-                    {format}
-                  </button>
-                ))}
+                {CAMERA_FORMATS.map((format) => {
+                  const labelKey = cameraFormatLabelKey(format);
+                  return (
+                    <button
+                      key={format}
+                      type="button"
+                      aria-pressed={cameraFormat === format}
+                      onClick={() => setCameraFormat(format)}
+                    >
+                      {labelKey ? tTypes(labelKey) : format}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>

@@ -6,17 +6,23 @@ import { Button, Icon, Stamp } from "@/design-system";
 import { DialogCloseButton } from "@/components/overlay/DialogCloseButton";
 import { ResponsiveDialog } from "@/components/overlay/ResponsiveDialog";
 import { listBag, removeFromBag } from "@/features/bag/actions";
-import type { TBagEntry } from "@/features/bag/queries";
+import { BagCanisterStrip } from "@/features/bag/components/BagCanisterStrip";
+import { ExpiryYearField } from "@/features/bag/components/ExpiryYearField";
+import { StockQtyStepper } from "@/features/bag/components/StockQtyStepper";
+import { summarizeBag, type TBagEntry } from "@/features/bag/queries";
 import { CataloguePicker } from "@/features/catalogue/components/CataloguePicker";
 import { CustomEntryForm, type TCustomEntryKind } from "@/features/catalogue/components/CustomEntryForm";
-import { cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
+import { cameraFormatLabelKey, cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
 import type { TCatalogueKind } from "@/features/catalogue/queries";
 import styles from "./BagList.module.css";
 
 type TDialogMode =
   | { view: "closed" }
   | { view: "picker"; kind: TCatalogueKind }
-  | { view: "custom"; kind: TCustomEntryKind; query?: string };
+  // `fromPicker` (E5): whether this custom form was opened from the
+  // picker's "không thấy?" flow — if so, its back button returns there
+  // instead of closing the whole dialog.
+  | { view: "custom"; kind: TCustomEntryKind; query?: string; fromPicker?: boolean };
 
 export interface BagListProps {
   initialEntries: TBagEntry[];
@@ -74,8 +80,10 @@ function RemoveIcon() {
  * one client component so add/remove/undo update `entries` in place — no
  * navigation, no full reload (D2's brief). Sections are grouped by
  * `bag_item.kind` (design finding 1: the boards only needed a lens
- * section added). BAG-2 (film quantities) and BAG-3 (camera roll counts)
- * aren't built: `listBag` (B4) doesn't carry that data yet.
+ * section added). Round 2 (BAG-2/BAG-3, audit B1–B5, B7, B8): the
+ * canister strip, the per-stock qty stepper and expiry year, and the
+ * "N CUỘN" / "ĐÃ CHỤP N CUỘN" counts, all sourced from `listBag`'s
+ * `qty`/`expiryYear`/`rollsShot` and `summarizeBag(entries)`.
  */
 export function BagList({ initialEntries }: BagListProps) {
   const t = useTranslations("bag");
@@ -93,6 +101,28 @@ export function BagList({ initialEntries }: BagListProps) {
     () => new Set(entries.map((entry) => `${entry.kind}:${entryRefId(entry)}`)),
     [entries],
   );
+
+  // BAG-2 (N6): the catalogue picker's "×N"/"hết" chips for a stock already in this bag.
+  const bagQtyByKey = useMemo(
+    () =>
+      new Map(
+        entries.filter((entry) => entry.kind === "stock").map((entry) => [`stock:${entry.stock.id}`, entry.qty ?? null]),
+      ),
+    [entries],
+  );
+
+  // BAG-2 (R2-2/R2-3): the counts line, film heading, and canister strip
+  // all come from the same pure summary over `entries` — no extra fetch.
+  const summary = useMemo(() => summarizeBag(entries), [entries]);
+
+  /** Patches one stock bag item's qty/expiryYear in place, after the server confirms the change. */
+  function updateStockEntry(bagItemId: string, patch: Partial<{ qty: number | null; expiryYear: number | null }>) {
+    setEntries((prev) =>
+      prev.map((entry) =>
+        entry.kind === "stock" && entry.bagItemId === bagItemId ? { ...entry, ...patch } : entry,
+      ),
+    );
+  }
 
   async function refresh() {
     setEntries(await listBag());
@@ -153,22 +183,35 @@ export function BagList({ initialEntries }: BagListProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="font-display text-display-l font-semibold">{t("title")}</h1>
-        <p className="font-mono text-meta text-ink-muted">
-          {t("counts", { films: films.length, cameras: cameras.length, lenses: lenses.length })}
-        </p>
+      {/* B9 (audit, BagWeb): title + counts on the left, search in a 380px
+          right column at desktop; stacked (search below) on phone. */}
+      <div className={styles.header}>
+        <div className="flex flex-col gap-2">
+          <h1 className="font-display text-display-l font-semibold">{t("title")}</h1>
+          <p className={styles.countsLine}>
+            {t("countsLine", {
+              rolls: summary.unloadedRolls,
+              films: films.length,
+              cameras: cameras.length,
+              lenses: lenses.length,
+            })}
+          </p>
+        </div>
+
+        {!isEmpty ? (
+          <div className={styles.headerSearch}>
+            <button type="button" className={styles.search} onClick={() => openPicker("stock")}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" />
+                <path d="M20 20l-3.5-3.5" />
+              </svg>
+              <span>{t("searchPrompt")}</span>
+            </button>
+          </div>
+        ) : null}
       </div>
 
-      {!isEmpty ? (
-        <button type="button" className={styles.search} onClick={() => openPicker("stock")}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="7" />
-            <path d="M20 20l-3.5-3.5" />
-          </svg>
-          <span>{t("searchPrompt")}</span>
-        </button>
-      ) : null}
+      <BagCanisterStrip canisters={summary.canisters} unloadedRolls={summary.unloadedRolls} />
 
       {isEmpty ? (
         <div className={styles.empty}>
@@ -187,38 +230,55 @@ export function BagList({ initialEntries }: BagListProps) {
         <div className={styles.sections} ref={sectionsRef} tabIndex={-1}>
           <section aria-labelledby="bag-film-heading" className="flex flex-col gap-2">
             <h2 id="bag-film-heading" className={styles.sectionHeading}>
-              {t("sectionFilm", { count: films.length })}
+              {t("sectionFilmWithRolls", { count: films.length, rolls: summary.unloadedRolls })}
             </h2>
             <ul className={styles.list}>
-              {films.map((entry) => (
-                <li key={entry.bagItemId} className={styles.item}>
-                  <span className={styles.itemIcon}>
-                    <CanisterSwatch color={entry.stock.canisterColor} />
-                  </span>
-                  <span className={styles.itemText}>
-                    <span className={styles.itemName}>
-                      {entryName(entry)}
-                      {isCustom(entry) ? <Stamp tone="ink">{t("own")}</Stamp> : null}
+              {films.map((entry) => {
+                const rollsShot = entry.rollsShot ?? 0;
+                return (
+                  <li key={entry.bagItemId} className={`${styles.item} ${styles.filmItem}`}>
+                    <span className={styles.itemIcon}>
+                      <CanisterSwatch color={entry.stock.canisterColor} />
                     </span>
-                    <span className={styles.itemMeta}>
-                      {joinMeta([
-                        entry.stock.iso != null && `ISO ${entry.stock.iso}`,
-                        typeLabel(stockTypeLabelKey(entry.stock.type)),
-                        entry.stock.formats?.join(", "),
-                      ])}
+                    <span className={styles.itemText}>
+                      <span className={styles.itemName}>
+                        {entryName(entry)}
+                        {isCustom(entry) ? <Stamp tone="ink">{t("own")}</Stamp> : null}
+                      </span>
+                      <span className={styles.itemMeta}>
+                        {joinMeta([
+                          entry.stock.iso != null && `ISO ${entry.stock.iso}`,
+                          typeLabel(stockTypeLabelKey(entry.stock.type)),
+                          entry.stock.formats?.join(", "),
+                        ])}
+                      </span>
+                      <span className={styles.itemMeta}>
+                        {rollsShot > 0 ? t("rollsShotFilm", { count: rollsShot }) : t("rollsShotFilmZero")}
+                      </span>
+                      <ExpiryYearField
+                        bagItemId={entry.bagItemId}
+                        expiryYear={entry.expiryYear ?? null}
+                        onChange={(expiryYear) => updateStockEntry(entry.bagItemId, { expiryYear })}
+                      />
                     </span>
-                  </span>
-                  <button
-                    type="button"
-                    className={styles.removeButton}
-                    aria-label={t("removeLabel", { name: entryName(entry) })}
-                    onClick={() => setConfirmEntry(entry)}
-                    disabled={removing && confirmEntry?.bagItemId === entry.bagItemId}
-                  >
-                    <RemoveIcon />
-                  </button>
-                </li>
-              ))}
+                    <StockQtyStepper
+                      bagItemId={entry.bagItemId}
+                      qty={entry.qty ?? null}
+                      stockName={entryName(entry)}
+                      onChange={(qty) => updateStockEntry(entry.bagItemId, { qty })}
+                    />
+                    <button
+                      type="button"
+                      className={styles.removeButton}
+                      aria-label={t("removeLabel", { name: entryName(entry) })}
+                      onClick={() => setConfirmEntry(entry)}
+                      disabled={removing && confirmEntry?.bagItemId === entry.bagItemId}
+                    >
+                      <RemoveIcon />
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
             <button type="button" className={styles.addLink} onClick={() => openPicker("stock")}>
               <Icon name="film" size={18} />
@@ -242,13 +302,17 @@ export function BagList({ initialEntries }: BagListProps) {
                       {isCustom(entry) ? <Stamp tone="ink">{t("own")}</Stamp> : null}
                     </span>
                     <span className={styles.itemMeta}>
-                      {joinMeta([typeLabel(cameraTypeLabelKey(entry.camera.type)), entry.camera.format])}
+                      {joinMeta([
+                        typeLabel(cameraTypeLabelKey(entry.camera.type)),
+                        typeLabel(cameraFormatLabelKey(entry.camera.format)) ?? entry.camera.format,
+                      ])}
                     </span>
                     {entry.fixedStock ? (
                       <span className={styles.itemMeta}>
                         {t("fixedStockNote", { name: `${entry.fixedStock.brand} ${entry.fixedStock.name}` })}
                       </span>
                     ) : null}
+                    <span className={styles.itemMeta}>{t("rollsShotCamera", { count: entry.rollsShot ?? 0 })}</span>
                   </span>
                   <button
                     type="button"
@@ -269,9 +333,12 @@ export function BagList({ initialEntries }: BagListProps) {
           </section>
 
           <section aria-labelledby="bag-lens-heading" className="flex flex-col gap-2">
-            <h2 id="bag-lens-heading" className={styles.sectionHeading}>
-              {t("sectionLens", { count: lenses.length })}
-            </h2>
+            <div className={styles.sectionHeadingRow}>
+              <h2 id="bag-lens-heading" className={styles.sectionHeading}>
+                {t("sectionLens", { count: lenses.length })}
+              </h2>
+              <span className={styles.sectionHeadingHint}>{t("sectionLensHint")}</span>
+            </div>
             <ul className={styles.list}>
               {lenses.map((entry) => (
                 <li key={entry.bagItemId} className={styles.item}>
@@ -286,6 +353,7 @@ export function BagList({ initialEntries }: BagListProps) {
                     <span className={styles.itemMeta}>
                       {joinMeta([entry.lens.focalLength ? `${entry.lens.focalLength}mm` : null])}
                     </span>
+                    <span className={styles.itemMeta}>{t("rollsShotLens", { count: entry.rollsShot ?? 0 })}</span>
                   </span>
                   <button
                     type="button"
@@ -313,8 +381,9 @@ export function BagList({ initialEntries }: BagListProps) {
             titleId={dialogTitleId}
             initialKind={dialog.kind}
             bagRefIds={bagRefIds}
+            bagQtyByKey={bagQtyByKey}
             onPicked={handlePicked}
-            onAddCustom={(kind, query) => setDialog({ view: "custom", kind, query })}
+            onAddCustom={(kind, query) => setDialog({ view: "custom", kind, query, fromPicker: true })}
             onClose={closeDialog}
           />
         ) : dialog.view === "custom" ? (
@@ -324,6 +393,13 @@ export function BagList({ initialEntries }: BagListProps) {
             initialQuery={dialog.query}
             onCreated={handleCreated}
             onClose={closeDialog}
+            onBack={
+              // `fromPicker` is only ever set by the picker's `onAddCustom`
+              // (kind: TCatalogueKind), so `dialog.kind` here is never "lens".
+              dialog.fromPicker && dialog.kind !== "lens"
+                ? () => setDialog({ view: "picker", kind: dialog.kind as TCatalogueKind })
+                : undefined
+            }
           />
         ) : null}
       </ResponsiveDialog>

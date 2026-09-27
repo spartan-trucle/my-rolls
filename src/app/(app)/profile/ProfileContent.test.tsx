@@ -105,4 +105,71 @@ describe("ProfileContent", () => {
 
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
   });
+
+  it("PR1: shows the roll-count stat tile when a summary is given", () => {
+    renderWithIntl(
+      <ProfileContent
+        name="Trúc Lê"
+        email="truc@gmail.com"
+        image={null}
+        createdAt={CREATED_AT}
+        summary={{ rollCount: 7, cameras: [], stocks: [], joinedAt: null }}
+      />,
+    );
+
+    expect(screen.getByText("7 cuộn")).toBeInTheDocument();
+  });
+
+  it("PR3/PR4: shows 'Túi của tôi' with camera roll counts and a 'Sửa túi' link to /bag", () => {
+    renderWithIntl(
+      <ProfileContent
+        name="Trúc Lê"
+        email="truc@gmail.com"
+        image={null}
+        createdAt={CREATED_AT}
+        summary={{
+          rollCount: 5,
+          cameras: [{ bagItemId: "b1", brand: "Pentax", model: "K1000", rollsShot: 3 }],
+          stocks: [{ stockId: "s1", brand: "Kodak", name: "Gold 200", canisterColor: "gold" }],
+          joinedAt: null,
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Túi của tôi" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Sửa túi ›" })).toHaveAttribute("href", "/bag");
+    expect(screen.getByText("Pentax K1000")).toBeInTheDocument();
+    expect(screen.getByText("3 cuộn")).toBeInTheDocument();
+  });
+
+  it("hides 'Túi của tôi' when the bag is empty, and stays hidden without a summary", () => {
+    renderWithIntl(
+      <ProfileContent
+        name="Trúc Lê"
+        email="truc@gmail.com"
+        image={null}
+        createdAt={CREATED_AT}
+        summary={{ rollCount: 0, cameras: [], stocks: [], joinedAt: null }}
+      />,
+    );
+
+    expect(screen.queryByText("Túi của tôi")).not.toBeInTheDocument();
+  });
+
+  it("never shows the hidden stat tiles (tấm ưng, oops, share links, delete account) even with a summary", () => {
+    renderWithIntl(
+      <ProfileContent
+        name="Trúc Lê"
+        email="truc@gmail.com"
+        image={null}
+        createdAt={CREATED_AT}
+        summary={{ rollCount: 5, cameras: [], stocks: [], joinedAt: null }}
+      />,
+    );
+
+    expect(screen.queryByText("Tấm ưng gần đây")).not.toBeInTheDocument();
+    expect(screen.queryByText("Ngôn ngữ")).not.toBeInTheDocument();
+    expect(screen.queryByText("Xoá tài khoản")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Link đang chia sẻ/)).not.toBeInTheDocument();
+  });
 });

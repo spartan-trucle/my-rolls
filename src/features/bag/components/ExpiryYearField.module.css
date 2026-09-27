@@ -1,0 +1,60 @@
+.chip {
+  appearance: none;
+  align-self: flex-start;
+  padding: 2px var(--space-2);
+  background: transparent;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-pill);
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.editor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.editorLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-muted);
+}
+
+.editorInput {
+  width: 72px;
+  height: 28px;
+  box-sizing: border-box;
+  padding: 0 var(--space-2);
+  background: var(--paper-raised);
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font: 600 13px/1 var(--font-mono);
+}
+
+.editorSave,
+.editorClear,
+.editorCancel {
+  appearance: none;
+  height: 28px;
+  padding: 0 var(--space-2);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  font: 600 12px/1 var(--font-sans);
+  cursor: pointer;
+}
+
+.editorSave {
+  background: var(--cobalt);
+  border-color: var(--cobalt);
+  color: var(--on-cobalt);
+}

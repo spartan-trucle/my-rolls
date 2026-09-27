@@ -1,9 +1,21 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { bagItem, camera, lens, stock } from "@/db/schema";
 import { createTestDb } from "@/db/test-db";
-import { addCustomCameraCore, addCustomLensCore, addCustomStockCore } from "./core";
+import { addCustomCameraCore, addCustomLensCore, addCustomStockCore, cameraInputSchema } from "./core";
 
 const OWNER = "user-1";
+
+describe("cameraInputSchema", () => {
+  it("E3 (Round 2): accepts 'other' as a valid format", () => {
+    const result = cameraInputSchema.safeParse({ brand: "Diana", model: "Mini", format: "other" });
+    expect(result.success).toBe(true);
+  });
+
+  it("still rejects a format outside 35mm/120/other", () => {
+    const result = cameraInputSchema.safeParse({ brand: "Diana", model: "Mini", format: "220" });
+    expect(result.success).toBe(false);
+  });
+});
 
 describe("addCustomStockCore", () => {
   let cleanup: (() => Promise<void>) | undefined;
@@ -143,6 +155,16 @@ describe("addCustomCameraCore", () => {
     const cameraRows = await db.select().from(camera);
     expect(cameraRows.find((row) => row.model === "Mat-124G")).toMatchObject({ format: "120" });
     expect(cameraRows.find((row) => row.model === "AE-1")).toMatchObject({ format: null });
+  });
+
+  it("E3 (Round 2): stores 'other' ('Khác') as a valid format", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+
+    await addCustomCameraCore(db, OWNER, { brand: "Diana", model: "Mini", format: "other" });
+
+    const cameraRows = await db.select().from(camera);
+    expect(cameraRows.find((row) => row.model === "Mini")).toMatchObject({ format: "other" });
   });
 });
 

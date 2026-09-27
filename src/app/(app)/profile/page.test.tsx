@@ -1,10 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "../../../../messages/vi.json";
 
 const getSession = vi.hoisted(() => vi.fn());
 const redirectMock = vi.hoisted(() => vi.fn());
+const getProfileSummaryQuery = vi.hoisted(() => vi.fn());
 const fakeRequestHeaders = vi.hoisted(() => ({ __brand: "fake-headers" }));
 
 vi.mock("@/lib/auth", () => ({
@@ -20,6 +21,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/lib/sign-out-action", () => ({ signOutAction: vi.fn() }));
+vi.mock("@/db/client", () => ({ getDb: vi.fn().mockReturnValue({ __brand: "fake-db" }) }));
+vi.mock("@/features/bag/queries", () => ({ getProfileSummary: getProfileSummaryQuery }));
 
 import ProfilePage from "./page";
 
@@ -42,9 +45,14 @@ const SESSION_USER = {
 };
 
 describe("ProfilePage", () => {
+  beforeEach(() => {
+    getProfileSummaryQuery.mockResolvedValue(null);
+  });
+
   afterEach(() => {
     getSession.mockReset();
     redirectMock.mockReset();
+    getProfileSummaryQuery.mockReset();
   });
 
   it("redirects to /sign-in when there is no session", async () => {
@@ -82,5 +90,16 @@ describe("ProfilePage", () => {
     renderPage(ui);
 
     expect(screen.getByRole("button", { name: "Đăng xuất" })).toBeInTheDocument();
+  });
+
+  it("PR1/PR3: fetches the profile summary owner-scoped and renders the roll count", async () => {
+    getSession.mockResolvedValue({ session: { id: "s1" }, user: SESSION_USER });
+    getProfileSummaryQuery.mockResolvedValue({ rollCount: 7, cameras: [], stocks: [], joinedAt: null });
+
+    const ui = await ProfilePage();
+    renderPage(ui);
+
+    expect(getProfileSummaryQuery).toHaveBeenCalledWith({ __brand: "fake-db" }, "u1");
+    expect(screen.getByText("7 cuộn")).toBeInTheDocument();
   });
 });
