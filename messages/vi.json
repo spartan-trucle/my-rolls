@@ -323,6 +323,7 @@
       "clearSearch": "Xoá ô tìm, xem cả danh mục"
     },
     "customEntry": {
+      "back": "‹ Quay lại",
       "segmentLabel": "Thêm gì",
       "segmentStock": "Film",
       "segmentCamera": "Máy ảnh",
@@ -339,6 +340,10 @@
       "stockNamePlaceholder": "VD: Vision3 250D chiết",
       "stockIsoLabel": "ISO hộp",
       "stockIsoHint": "Film hết hạn cứ ghi ISO in trên hộp.",
+      "stockQtyLabel": "Đang có",
+      "stockQtyDecrement": "Giảm số cuộn đang có",
+      "stockQtyIncrement": "Tăng số cuộn đang có",
+      "stockQtyHint": "Số cuộn chưa chụp.",
       "stockTypeLegend": "Loại film",
       "stockTypeHint": "Màu vỏ cuộn trên kệ đi theo loại film.",
       "stockFormatLegend": "Định dạng",

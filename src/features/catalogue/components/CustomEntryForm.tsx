@@ -39,6 +39,14 @@ export interface CustomEntryFormProps {
   onCreated: (entry: ICustomEntryCreated) => void;
   /** The heading row's close button (the board's `.xbtn`) — omitted when there's nothing for it to call. */
   onClose?: () => void;
+  /**
+   * E5 (audit): "‹ Quay lại" — shown instead of the close ✕ when this form
+   * was opened from `CataloguePicker`'s "không thấy?" flow, so cancelling
+   * returns to the search rather than closing the whole dialog. Omitted
+   * when there's no picker to go back to (e.g. the bag's "+ Thêm ống
+   * kính", which opens this form directly).
+   */
+  onBack?: () => void;
   /** Same id as the host `ResponsiveDialog`'s `labelledBy`. Falls back to a generated id when rendered standalone. */
   titleId?: string;
   className?: string;
@@ -57,6 +65,7 @@ export function CustomEntryForm({
   initialQuery,
   onCreated,
   onClose,
+  onBack,
   titleId,
   className,
 }: CustomEntryFormProps) {
@@ -68,6 +77,11 @@ export function CustomEntryForm({
   const [brand, setBrand] = useState("");
   const [name, setName] = useState(initialQuery ?? "");
   const [iso, setIso] = useState("");
+  // BAG-2 (E2): "Đang có" — how many rolls of this new stock the caller
+  // already owns. `0` (not `null`) so the stepper always shows a number;
+  // the server keeps `qty: 0` as an explicit "counted, none left", same
+  // as the bag's own stepper once it reaches zero.
+  const [qty, setQty] = useState(0);
   const [canisterColor, setCanisterColor] = useState<TCanisterColor>("gold");
   const [formats, setFormats] = useState<ReadonlySet<TFormat>>(new Set(["35mm"]));
   const [cameraFormat, setCameraFormat] = useState<TFormat>("35mm");
@@ -107,6 +121,7 @@ export function CustomEntryForm({
           iso: iso.trim() === "" ? undefined : Number(iso),
           formats: formats.size > 0 ? Array.from(formats) : undefined,
           canisterColor,
+          qty,
         })
       : kind === "camera"
         ? addCustomCamera({ brand: trimmedBrand, model: trimmedName, format: cameraFormat })
@@ -135,7 +150,13 @@ export function CustomEntryForm({
             </h2>
             <p className={styles.lead}>{lead}</p>
           </div>
-          {onClose ? <DialogCloseButton onClose={onClose} /> : null}
+          {onBack ? (
+            <button type="button" className={styles.backButton} onClick={onBack}>
+              {t("back")}
+            </button>
+          ) : onClose ? (
+            <DialogCloseButton onClose={onClose} />
+          ) : null}
         </div>
 
         <div className={styles.seg} role="group" aria-label={t("segmentLabel")}>
@@ -174,6 +195,24 @@ export function CustomEntryForm({
               value={iso}
               onChange={(event) => setIso(event.target.value)}
             />
+            <div className={styles.field}>
+              <span className={styles.legend}>{t("stockQtyLabel")}</span>
+              <div className={styles.qtyStepper}>
+                <button
+                  type="button"
+                  aria-label={t("stockQtyDecrement")}
+                  onClick={() => setQty((prev) => Math.max(0, prev - 1))}
+                  disabled={qty <= 0}
+                >
+                  −
+                </button>
+                <span aria-live="polite">{qty}</span>
+                <button type="button" aria-label={t("stockQtyIncrement")} onClick={() => setQty((prev) => prev + 1)}>
+                  +
+                </button>
+              </div>
+              <p className={styles.fieldHint}>{t("stockQtyHint")}</p>
+            </div>
             <fieldset className={styles.fieldset}>
               <legend className={styles.legend}>{t("stockTypeLegend")}</legend>
               <div className={styles.chips}>

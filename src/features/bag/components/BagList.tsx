@@ -19,7 +19,10 @@ import styles from "./BagList.module.css";
 type TDialogMode =
   | { view: "closed" }
   | { view: "picker"; kind: TCatalogueKind }
-  | { view: "custom"; kind: TCustomEntryKind; query?: string };
+  // `fromPicker` (E5): whether this custom form was opened from the
+  // picker's "không thấy?" flow — if so, its back button returns there
+  // instead of closing the whole dialog.
+  | { view: "custom"; kind: TCustomEntryKind; query?: string; fromPicker?: boolean };
 
 export interface BagListProps {
   initialEntries: TBagEntry[];
@@ -371,7 +374,7 @@ export function BagList({ initialEntries }: BagListProps) {
             bagRefIds={bagRefIds}
             bagQtyByKey={bagQtyByKey}
             onPicked={handlePicked}
-            onAddCustom={(kind, query) => setDialog({ view: "custom", kind, query })}
+            onAddCustom={(kind, query) => setDialog({ view: "custom", kind, query, fromPicker: true })}
             onClose={closeDialog}
           />
         ) : dialog.view === "custom" ? (
@@ -381,6 +384,13 @@ export function BagList({ initialEntries }: BagListProps) {
             initialQuery={dialog.query}
             onCreated={handleCreated}
             onClose={closeDialog}
+            onBack={
+              // `fromPicker` is only ever set by the picker's `onAddCustom`
+              // (kind: TCatalogueKind), so `dialog.kind` here is never "lens".
+              dialog.fromPicker && dialog.kind !== "lens"
+                ? () => setDialog({ view: "picker", kind: dialog.kind as TCatalogueKind })
+                : undefined
+            }
           />
         ) : null}
       </ResponsiveDialog>

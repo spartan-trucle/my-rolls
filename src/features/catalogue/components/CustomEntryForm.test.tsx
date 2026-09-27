@@ -60,6 +60,7 @@ describe("CustomEntryForm", () => {
         iso: 250,
         formats: ["35mm", "120"],
         canisterColor: "rose",
+        qty: 0,
       }),
     );
     expect(onCreated).toHaveBeenCalledWith({ kind: "stock", refId: "stock-1", bagItemId: "bag-1" });
@@ -112,5 +113,31 @@ describe("CustomEntryForm", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Có gì đó không ổn. Thử lại nhé.");
     expect(onCreated).not.toHaveBeenCalled();
+  });
+
+  it("BAG-2 (E2): steps 'Đang có' and submits it as qty", async () => {
+    addCustomStock.mockResolvedValue({ ok: true, refId: "stock-1", bagItemId: "bag-1" });
+    const { user } = setup();
+
+    await user.type(screen.getByLabelText("Hãng hoặc nơi chiết"), "Tự chiết");
+    await user.type(screen.getByLabelText("Tên film"), "Vision3 250D chiết");
+    await user.click(screen.getByRole("button", { name: "Tăng số cuộn đang có" }));
+    await user.click(screen.getByRole("button", { name: "Tăng số cuộn đang có" }));
+
+    await user.click(screen.getByRole("button", { name: "Thêm film vào túi" }));
+
+    await waitFor(() => expect(addCustomStock).toHaveBeenCalledWith(expect.objectContaining({ qty: 2 })));
+  });
+
+  it("E5: shows '‹ Quay lại' instead of the close ✕ when onBack is given", async () => {
+    const onBack = vi.fn();
+    const user = userEvent.setup();
+    renderWithIntl(<CustomEntryForm onCreated={vi.fn()} onClose={vi.fn()} onBack={onBack} />);
+
+    const back = screen.getByRole("button", { name: "‹ Quay lại" });
+    expect(screen.queryByRole("button", { name: "Đóng" })).not.toBeInTheDocument();
+
+    await user.click(back);
+    expect(onBack).toHaveBeenCalled();
   });
 });
