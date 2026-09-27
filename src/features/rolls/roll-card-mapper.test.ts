@@ -37,9 +37,28 @@ describe("toRollCardProps", () => {
     });
   });
 
-  it("falls back to the stock's name when the roll has no name", () => {
+  it("falls back to the stock's name when the roll has no name and no unnamedRollLabel was given (no roll number)", () => {
     const entry = { ...baseEntry, name: null };
     expect(toRollCardProps(entry).name).toBe("Kodak Gold 200");
+  });
+
+  it("N1: reads 'Cuộn #{number}' for an unnamed roll when the caller passes unnamedRollLabel", () => {
+    const entry = { ...baseEntry, name: null, number: 16 };
+    expect(toRollCardProps(entry, { unnamedRollLabel: "Cuộn #16" }).name).toBe("Cuộn #16");
+  });
+
+  it("prefers a real name over unnamedRollLabel", () => {
+    const entry = { ...baseEntry, number: 16 };
+    expect(toRollCardProps(entry, { unnamedRollLabel: "Cuộn #16" }).name).toBe("Đà Lạt, tháng 10");
+  });
+
+  it("R2-4: formats the date at month precision via formatRollDate's second argument", () => {
+    const entry = {
+      ...baseEntry,
+      shotFrom: new Date("2025-10-01T00:00:00Z"),
+      datePrecision: "month" as const,
+    };
+    expect(toRollCardProps(entry).date).toBe("10.2025");
   });
 
   it("falls back to the gold canister for an unknown or missing canister colour", () => {

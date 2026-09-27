@@ -135,6 +135,26 @@ describe("Home (/)", () => {
     );
   });
 
+  it("H2: shows the 'Mới nhất trước' sort label beside the Kệ/Lưới toggle", async () => {
+    getSessionCookie.mockReturnValue("a-session-token");
+    getSession.mockResolvedValue(signedInSession);
+    listRolls.mockResolvedValue([]);
+
+    renderHome(await Home());
+
+    expect(screen.getByText("Mới nhất trước")).toBeInTheDocument();
+  });
+
+  it("N1: names an unnamed roll 'Cuộn #{number}' instead of the stock name", async () => {
+    getSessionCookie.mockReturnValue("a-session-token");
+    getSession.mockResolvedValue(signedInSession);
+    listRolls.mockResolvedValue([makeRoll({ id: "roll-16", name: null, number: 16 })]);
+
+    renderHome(await Home());
+
+    expect(screen.getByRole("link", { name: /Cuộn #16/ })).toHaveAttribute("href", "/rolls/roll-16");
+  });
+
   it("disables the Lưới (grid) view segment until Phase 3", async () => {
     getSessionCookie.mockReturnValue("a-session-token");
     getSession.mockResolvedValue(signedInSession);

@@ -35,11 +35,20 @@ function EmptyShelf({ t }: { t: ReturnType<typeof useTranslations<"home">> }) {
   );
 }
 
-function RollList({ rolls }: { rolls: IRollEntry[] }) {
+/** N1: the "Cuộn #{number}" fallback for an unnamed roll, or `undefined` when there's no number to build it from (a pre-Round-2 row). */
+function unnamedRollLabel(
+  t: ReturnType<typeof useTranslations<"home">>,
+  number: number | null | undefined,
+): string | undefined {
+  return number ? t("unnamedRoll", { number }) : undefined;
+}
+
+/** H1: a single column on the phone, 2 columns from 1024px up (`HomeWeb`'s shelf grid). */
+function RollList({ rolls, t }: { rolls: IRollEntry[]; t: ReturnType<typeof useTranslations<"home">> }) {
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="grid grid-cols-1 gap-2.5 lg:grid-cols-2 lg:gap-x-6 lg:gap-y-4">
       {rolls.map((roll) => (
-        <RollCard key={roll.id} {...toRollCardProps(roll)} />
+        <RollCard key={roll.id} {...toRollCardProps(roll, { unnamedRollLabel: unnamedRollLabel(t, roll.number) })} />
       ))}
     </div>
   );
@@ -61,7 +70,7 @@ function HomeContent({ name, rolls }: { name: string; rolls: IRollEntry[] }) {
         <h1 className="font-display text-display-l font-semibold">{t("heading", { name: firstName(name) })}</h1>
         <p className="font-mono text-meta uppercase text-ink-muted">{t("countLine", { count: rolls.length })}</p>
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div className="inline-flex border border-ink" role="group" aria-label={t("viewLabel")}>
           <button
             type="button"
@@ -79,8 +88,12 @@ function HomeContent({ name, rolls }: { name: string; rolls: IRollEntry[] }) {
             {t("viewGrid")}
           </button>
         </div>
+        {/* H2: "Mới nhất trước", beside the Kệ/Lưới toggle — after it on the
+            phone (`Home`'s justify-between row), before it from 1024px up
+            (`HomeWeb`'s `gap:16px` row, label first). */}
+        <span className="text-body-sm text-ink-muted lg:order-first">{t("sortLabel")}</span>
       </div>
-      {rolls.length > 0 ? <RollList rolls={rolls} /> : <EmptyShelf t={t} />}
+      {rolls.length > 0 ? <RollList rolls={rolls} t={t} /> : <EmptyShelf t={t} />}
     </div>
   );
 }

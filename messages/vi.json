@@ -93,6 +93,8 @@
   "home": {
     "heading": "Kệ của {name}",
     "countLine": "{count} CUỘN",
+    "sortLabel": "Mới nhất trước",
+    "unnamedRoll": "Cuộn #{number}",
     "viewLabel": "Kiểu xem",
     "viewShelf": "Kệ",
     "viewGrid": "Lưới",
@@ -123,6 +125,7 @@
   },
   "labs": {
     "picker": {
+      "title": "Tráng ở lab nào?",
       "searchLabel": "Tìm lab",
       "searchPlaceholder": "Tên lab hoặc thành phố",
       "searchHint": "Gõ không dấu cũng được: da lat",
@@ -137,6 +140,7 @@
     },
     "add": {
       "back": "‹ Quay lại",
+      "backDesktop": "‹ Quay lại danh sách lab",
       "title": "Thêm lab mới",
       "subtitle": "Lab của bạn chưa có trong danh bạ? Thêm vào đây.",
       "nameLabel": "Tên lab",
