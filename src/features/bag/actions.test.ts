@@ -12,7 +12,7 @@ describe("bag actions module", () => {
   it("exports only async functions", () => {
     const exportNames = Object.keys(actions);
 
-    expect(exportNames).toEqual(expect.arrayContaining(["addToBag", "removeFromBag"]));
+    expect(exportNames).toEqual(expect.arrayContaining(["addToBag", "removeFromBag", "listBag"]));
 
     for (const name of exportNames) {
       const value = (actions as Record<string, unknown>)[name];

@@ -300,5 +300,25 @@
       "errorRequired": "Điền cái này với bạn nhé.",
       "errorGeneric": "Có gì đó không ổn. Thử lại nhé."
     }
+  },
+  "bag": {
+    "title": "Túi",
+    "counts": "{films} loại film · {cameras} máy · {lenses} ống kính",
+    "searchPrompt": "Tìm máy, film trong danh mục",
+    "own": "Riêng",
+    "sectionFilm": "Film · {count} loại",
+    "sectionCamera": "Máy ảnh · {count}",
+    "sectionLens": "Ống kính · {count}",
+    "addFilm": "+ Thêm film từ danh mục",
+    "addCamera": "+ Thêm máy từ danh mục",
+    "addLens": "+ Thêm ống kính",
+    "fixedStockNote": "Film cố định: {name}",
+    "removeLabel": "Bỏ {name} khỏi túi",
+    "removedToast": "Đã bỏ {name} khỏi túi.",
+    "undo": "Hoàn tác",
+    "emptyTitle": "Túi trống trơn.",
+    "emptyBody": "Thêm máy và film bạn hay dùng, lần ghi cuộn sau chọn được luôn.",
+    "emptyAddCamera": "+ Thêm máy",
+    "emptyAddFilm": "+ Thêm film"
   }
 }

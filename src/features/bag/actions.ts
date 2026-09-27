@@ -10,6 +10,7 @@ import {
   type TAddToBagResult,
   type TRemoveFromBagResult,
 } from "@/features/bag/core";
+import { listBag as listBagQuery, type TBagEntry } from "@/features/bag/queries";
 import { getAuth } from "@/lib/auth";
 
 /**
@@ -43,4 +44,18 @@ export async function removeFromBag(input: IRemoveFromBagInput): Promise<TRemove
   if (!userId) return { ok: false, error: "unauthenticated" };
 
   return removeFromBagCore(getDb(), userId, input);
+}
+
+/**
+ * D2: `/bag` re-fetches through this after every add, remove or undo,
+ * rather than trying to patch `TBagEntry`'s joined rows together from
+ * `CataloguePicker`'s or `CustomEntryForm`'s own (narrower) result shapes —
+ * one source of truth, still no full page reload. An unauthenticated
+ * caller (session expired mid-visit) gets an empty bag rather than a throw.
+ */
+export async function listBag(): Promise<TBagEntry[]> {
+  const userId = await requireUserId();
+  if (!userId) return [];
+
+  return listBagQuery(getDb(), userId);
 }
