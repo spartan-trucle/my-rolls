@@ -55,7 +55,7 @@ function HomeContent({ name, rolls }: { name: string; rolls: IRollEntry[] }) {
   const t = useTranslations("home");
 
   return (
-    <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-8 md:px-16 md:py-12">
+    <div className="mx-auto flex max-w-[1440px] flex-col gap-6">
       <div className="flex flex-col gap-1.5">
         {/* No logo: the name is set in Fraunces at weight 600 (matches AuthLayout's wordmark). */}
         <h1 className="font-display text-display-l font-semibold">{t("heading", { name: firstName(name) })}</h1>

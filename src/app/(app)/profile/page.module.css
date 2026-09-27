@@ -3,7 +3,6 @@
   flex-direction: column;
   gap: 20px;
   box-sizing: border-box;
-  padding: 16px 16px 32px;
 }
 
 /* Phone-only quick toggle row (board finding 1). Desktop reaches theme
@@ -131,7 +130,6 @@
     display: grid;
     grid-template-columns: 400px minmax(0, 1fr);
     gap: 64px;
-    padding: 48px 120px;
   }
 
   .header {

@@ -23,7 +23,7 @@ export default async function BagPage() {
   const entries = await listBag(getDb(), session.user.id);
 
   return (
-    <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-8 md:px-16 md:py-12">
+    <div className="mx-auto flex max-w-[1440px] flex-col gap-6">
       <BagList initialEntries={entries} />
     </div>
   );

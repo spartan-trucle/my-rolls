@@ -7,6 +7,8 @@
 .content {
   flex: 1 1 auto;
   min-height: 0;
+  box-sizing: border-box;
+  padding: var(--space-4) var(--space-4) var(--space-8);
 }
 
 /* Phone: BottomTabs, no TopNav. */
@@ -28,5 +30,9 @@
 
   .bottomTabs {
     display: none;
+  }
+
+  .content {
+    padding: var(--space-8) 120px var(--space-12);
   }
 }
