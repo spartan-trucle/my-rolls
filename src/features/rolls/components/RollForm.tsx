@@ -536,9 +536,10 @@ export function RollForm({ mode }: RollFormProps) {
             initialKind={dialog.kind}
             onPicked={handlePicked}
             onAddCustom={(kind, query) => setDialog({ view: "custom", kind, query })}
+            onClose={closeDialog}
           />
         ) : dialog.view === "custom" ? (
-          <CustomEntryForm titleId={titleId} initialKind={dialog.kind} initialQuery={dialog.query} onCreated={handleCreated} />
+          <CustomEntryForm titleId={titleId} initialKind={dialog.kind} initialQuery={dialog.query} onCreated={handleCreated} onClose={closeDialog} />
         ) : null}
       </ResponsiveDialog>
     </div>

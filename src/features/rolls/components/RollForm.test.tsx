@@ -6,6 +6,7 @@ import type { TBagEntry, TCameraRow, TStockRow } from "@/features/bag/queries";
 
 const listBag = vi.hoisted(() => vi.fn());
 const addToBag = vi.hoisted(() => vi.fn());
+const listCatalogue = vi.hoisted(() => vi.fn().mockResolvedValue({ ok: true, entries: [] }));
 const searchCatalogue = vi.hoisted(() => vi.fn());
 const addCustomStock = vi.hoisted(() => vi.fn());
 const addCustomCamera = vi.hoisted(() => vi.fn());
@@ -15,7 +16,7 @@ const push = vi.hoisted(() => vi.fn());
 const posthogCapture = vi.hoisted(() => vi.fn());
 
 vi.mock("@/features/bag/actions", () => ({ listBag, addToBag }));
-vi.mock("@/features/catalogue/actions", () => ({ searchCatalogue, addCustomStock, addCustomCamera, addCustomLens }));
+vi.mock("@/features/catalogue/actions", () => ({ listCatalogue, searchCatalogue, addCustomStock, addCustomCamera, addCustomLens }));
 vi.mock("@/features/rolls/actions", () => ({ createRoll }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("posthog-js", () => ({ default: { capture: posthogCapture } }));
