@@ -1,7 +1,7 @@
 # Cuộn roadmap
 
 > **Mirror — the artifact is the source of truth:** [Cuộn roadmap](https://claude.ai/artifact/Lsq7MWHNCVanpBWQ2D4XTo)
-> Last synced: 27.09.2026 · doc revision 26 · by Claude for Trúc (revisions 16–23 by Trúc: waitlist page in Phase 1, landing page in Phase 5, 139 h build + 21 h buffer; revision 24 ticks "Repo, Next.js + Tailwind mapped to design tokens", landed in PR #1; revisions 25–26 remove the Phase 1 waitlist page at Trúc's request: sign-up stays open through the landing page).
+> Last synced: 27.09.2026 · doc revision 27 · by Claude for Trúc (revisions 16–23 by Trúc: waitlist page in Phase 1, landing page in Phase 5, 139 h build + 21 h buffer; revision 24 ticks "Repo, Next.js + Tailwind mapped to design tokens", landed in PR #1; revisions 25–26 remove the Phase 1 waitlist page at Trúc's request: sign-up stays open through the landing page; revision 27 ticks `next-intl`, Neon + Drizzle, Vercel `sin1` and PostHog, landed in PRs #3 and #5).
 > Before editing, re-read the artifact. Make changes in the artifact and copy them here in the same session (see [CLAUDE.md](../CLAUDE.md#sync-rules)).
 
 Related: [PRD overview](product/prd.md) · [Requirements index](product/requirements/README.md) · [ADR-001](architecture/adr-001-tech-stack.md) · [Design system](design/design-system.md)
@@ -22,11 +22,11 @@ Tick items as they land; a phase is done when its last item (the exit check) is 
 ### Phase 0 · Foundations (28 Sep – 11 Oct)
 
 - [x] Repo, Next.js + Tailwind mapped to design tokens
-- [ ] `next-intl` with Vietnamese
-- [ ] Neon + Drizzle schema
+- [x] `next-intl` with Vietnamese
+- [x] Neon + Drizzle schema
 - [ ] R2 buckets (private originals, public derivatives)
-- [ ] Vercel deploy in `sin1`
-- [ ] PostHog for analytics and errors
+- [x] Vercel deploy in `sin1`
+- [x] PostHog for analytics and errors
 - [ ] Google sign-in ([AUTH-1](product/requirements/auth.md))
 - [ ] Spike: `next/og` with Be Vietnam Pro
 - [ ] Spike: Web Share with files on iPhone and in Zalo, Messenger, Instagram
