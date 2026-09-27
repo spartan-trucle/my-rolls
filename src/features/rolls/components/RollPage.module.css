@@ -1,0 +1,139 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 640px;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+}
+
+.back {
+  font: 500 14px/20px var(--font-sans);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.ok {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  background: var(--cobalt-soft);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.ok svg {
+  color: var(--cobalt);
+}
+
+.headingBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 44px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+
+.stamps {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionHeading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+}
+
+.detailsHeadingRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.scanPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  border: 1.5px dashed var(--line);
+  color: var(--ink-muted);
+}
+
+.scanTitle {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.scanBody {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.dl {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+
+.dl dt,
+.dl dd {
+  margin: 0;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.dl dt {
+  color: var(--ink-muted);
+}
+
+.dl dd {
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+
+.backToShelf {
+  appearance: none;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+  font: 600 15px/1 var(--font-sans);
+  text-decoration: none;
+}
