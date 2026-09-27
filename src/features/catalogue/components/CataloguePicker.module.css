@@ -115,13 +115,6 @@
   }
 }
 
-.hint {
-  margin: var(--space-4) 0 0;
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--ink-muted);
-}
-
 .list {
   list-style: none;
   margin: 0;

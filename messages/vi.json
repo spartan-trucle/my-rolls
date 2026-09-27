@@ -317,8 +317,7 @@
       "emptyTitle": "Danh mục chưa có “{query}”.",
       "emptyBodyStock": "Film chiết, film hết hạn hay film tiệm tự chiết đều thêm được. Chỉ mình bạn thấy, vào túi ngay.",
       "emptyBodyCamera": "Máy hiếm hay máy tự chế đều thêm được. Chỉ mình bạn thấy, vào túi ngay.",
-      "clearSearch": "Xoá ô tìm, xem cả danh mục",
-      "startHint": "Gõ tên film hoặc máy để tìm trong danh mục."
+      "clearSearch": "Xoá ô tìm, xem cả danh mục"
     },
     "customEntry": {
       "segmentLabel": "Thêm gì",

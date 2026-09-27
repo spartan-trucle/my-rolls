@@ -2,6 +2,7 @@ import { and, asc, desc, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm
 import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { camera, stock } from "@/db/schema";
 import type { TDb } from "@/features/shared/db";
+import { POPULAR_CAMERA_SLUGS, POPULAR_STOCK_SLUGS } from "@/features/catalogue/popularSlugs";
 import { toSearchText } from "@/lib/search-text";
 
 const DEFAULT_LIMIT = 20;
@@ -73,6 +74,103 @@ async function searchCameras<TQueryResult extends PgQueryResultHKT>(
     .limit(limit);
 
   return rows.map((row) => ({ kind: "camera" as const, ...row }));
+}
+
+async function listStocks<TQueryResult extends PgQueryResultHKT>(
+  db: TDb<TQueryResult>,
+  userId: string,
+  limit: number,
+): Promise<TStockEntry[]> {
+  const ownRows = await db
+    .select()
+    .from(stock)
+    .where(and(isNull(stock.deletedAt), eq(stock.ownerId, userId)))
+    .orderBy(asc(stock.brand), asc(stock.name));
+
+  const seenIds = new Set(ownRows.map((row) => row.id));
+
+  const popularRows = await db
+    .select()
+    .from(stock)
+    .where(and(isNull(stock.deletedAt), isNull(stock.ownerId), inArray(stock.slug, POPULAR_STOCK_SLUGS)));
+  const popularBySlug = new Map(popularRows.map((row) => [row.slug, row]));
+  const popularOrdered = POPULAR_STOCK_SLUGS.flatMap((slug) => {
+    const row = popularBySlug.get(slug);
+    if (!row || seenIds.has(row.id)) return [];
+    seenIds.add(row.id);
+    return [row];
+  });
+
+  const restRows = await db
+    .select()
+    .from(stock)
+    .where(and(isNull(stock.deletedAt), isNull(stock.ownerId)))
+    .orderBy(asc(stock.brand), asc(stock.name))
+    .limit(limit);
+  const restOrdered = restRows.filter((row) => !seenIds.has(row.id));
+
+  return [...ownRows, ...popularOrdered, ...restOrdered].slice(0, limit).map((row) => ({ kind: "stock" as const, ...row }));
+}
+
+async function listCameras<TQueryResult extends PgQueryResultHKT>(
+  db: TDb<TQueryResult>,
+  userId: string,
+  limit: number,
+): Promise<TCameraEntry[]> {
+  const ownRows = await db
+    .select()
+    .from(camera)
+    .where(and(isNull(camera.deletedAt), eq(camera.ownerId, userId)))
+    .orderBy(asc(camera.brand), asc(camera.model));
+
+  const seenIds = new Set(ownRows.map((row) => row.id));
+
+  const popularRows = await db
+    .select()
+    .from(camera)
+    .where(and(isNull(camera.deletedAt), isNull(camera.ownerId), inArray(camera.slug, POPULAR_CAMERA_SLUGS)));
+  const popularBySlug = new Map(popularRows.map((row) => [row.slug, row]));
+  const popularOrdered = POPULAR_CAMERA_SLUGS.flatMap((slug) => {
+    const row = popularBySlug.get(slug);
+    if (!row || seenIds.has(row.id)) return [];
+    seenIds.add(row.id);
+    return [row];
+  });
+
+  const restRows = await db
+    .select()
+    .from(camera)
+    .where(and(isNull(camera.deletedAt), isNull(camera.ownerId)))
+    .orderBy(asc(camera.brand), asc(camera.model))
+    .limit(limit);
+  const restOrdered = restRows.filter((row) => !seenIds.has(row.id));
+
+  return [...ownRows, ...popularOrdered, ...restOrdered].slice(0, limit).map((row) => ({ kind: "camera" as const, ...row }));
+}
+
+export interface IListCatalogueInput {
+  kind: TCatalogueKind;
+  userId: string;
+  limit?: number;
+}
+
+/**
+ * CAT-1's "list before typing" fix (D1 review): `CataloguePicker` shows
+ * this instead of a bare hint until the caller types something. Order is
+ * the caller's own custom entries first (most likely to want what's
+ * already private to them), then the curated `POPULAR_*_SLUGS` order
+ * (`popularSlugs.ts`, same order F1's onboarding chips use), then every
+ * other seeded row by brand/name — capped at `limit` (20 by default), same
+ * as `searchCatalogue`. Excludes soft-deleted rows and never another
+ * user's private entry, same privacy rules as `searchCatalogue`.
+ */
+export async function listCatalogue<TQueryResult extends PgQueryResultHKT>(
+  db: TDb<TQueryResult>,
+  input: IListCatalogueInput,
+): Promise<TCatalogueEntry[]> {
+  const limit = input.limit ?? DEFAULT_LIMIT;
+
+  return input.kind === "stock" ? listStocks(db, input.userId, limit) : listCameras(db, input.userId, limit);
 }
 
 /**

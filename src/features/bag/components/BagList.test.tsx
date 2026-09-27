@@ -1,6 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/i18n/test-utils";
 import type { TBagEntry } from "@/features/bag/queries";
 
@@ -9,10 +9,12 @@ const removeFromBag = vi.hoisted(() => vi.fn());
 const listBag = vi.hoisted(() => vi.fn());
 const addCustomLens = vi.hoisted(() => vi.fn());
 const searchCatalogue = vi.hoisted(() => vi.fn());
+const listCatalogue = vi.hoisted(() => vi.fn());
 
 vi.mock("@/features/bag/actions", () => ({ addToBag, removeFromBag, listBag }));
 vi.mock("@/features/catalogue/actions", () => ({
   searchCatalogue,
+  listCatalogue,
   addCustomStock: vi.fn(),
   addCustomCamera: vi.fn(),
   addCustomLens,
@@ -104,12 +106,17 @@ function setup(entries: TBagEntry[]) {
 }
 
 describe("BagList", () => {
+  beforeEach(() => {
+    listCatalogue.mockResolvedValue({ ok: true, entries: [] });
+  });
+
   afterEach(() => {
     addToBag.mockReset();
     removeFromBag.mockReset();
     listBag.mockReset();
     addCustomLens.mockReset();
     searchCatalogue.mockReset();
+    listCatalogue.mockReset();
   });
 
   it("groups entries by kind, with a lens section (design finding 1)", () => {

@@ -1,12 +1,13 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/i18n/test-utils";
 
 const searchCatalogue = vi.hoisted(() => vi.fn());
+const listCatalogue = vi.hoisted(() => vi.fn());
 const addToBag = vi.hoisted(() => vi.fn());
 
-vi.mock("@/features/catalogue/actions", () => ({ searchCatalogue }));
+vi.mock("@/features/catalogue/actions", () => ({ searchCatalogue, listCatalogue }));
 vi.mock("@/features/bag/actions", () => ({ addToBag }));
 
 import { CataloguePicker } from "./CataloguePicker";
@@ -40,16 +41,63 @@ function setup() {
 }
 
 describe("CataloguePicker", () => {
+  beforeEach(() => {
+    listCatalogue.mockResolvedValue({ ok: true, entries: [] });
+  });
+
   afterEach(() => {
     searchCatalogue.mockReset();
+    listCatalogue.mockReset();
     addToBag.mockReset();
   });
 
-  it("shows a hint and doesn't search until something is typed", () => {
+  it("lists the catalogue (listCatalogue) before anything is typed, not a search", async () => {
+    listCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
     setup();
 
-    expect(screen.getByText("Gõ tên film hoặc máy để tìm trong danh mục.")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Kodak Gold 200" })).toBeInTheDocument();
+    expect(listCatalogue).toHaveBeenCalledWith({ kind: "stock" });
     expect(searchCatalogue).not.toHaveBeenCalled();
+  });
+
+  it("typing replaces the list with search results", async () => {
+    listCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
+    searchCatalogue.mockResolvedValue({ ok: true, entries: [K1000] });
+    const { user } = setup();
+
+    await screen.findByRole("button", { name: "Kodak Gold 200" });
+
+    await user.type(screen.getByLabelText("Tìm trong danh mục"), "k1000");
+
+    expect(await screen.findByRole("button", { name: "Pentax K1000" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Kodak Gold 200" })).not.toBeInTheDocument();
+  });
+
+  it("clearing the search box brings the list back", async () => {
+    listCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
+    searchCatalogue.mockResolvedValue({ ok: true, entries: [K1000] });
+    const { user } = setup();
+
+    const input = screen.getByLabelText("Tìm trong danh mục");
+    await user.type(input, "k1000");
+    await screen.findByRole("button", { name: "Pentax K1000" });
+
+    await user.clear(input);
+
+    expect(await screen.findByRole("button", { name: "Kodak Gold 200" })).toBeInTheDocument();
+  });
+
+  it("only the results list scrolls, not the whole dialog (fix 2's constant-height box)", () => {
+    setup();
+
+    // The results container is the only flex-grow / overflow-y region;
+    // header and controls stay outside it, so `document.querySelector`
+    // (rather than a role/text query) is the honest way to assert this
+    // structural property.
+    const results = document.querySelector('[class*="results"]');
+    expect(results).not.toBeNull();
+    expect(results?.querySelector('[class*="header"]')).toBeNull();
+    expect(results?.querySelector('input')).toBeNull();
   });
 
   it("debounces the search (~200ms) and calls it with the current kind", async () => {
@@ -137,7 +185,8 @@ describe("CataloguePicker", () => {
     expect(onAddCustom).toHaveBeenCalledWith("stock", "aerocolor");
   });
 
-  it("clears the search from the no-match state", async () => {
+  it("clears the search from the no-match state, back to the list", async () => {
+    listCatalogue.mockResolvedValue({ ok: true, entries: [GOLD_200] });
     searchCatalogue.mockResolvedValue({ ok: true, entries: [] });
     const { user } = setup();
 
@@ -148,6 +197,6 @@ describe("CataloguePicker", () => {
     await user.click(screen.getByRole("button", { name: "Xoá ô tìm, xem cả danh mục" }));
 
     await waitFor(() => expect(input).toHaveValue(""));
-    expect(await screen.findByText("Gõ tên film hoặc máy để tìm trong danh mục.")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Kodak Gold 200" })).toBeInTheDocument();
   });
 });
