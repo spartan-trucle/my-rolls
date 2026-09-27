@@ -3,7 +3,7 @@ import "server-only";
 import { and, eq, isNull, ne, or } from "drizzle-orm";
 import { z } from "zod";
 import { lab, labBranch } from "@/db/schema";
-import type { TDb } from "@/db/types";
+import type { TDb } from "@/features/shared/db";
 import { toSearchText } from "@/lib/search-text";
 import { HOME_DEVELOPMENT_SLUG, LAB_SERVICES } from "./constants";
 
