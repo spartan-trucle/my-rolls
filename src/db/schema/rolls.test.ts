@@ -38,6 +38,25 @@ describe("rolls schema", () => {
     expect(Object.keys(getTableColumns(roll))).not.toContain("pushPull");
   });
 
+  it("carries a nullable per-user number and a day|month date precision (Round 2, R2-4, R2-5)", () => {
+    const columns = getTableColumns(roll);
+
+    expect(columns.number.notNull).toBe(false);
+    expect(columns.number.dataType).toBe("number");
+    expect(columns.datePrecision.name).toBe("date_precision");
+    expect(columns.datePrecision.notNull).toBe(false);
+    expect(columns.datePrecision.enumValues).toEqual(["day", "month"]);
+  });
+
+  it("never reuses a live roll number for the same user (R2-5)", () => {
+    const indexes = getTableConfig(roll).indexes;
+    const numberIndex = indexes.find((index) => index.config.name === "roll_user_id_number_idx");
+
+    expect(numberIndex).toBeDefined();
+    expect(numberIndex?.config.unique).toBe(true);
+    expect(numberIndex?.config.where).toBeDefined();
+  });
+
   it("carries version for share-image cache busting, and user_id for owner scoping (D9)", () => {
     const columns = getTableColumns(roll);
 

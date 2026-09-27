@@ -21,6 +21,16 @@ describe("bag schema", () => {
     expect(columns.deletedAt.name).toBe("deleted_at");
   });
 
+  it("qty and expiry_year are nullable integers, for BAG-2's film pocket (Round 2)", () => {
+    const columns = getTableColumns(bagItem);
+
+    expect(columns.qty.notNull).toBe(false);
+    expect(columns.qty.dataType).toBe("number");
+    expect(columns.expiryYear.name).toBe("expiry_year");
+    expect(columns.expiryYear.notNull).toBe(false);
+    expect(columns.expiryYear.dataType).toBe("number");
+  });
+
   it("indexes user_id for owner-scoped listBag queries, partial on deleted_at (D9)", () => {
     const indexes = getTableConfig(bagItem).indexes;
     const userIdIndex = indexes.find((index) => index.config.name === "bag_item_user_id_idx");

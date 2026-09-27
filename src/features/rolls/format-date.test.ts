@@ -15,4 +15,20 @@ describe("formatRollDate", () => {
   it("returns null for a null date", () => {
     expect(formatRollDate(null)).toBeNull();
   });
+
+  it("formats as mm.yyyy when precision is month (R2-4, audit P4)", () => {
+    expect(formatRollDate(new Date("2025-10-12T12:00:00Z"), "month")).toBe("10.2025");
+  });
+
+  it("still formats dd.mm.yy when precision is day", () => {
+    expect(formatRollDate(new Date("2025-10-12T12:00:00Z"), "day")).toBe("12.10.25");
+  });
+
+  it("still formats dd.mm.yy when precision is null (unknown/omitted)", () => {
+    expect(formatRollDate(new Date("2025-10-12T12:00:00Z"), null)).toBe("12.10.25");
+  });
+
+  it("returns null for a null date regardless of precision", () => {
+    expect(formatRollDate(null, "month")).toBeNull();
+  });
 });
