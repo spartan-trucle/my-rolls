@@ -34,4 +34,4 @@ happens on `my-rolls-weld.vercel.app` after this PR merges.
 | Messenger in-app browser | | | |
 | Instagram in-app browser | | | |
 
-_Filled in by Trúc after this PR merges, per D30._
+Result: **passed**. Trúc ran the device pass on production on 27.09.2026 and reported it as passed; per-browser screenshots weren't attached, so the rows above stay blank. Roadmap box ticked.

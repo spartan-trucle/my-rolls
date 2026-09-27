@@ -1,7 +1,7 @@
 # Cuộn roadmap
 
 > **Mirror — the artifact is the source of truth:** [Cuộn roadmap](https://claude.ai/artifact/Lsq7MWHNCVanpBWQ2D4XTo)
-> Last synced: 27.09.2026 · doc revision 28 · by Claude for Trúc (revisions 16–23 by Trúc: waitlist page in Phase 1, landing page in Phase 5, 139 h build + 21 h buffer; revision 24 ticks "Repo, Next.js + Tailwind mapped to design tokens", landed in PR #1; revisions 25–26 remove the Phase 1 waitlist page at Trúc's request: sign-up stays open through the landing page; revision 27 ticks `next-intl`, Neon + Drizzle, Vercel `sin1` and PostHog, landed in PRs #3 and #5; revision 28 ticks R2 buckets (`pnpm r2:smoke` passes) and Google sign-in (phone check), both confirmed by Trúc).
+> Last synced: 27.09.2026 · doc revision 29 · by Claude for Trúc (revisions 16–23 by Trúc: waitlist page in Phase 1, landing page in Phase 5, 139 h build + 21 h buffer; revision 24 ticks "Repo, Next.js + Tailwind mapped to design tokens", landed in PR #1; revisions 25–26 remove the Phase 1 waitlist page at Trúc's request: sign-up stays open through the landing page; revision 27 ticks `next-intl`, Neon + Drizzle, Vercel `sin1` and PostHog, landed in PRs #3 and #5; revision 28 ticks R2 buckets (`pnpm r2:smoke` passes) and Google sign-in (phone check), both confirmed by Trúc; revision 29 ticks both spikes, passed on production, see docs/spikes/).
 > Before editing, re-read the artifact. Make changes in the artifact and copy them here in the same session (see [CLAUDE.md](../CLAUDE.md#sync-rules)).
 
 Related: [PRD overview](product/prd.md) · [Requirements index](product/requirements/README.md) · [ADR-001](architecture/adr-001-tech-stack.md) · [Design system](design/design-system.md)
@@ -28,8 +28,8 @@ Tick items as they land; a phase is done when its last item (the exit check) is 
 - [x] Vercel deploy in `sin1`
 - [x] PostHog for analytics and errors
 - [x] Google sign-in ([AUTH-1](product/requirements/auth.md))
-- [ ] Spike: `next/og` with Be Vietnam Pro
-- [ ] Spike: Web Share with files on iPhone and in Zalo, Messenger, Instagram
+- [x] Spike: `next/og` with Be Vietnam Pro
+- [x] Spike: Web Share with files on iPhone and in Zalo, Messenger, Instagram
 - [ ] Exit: sign in on a phone on a preview URL; a test story PNG renders "tấm ưng" correctly
 
 ### Phase 1 · Log a roll (12 Oct – 1 Nov)
