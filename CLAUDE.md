@@ -26,7 +26,7 @@ The roadmap and the design system must always match their artifacts.
 
 ### Roadmap progress checklist
 
-The roadmap's **Progress** section (per phase, content track, decisions) is a checklist that lives in both places.
+The roadmap's **Progress** section (per phase, content track, decisions) is a checklist that lives in both places. `/progress` ([skill](.claude/skills/progress/SKILL.md)) runs the check and the update below in order.
 
 - When work lands (a requirement merged, an exit check met, a decision made), tick the box in the artifact and in `docs/roadmap.md` in the same session, and bump "Last synced".
 - Before ticking, re-read the artifact: boxes ticked there by hand (in the Claude Docs viewer) must be copied into the mirror first, never overwritten.
