@@ -274,16 +274,8 @@ export function BagList({ initialEntries }: BagListProps) {
                       qty={entry.qty ?? null}
                       stockName={entryName(entry)}
                       onChange={(qty) => updateStockEntry(entry.bagItemId, { qty })}
+                      onRemove={() => updateStockEntry(entry.bagItemId, { qty: 0 })}
                     />
-                    <button
-                      type="button"
-                      className={styles.removeButton}
-                      aria-label={t("removeLabel", { name: entryName(entry) })}
-                      onClick={() => setConfirmEntry(entry)}
-                      disabled={removing && confirmEntry?.bagItemId === entry.bagItemId}
-                    >
-                      <RemoveIcon />
-                    </button>
                   </li>
                 );
               })}

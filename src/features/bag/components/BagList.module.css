@@ -116,7 +116,7 @@
 }
 
 .filmItem {
-  grid-template-columns: 40px minmax(0, 1fr) auto 44px;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
 }
 
 .itemIcon {

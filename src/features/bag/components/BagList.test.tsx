@@ -157,31 +157,31 @@ describe("BagList", () => {
   });
 
   it("opens a confirm dialog naming the item; cancel does nothing", async () => {
-    const { user } = setup([stockEntry()]);
+    const { user } = setup([cameraEntry()]);
 
-    await user.click(screen.getByRole("button", { name: "Bỏ Kodak Gold 200 khỏi túi" }));
+    await user.click(screen.getByRole("button", { name: "Bỏ Pentax K1000 khỏi túi" }));
 
-    expect(await screen.findByRole("heading", { name: "Bỏ Kodak Gold 200 khỏi túi?" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Bỏ Pentax K1000 khỏi túi?" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Huỷ" }));
 
     expect(removeFromBag).not.toHaveBeenCalled();
-    expect(screen.queryByRole("heading", { name: "Bỏ Kodak Gold 200 khỏi túi?" })).not.toBeInTheDocument();
-    expect(screen.getByText("Kodak Gold 200")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Bỏ Pentax K1000 khỏi túi?" })).not.toBeInTheDocument();
+    expect(screen.getByText("Pentax K1000")).toBeInTheDocument();
   });
 
   it("confirming the dialog calls removeFromBag and drops the item from the list", async () => {
     removeFromBag.mockResolvedValue({ ok: true });
-    const { user } = setup([stockEntry()]);
+    const { user } = setup([cameraEntry()]);
 
-    await user.click(screen.getByRole("button", { name: "Bỏ Kodak Gold 200 khỏi túi" }));
-    await screen.findByRole("heading", { name: "Bỏ Kodak Gold 200 khỏi túi?" });
+    await user.click(screen.getByRole("button", { name: "Bỏ Pentax K1000 khỏi túi" }));
+    await screen.findByRole("heading", { name: "Bỏ Pentax K1000 khỏi túi?" });
 
     await user.click(screen.getByRole("button", { name: "Xoá khỏi túi" }));
 
-    expect(removeFromBag).toHaveBeenCalledWith({ bagItemId: "bag-stock-1" });
-    await waitFor(() => expect(screen.queryByText("Kodak Gold 200")).not.toBeInTheDocument());
-    expect(screen.queryByRole("heading", { name: "Bỏ Kodak Gold 200 khỏi túi?" })).not.toBeInTheDocument();
+    expect(removeFromBag).toHaveBeenCalledWith({ bagItemId: "bag-cam-1" });
+    await waitFor(() => expect(screen.queryByText("Pentax K1000")).not.toBeInTheDocument());
+    expect(screen.queryByRole("heading", { name: "Bỏ Pentax K1000 khỏi túi?" })).not.toBeInTheDocument();
   });
 
   it("adds from the catalogue picker: opens it with bagRefIds, and updates the list once picked", async () => {
@@ -274,5 +274,21 @@ describe("BagList", () => {
 
     expect(setStockQty).toHaveBeenCalledWith({ bagItemId: "bag-stock-1", qty: 0 });
     await waitFor(() => expect(screen.queryByText("Kodak Gold 200")).toBeNull());
+  });
+
+  it("BAG-2 (owner 28.09.2026): a film row has no × — removing it lives in the count dialog", async () => {
+    removeFromBag.mockResolvedValue({ ok: true });
+    const { user } = setup([{ ...stockEntry(), qty: 2 }, cameraEntry()]);
+
+    expect(screen.queryByRole("button", { name: "Bỏ Kodak Gold 200 khỏi túi" })).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Sửa số cuộn Kodak Gold 200" }));
+    const dialog = screen.getByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Xoá khỏi túi" }));
+
+    expect(removeFromBag).toHaveBeenCalledWith({ bagItemId: "bag-stock-1" });
+    expect(setStockQty).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.queryByText("Kodak Gold 200")).toBeNull());
+    expect(screen.getByText("Pentax K1000")).toBeInTheDocument();
   });
 });

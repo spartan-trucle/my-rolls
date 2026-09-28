@@ -102,7 +102,33 @@
 
 .actions {
   display: flex;
+  align-items: center;
   gap: var(--space-3);
   align-self: stretch;
   justify-content: flex-end;
+}
+
+/* Removing sits apart from Huỷ / Lưu, on the left, in the pin colour. */
+.remove {
+  appearance: none;
+  min-height: 44px;
+  margin-right: auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--pin);
+  font: 600 14px/20px var(--font-sans);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.remove:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.remove:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }

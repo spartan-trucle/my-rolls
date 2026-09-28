@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Icon } from "@/design-system";
 import { ResponsiveDialog } from "@/components/overlay/ResponsiveDialog";
-import { setStockQty } from "@/features/bag/actions";
+import { removeFromBag, setStockQty } from "@/features/bag/actions";
 import styles from "./StockQtyEdit.module.css";
 
 export interface StockQtyEditProps {
@@ -13,15 +13,20 @@ export interface StockQtyEditProps {
   qty: number | null;
   /** Fires once a save commits. `0` means the film left the bag (the server soft-deletes it). */
   onChange: (qty: number) => void;
+  /** Fires once "Xoá khỏi túi" in the dialog removed the film from the bag. */
+  onRemove: () => void;
   stockName: string;
 }
 
 /**
  * BAG-2 (owner 28.09.2026): the film row shows its count as a `×N` badge
  * and a pencil button; the − / count / + stepper lives in a dialog and
- * only commits on "Lưu". Saving 0 takes the film out of the bag.
+ * only commits on "Lưu". Saving 0 takes the film out of the bag, and so
+ * does the dialog's "Xoá khỏi túi" — the film row has no × of its own.
+ * Opening the dialog is already the deliberate step, so removing from it
+ * doesn't ask a second time.
  */
-export function StockQtyEdit({ bagItemId, qty, onChange, stockName }: StockQtyEditProps) {
+export function StockQtyEdit({ bagItemId, qty, onChange, onRemove, stockName }: StockQtyEditProps) {
   const t = useTranslations("bag");
   const titleId = useId();
   const [open, setOpen] = useState(false);
@@ -45,6 +50,18 @@ export function StockQtyEdit({ bagItemId, qty, onChange, stockName }: StockQtyEd
     }
     setOpen(false);
     onChange(result.qty ?? 0);
+  }
+
+  async function remove() {
+    setSaving(true);
+    const result = await removeFromBag({ bagItemId });
+    setSaving(false);
+    if (!result.ok) {
+      setFailed(true);
+      return;
+    }
+    setOpen(false);
+    onRemove();
   }
 
   return (
@@ -90,6 +107,9 @@ export function StockQtyEdit({ bagItemId, qty, onChange, stockName }: StockQtyEd
               </p>
             ) : null}
             <div className={styles.actions}>
+              <button type="button" className={styles.remove} onClick={remove} disabled={saving}>
+                {t("removeConfirmConfirm")}
+              </button>
               <Button onClick={() => setOpen(false)} disabled={saving}>
                 {t("qtyCancel")}
               </Button>
