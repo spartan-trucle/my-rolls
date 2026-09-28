@@ -16,7 +16,7 @@ Back to: [PRD overview](../prd.md) · [Docs index](../../README.md)
 |---|---|---|---|---|
 | AUTH-1 | P0 | Google sign-in | Phase 0 | [auth](auth.md) |
 | AUTH-2 | P1 | Delete account | v1.1a | [auth](auth.md) |
-| ROLL-1 | P0 | New roll, two required fields | Phase 1 | [rolls](rolls.md) |
+| ROLL-1 | P0 | New roll: film, camera, box ISO and format required (ISO and format prefilled) | Phase 1 | [rolls](rolls.md) |
 | ROLL-2 | P0 | Add a past roll | Phase 1 | [rolls](rolls.md) |
 | ROLL-3 | P1 | Bulk import of old rolls | v1.1a | [rolls](rolls.md) |
 | ROLL-4 | P1 | Roll status steps | v1.1b | [rolls](rolls.md) |

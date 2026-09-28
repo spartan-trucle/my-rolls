@@ -8,7 +8,7 @@ Back to: [Requirements index](README.md) · [PRD overview](../prd.md) · Ships i
 
 | ID | P | Requirement |
 |---|---|---|
-| ROLL-1 | P0 | Create a roll with only two required fields: film stock and camera, both picked from the bag first. Title, lens, format, exposures, shot-at ISO, dates and locations are optional. Push/pull is calculated in stops from box and shot-at ISO. |
+| ROLL-1 | P0 | Create a roll with four required fields: film stock and camera, both picked from the bag first, plus box ISO and format, both prefilled from the film. Title, lens, exposures, shot-at ISO, dates and locations are optional. Push/pull is calculated in stops from box and shot-at ISO. |
 | ROLL-2 | P0 | Add a past roll: the same form with dates in the past, followed straight away by uploading its scans. This is how a new user fills their shelf on day one. |
 | ROLL-3 | P1 | Import many old rolls at once: pick several local folders or a Google Drive folder; each subfolder becomes a roll with its scans, details filled in afterwards. |
 | ROLL-4 | P1 | Status steps: Loaded → Shot → At the lab → Scanned → Archived, each change timestamped. In the MVP a roll is either waiting for scans or has them. |
