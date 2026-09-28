@@ -550,6 +550,7 @@ export function RollForm({ mode, roll }: RollFormProps) {
 
       <div className={styles.layout}>
       <div className={styles.body}>
+        <div className={styles.titleRow}>
         <div className={styles.headingBlock}>
           <h1 className={styles.heading}>{heading}</h1>
           <p className={styles.lead}>{lead}</p>
@@ -565,7 +566,10 @@ export function RollForm({ mode, roll }: RollFormProps) {
             </Link>
           </div>
         ) : null}
+        </div>
 
+        {/* NewRollWeb: film and camera side by side at desktop. */}
+        <div className={styles.pickers}>
         <fieldset className={styles.fieldset}>
           <legend className={styles.legendRow}>
             <span className={styles.legendLabel}>{t("filmLegend")}</span>
@@ -753,6 +757,7 @@ export function RollForm({ mode, roll }: RollFormProps) {
             {t("addCamera")}
           </button>
         </fieldset>
+        </div>
 
         {mode === "past" ? (
           <fieldset className={styles.fieldset}>
@@ -946,13 +951,21 @@ export function RollForm({ mode, roll }: RollFormProps) {
       </div>
 
       {/* N12 (desktop only): the real `RollCard`, live from the form's own values. */}
-      <aside className={styles.preview} aria-hidden="true">
-        <span className={styles.previewHeading}>{kickerNumber !== null ? t("kicker", { number: kickerNumber }) : t("previewHeading")}</span>
+      {/* NewRollWeb: the desktop side panel holds the preview and the save
+          actions; on phone it dissolves (`display: contents`) so the footer
+          stays the sticky save bar. */}
+      <div className={styles.side}>
+      <div className={styles.preview} aria-hidden="true">
+        <div className={styles.previewHead}>
+          <span className={styles.previewHeading}>{t("previewHeading")}</span>
+          {kickerNumber !== null ? <span className={styles.kicker}>{t("kicker", { number: kickerNumber })}</span> : null}
+        </div>
         <RollCard {...previewCardProps} href={undefined} className={styles.previewCard} />
-        <Scribble arrow="left" size="sm">
-          {t("previewScribble")}
-        </Scribble>
-      </aside>
+        <span className={styles.previewScribble}>
+          <Scribble arrow="left" size="sm">
+            {t("previewScribble")}
+          </Scribble>
+        </span>
       </div>
 
       <div className={styles.footer}>
@@ -965,6 +978,8 @@ export function RollForm({ mode, roll }: RollFormProps) {
             {t("cancelDesktop")}
           </Link>
         </div>
+      </div>
+      </div>
       </div>
 
       <ResponsiveDialog open={dialog.view !== "closed"} onClose={closeDialog} labelledBy={titleId}>

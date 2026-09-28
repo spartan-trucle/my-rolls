@@ -62,16 +62,41 @@
   flex: 1 1 auto;
 }
 
-/* N12 (desktop): a "Sẽ lên kệ thế này" preview card beside the form. */
+.titleRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.pickers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* N12 (desktop): the side panel — "Sẽ lên kệ thế này" preview card, then the
+   summary and save actions (NewRollWeb's aside). On phone only the footer
+   shows, as the sticky save bar. */
+.side {
+  display: contents;
+}
+
 .preview {
   display: none;
   flex-direction: column;
-  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.previewHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-4);
-  border: 1.5px solid var(--line);
-  background: var(--paper-raised);
-  align-self: flex-start;
+}
+
+.previewScribble {
+  align-self: flex-end;
+  margin-top: -6px;
 }
 
 .previewHeading {
@@ -94,15 +119,42 @@
     display: inline-flex;
   }
 
+  .page {
+    max-width: none;
+  }
+
   .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    gap: 64px;
+    align-items: start;
+  }
+
+  .titleRow {
     flex-direction: row;
-    align-items: flex-start;
-    gap: var(--space-8);
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-6);
+  }
+
+  .pickers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 40px;
+    align-items: start;
+  }
+
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-6);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
   }
 
   .preview {
     display: flex;
-    flex: 0 0 220px;
   }
 }
 
@@ -491,19 +543,26 @@
 }
 
 @media (min-width: 1024px) {
-  .footerActions {
-    flex-direction: row-reverse;
-    justify-content: flex-end;
-    gap: var(--space-3);
+  /* Inside the side panel: no bar chrome, Save full width, "Huỷ" under it. */
+  .footer {
+    position: static;
+    gap: var(--space-4);
+    padding: 0;
+    background: transparent;
+    border-top: 0;
   }
 
-  .save {
-    width: auto;
-    padding: 0 var(--space-6);
+  .summary {
+    text-align: left;
+  }
+
+  .footerSpacer {
+    display: none;
   }
 
   .cancelDesktop {
     display: inline-flex;
+    align-self: center;
   }
 }
 
