@@ -57,6 +57,27 @@ describe("RollPage", () => {
     expect(screen.getByRole("link", { name: "Đặt tên cho cuộn" })).toHaveAttribute("href", "/rolls/roll-1/edit");
   });
 
+  it("an unnamed roll shows its number once — no 'Cuộn N' kicker over 'Cuộn #N'", async () => {
+    render(await RollPage({ roll: makeRoll({ name: null, number: 3 }) }));
+
+    expect(screen.getByRole("heading", { name: "Cuộn #3" })).toBeInTheDocument();
+    expect(screen.queryByText("Cuộn 3")).toBeNull();
+  });
+
+  it("a named roll keeps its number as the kicker", async () => {
+    render(await RollPage({ roll: makeRoll({ name: "Đà Lạt mùa mưa", number: 3 }) }));
+
+    expect(screen.getByRole("heading", { name: "Đà Lạt mùa mưa" })).toBeInTheDocument();
+    expect(screen.getByText("Cuộn 3")).toBeInTheDocument();
+  });
+
+  it("links back to the shelf once, from the top — no second 'Về kệ' button", async () => {
+    render(await RollPage({ roll: makeRoll({}) }));
+
+    expect(screen.getByRole("link", { name: "‹ Kệ" })).toHaveAttribute("href", "/");
+    expect(screen.queryByRole("link", { name: "Về kệ" })).toBeNull();
+  });
+
   it("R1: shows the just-saved banner only when justSaved is true", async () => {
     const { rerender } = render(await RollPage({ roll: makeRoll({}) }));
     expect(screen.queryByText("Đã lên kệ.")).not.toBeInTheDocument();

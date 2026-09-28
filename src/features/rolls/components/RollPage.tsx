@@ -102,7 +102,8 @@ export async function RollPage({ roll, justSaved = false }: RollPageProps) {
       <div className={styles.layout}>
         <div className={styles.main}>
           <div className={styles.headingBlock}>
-            {roll.number != null ? <span className={styles.kicker}><Icon name="roll" size={16} /> {t("kickerNumber", { number: roll.number })}</span> : null}
+            {/* The number kicker only adds something over a name; an unnamed roll's title is already "Cuộn #N". */}
+            {roll.name !== null && roll.number != null ? <span className={styles.kicker}><Icon name="roll" size={16} /> {t("kickerNumber", { number: roll.number })}</span> : null}
             <h1 className={styles.heading}>{title}</h1>
             {roll.name === null ? (
               <Link href={`/rolls/${roll.id}/edit`} className={styles.nameLink}>
@@ -146,10 +147,6 @@ export async function RollPage({ roll, justSaved = false }: RollPageProps) {
               <DetailRow label={t("detailLocations")} value={roll.locations && roll.locations.length > 0 ? roll.locations.join(", ") : null} />
             </dl>
           </section>
-
-          <Link href="/" className={styles.backToShelf}>
-            {t("backToShelf")}
-          </Link>
         </div>
 
         <div className={styles.side}>

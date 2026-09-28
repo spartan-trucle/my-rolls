@@ -86,10 +86,6 @@
   order: 3;
 }
 
-.backToShelf {
-  order: 4;
-}
-
 .shelf {
   display: none;
 }
@@ -266,20 +262,6 @@
 .dl dd {
   font-family: var(--font-mono);
   font-size: 14px;
-}
-
-.backToShelf {
-  appearance: none;
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1.5px solid var(--ink);
-  color: var(--ink);
-  font: 600 15px/1 var(--font-sans);
-  text-decoration: none;
 }
 
 /* RollSavedWeb: the desktop title is 56px. Declared after `.heading` so it wins. */
