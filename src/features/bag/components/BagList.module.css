@@ -4,17 +4,26 @@
   gap: var(--space-4);
 }
 
+/* Title + counts, then the canister pocket (BagWeb: gap 24px). */
+.headerMain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+/* BagWeb: `1fr | 380px`, gap 48px, bottoms aligned so the search sits
+   level with the pocket's ledge. */
 @media (min-width: 1024px) {
   .header {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--space-8);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: var(--space-12);
+    align-items: end;
   }
 
   .headerSearch {
-    flex: 0 0 380px;
-    width: 380px;
+    padding-bottom: var(--space-4);
   }
 }
 

@@ -23,18 +23,24 @@ export function BagCanisterStrip({ canisters, unloadedRolls }: BagCanisterStripP
 
   return (
     <div className={styles.root}>
-      <ul className={styles.strip} aria-label={t("canisterStripNote", { count: unloadedRolls })}>
-        {canisters.flatMap((canister) =>
-          Array.from({ length: canister.qty }, (_, index) => (
-            <li key={`${canister.stockId}-${index}`} className={styles.canisterItem}>
-              <Canister color={canister.canisterColor} iso={canister.iso} />
-            </li>
-          )),
-        )}
-      </ul>
-      <Scribble arrow="left" size="sm">
-        {t("canisterStripNote", { count: unloadedRolls })}
-      </Scribble>
+      <div className={styles.pocket}>
+        <ul className={styles.strip} aria-label={t("canisterStripNote", { count: unloadedRolls })}>
+          {canisters.flatMap((canister) =>
+            Array.from({ length: canister.qty }, (_, index) => (
+              <li key={`${canister.stockId}-${index}`} className={styles.canisterItem}>
+                <Canister color={canister.canisterColor} iso={canister.iso} />
+              </li>
+            )),
+          )}
+        </ul>
+        <span className={styles.note}>
+          <Scribble arrow="left" size="sm">
+            {t("canisterStripNote", { count: unloadedRolls })}
+          </Scribble>
+        </span>
+      </div>
+      <div className={styles.ledge} aria-hidden="true" />
+      <div className={styles.ledgeBase} aria-hidden="true" />
     </div>
   );
 }

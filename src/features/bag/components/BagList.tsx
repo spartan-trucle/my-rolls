@@ -183,9 +183,11 @@ export function BagList({ initialEntries }: BagListProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* B9 (audit, BagWeb): title + counts on the left, search in a 380px
-          right column at desktop; stacked (search below) on phone. */}
+      {/* B9 (audit, BagWeb): title + counts + the canister pocket on the
+          left, search in a 380px right column at desktop; stacked (search
+          below) on phone. */}
       <div className={styles.header}>
+        <div className={styles.headerMain}>
         <div className="flex flex-col gap-2">
           <h1 className="font-display text-display-l font-semibold">{t("title")}</h1>
           <p className={styles.countsLine}>
@@ -196,6 +198,8 @@ export function BagList({ initialEntries }: BagListProps) {
               lenses: lenses.length,
             })}
           </p>
+        </div>
+        <BagCanisterStrip canisters={summary.canisters} unloadedRolls={summary.unloadedRolls} />
         </div>
 
         {!isEmpty ? (
@@ -211,7 +215,6 @@ export function BagList({ initialEntries }: BagListProps) {
         ) : null}
       </div>
 
-      <BagCanisterStrip canisters={summary.canisters} unloadedRolls={summary.unloadedRolls} />
 
       {isEmpty ? (
         <div className={styles.empty}>

@@ -1,51 +1,69 @@
+/* Design system `.rc-can` (components/bundle.css), 1:1 — keep in step with
+   `RollCard.module.css`'s `.can*`. The leader pokes 9px past the right
+   edge; callers leave room for it. */
 .canister {
-  --can-w: 26px;
-  --can-h: 44px;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  width: var(--can-w);
+  position: relative;
+  display: block;
   flex: 0 0 auto;
-}
-
-.canister.md {
-  --can-w: 40px;
-  --can-h: 70px;
+  width: 44px;
+  height: 72px;
+  margin-left: 2px;
 }
 
 .cap {
-  box-sizing: border-box;
-  width: 100%;
-  height: calc(var(--can-h) * 0.22);
+  display: block;
+  width: 22px;
+  height: 7px;
+  margin: 0 auto;
   background: var(--film);
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
 
 .body {
-  box-sizing: border-box;
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: calc(var(--can-h) * 0.78);
+  display: block;
+  height: 65px;
+  overflow: hidden;
   background: var(--rc-stock, var(--stock-gold));
-  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  border-radius: var(--radius-sm);
+}
+
+.body::before,
+.body::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: var(--film);
+}
+
+.body::before {
+  top: 0;
+}
+
+.body::after {
+  bottom: 0;
 }
 
 .label {
-  box-sizing: border-box;
-  width: 88%;
-  padding: 1px 0;
-  background: var(--paper-raised);
-  color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  line-height: 1.4;
-  font-weight: 600;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 22px;
+  padding: 3px 0;
+  font: 700 12px/1 var(--font-mono);
   text-align: center;
+  color: var(--on-print);
+  background: var(--print);
 }
 
-.canister.md .label {
-  font-size: 13px;
+.leader {
+  position: absolute;
+  right: -9px;
+  top: 30px;
+  width: 11px;
+  height: 22px;
+  background: var(--film);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }

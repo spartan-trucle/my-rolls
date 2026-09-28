@@ -164,7 +164,7 @@ export async function RollPage({ roll, justSaved = false }: RollPageProps) {
         </div>
 
         <aside className={styles.aside} aria-hidden="true">
-          <Canister color={roll.canisterColor} iso={roll.boxIso} size="md" />
+          <Canister color={roll.canisterColor} iso={roll.boxIso} />
           <Scribble arrow="left" size="sm">
             {t("canisterScribble")}
           </Scribble>

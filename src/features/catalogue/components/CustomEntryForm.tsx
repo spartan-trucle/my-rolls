@@ -181,7 +181,7 @@ export function CustomEntryForm({
         {kind === "stock" ? (
           <div className={styles.section}>
             <div className={styles.canisterPreview}>
-              <Canister color={canisterColor} iso={iso.trim() === "" ? null : Number(iso)} size="md" />
+              <Canister color={canisterColor} iso={iso.trim() === "" ? null : Number(iso)} />
               <Scribble arrow="left" size="sm">
                 {t("canisterPreviewScribble")}
               </Scribble>

@@ -1,22 +1,44 @@
+/* BagWeb/Bag board's pocket: canisters standing on a two-bar ledge
+   (scrap-edge, then line), the handwritten note at the end of the row. */
 .root {
   display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-  padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--line);
+  flex-direction: column;
+}
+
+.pocket {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 0 8px;
+  overflow-x: auto;
 }
 
 .strip {
   display: flex;
   align-items: flex-end;
-  gap: var(--space-2);
+  gap: 10px;
   list-style: none;
   margin: 0;
-  padding: 0;
-  overflow-x: auto;
+  /* Room for the last canister's leader (it pokes 9px past the can). */
+  padding: 0 9px 0 0;
 }
 
 .canisterItem {
   flex: 0 0 auto;
+}
+
+.note {
+  flex: 0 0 auto;
+  padding: 0 0 18px 8px;
+}
+
+.ledge {
+  height: 10px;
+  margin-top: 4px;
+  background: var(--scrap-edge);
+}
+
+.ledgeBase {
+  height: 6px;
+  background: var(--line);
 }
