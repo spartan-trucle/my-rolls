@@ -128,18 +128,7 @@ export async function RollPage({ roll, justSaved = false }: RollPageProps) {
             {roll.format ? <Stamp>{roll.exposures ? `${roll.format} · ${roll.exposures} exp` : roll.format}</Stamp> : null}
           </div>
 
-          <section aria-labelledby="roll-scan-heading" className={styles.section}>
-            <h2 id="roll-scan-heading" className={styles.sectionHeading}>
-              {t("scanHeading")}
-            </h2>
-            <div className={styles.scanPlaceholder}>
-              <Icon name="upload" size={28} />
-              <p className={styles.scanTitle}>{t("scanComingSoon")}</p>
-              <p className={styles.scanBody}>{t("scanComingSoonBody")}</p>
-            </div>
-          </section>
-
-          <section aria-labelledby="roll-details-heading" className={styles.section}>
+          <section aria-labelledby="roll-details-heading" className={`${styles.section} ${styles.details}`}>
             <div className={styles.detailsHeadingRow}>
               <h2 id="roll-details-heading" className={styles.sectionHeading}>
                 {t("detailsHeading")}
@@ -163,12 +152,35 @@ export async function RollPage({ roll, justSaved = false }: RollPageProps) {
           </Link>
         </div>
 
-        <aside className={styles.aside} aria-hidden="true">
-          <Canister color={roll.canisterColor} iso={roll.boxIso} />
-          <Scribble arrow="left" size="sm">
-            {t("canisterScribble")}
-          </Scribble>
-        </aside>
+        <div className={styles.side}>
+          {/* RollSavedWeb: the roll's canister standing on the shelf ledge
+              beside two empty slots, the note at the end of the row. */}
+          <div className={styles.shelf} aria-hidden="true">
+            <div className={styles.shelfRow}>
+              <span className={styles.shelfSlot} />
+              <span className={styles.shelfSlot} />
+              <Canister color={roll.canisterColor} iso={roll.boxIso} />
+              <span className={styles.shelfNote}>
+                <Scribble arrow="left" size="sm">
+                  {t("canisterScribble")}
+                </Scribble>
+              </span>
+            </div>
+            <div className={styles.ledge} />
+            <div className={styles.ledgeBase} />
+          </div>
+
+          <section aria-labelledby="roll-scan-heading" className={`${styles.section} ${styles.scan}`}>
+            <h2 id="roll-scan-heading" className={styles.sectionHeading}>
+              {t("scanHeading")}
+            </h2>
+            <div className={styles.scanPlaceholder}>
+              <Icon name="upload" size={28} />
+              <p className={styles.scanTitle}>{t("scanComingSoon")}</p>
+              <p className={styles.scanBody}>{t("scanComingSoonBody")}</p>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );
