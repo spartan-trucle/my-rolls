@@ -224,7 +224,7 @@ describe("createRollCore", () => {
     cleanup = () => client.close();
     const [fixedStockRow] = await db
       .insert(stock)
-      .values({ brand: "Kodak", name: "FunSaver film", searchText: toSearchText("Kodak FunSaver film") })
+      .values({ brand: "Kodak", name: "FunSaver film", iso: 800, searchText: toSearchText("Kodak FunSaver film") })
       .returning();
     const [singleUseCameraRow] = await db
       .insert(camera)
@@ -259,7 +259,7 @@ describe("createRollCore", () => {
     const { stockRow: otherStockRow } = await seedBasics(db);
     const [fixedStockRow] = await db
       .insert(stock)
-      .values({ brand: "Kodak", name: "FunSaver film", searchText: toSearchText("Kodak FunSaver film") })
+      .values({ brand: "Kodak", name: "FunSaver film", iso: 800, searchText: toSearchText("Kodak FunSaver film") })
       .returning();
     const [singleUseCameraRow] = await db
       .insert(camera)
@@ -1149,5 +1149,89 @@ describe("updateRollCore (R4)", () => {
     const [rollRow] = await db.select().from(roll).where(eq(roll.id, created.rollId));
     expect(rollRow.datePrecision).toBe("month");
     expect(rollRow.shotTo).toBeNull();
+  });
+});
+
+describe("box ISO and format are required, prefilled from the stock (ROLL-1, owner 28.09.2026)", () => {
+  let cleanup: (() => Promise<void>) | undefined;
+
+  afterEach(async () => {
+    await cleanup?.();
+    cleanup = undefined;
+  });
+
+  async function seedStock(db: Awaited<ReturnType<typeof createTestDb>>["db"], values: { iso: number | null; formats: string[] | null }) {
+    const [stockRow] = await db
+      .insert(stock)
+      .values({ brand: "Lomo", name: "Test", iso: values.iso, formats: values.formats, searchText: toSearchText("Lomo Test") })
+      .returning();
+    return stockRow;
+  }
+
+  it("defaults format to 35mm when none is sent", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+
+    const result = await createRollCore(db, OWNER, { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id }, NOW);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const [rollRow] = await db.select().from(roll).where(eq(roll.id, result.rollId));
+    expect(rollRow).toMatchObject({ boxIso: 400, format: "35mm" });
+  });
+
+  it("defaults format to 120 when the stock only comes in 120", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { cameraBagItemRow } = await seedBasics(db);
+    const stockRow = await seedStock(db, { iso: 160, formats: ["120"] });
+
+    const result = await createRollCore(db, OWNER, { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id }, NOW);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const [rollRow] = await db.select().from(roll).where(eq(roll.id, result.rollId));
+    expect(rollRow).toMatchObject({ boxIso: 160, format: "120" });
+  });
+
+  it("rejects a roll when neither the input nor the stock has a box ISO", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { cameraBagItemRow } = await seedBasics(db);
+    const stockRow = await seedStock(db, { iso: null, formats: null });
+
+    const result = await createRollCore(db, OWNER, { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id }, NOW);
+
+    expect(result).toEqual({ ok: false, error: "validation" });
+    expect(await db.select().from(roll)).toHaveLength(0);
+  });
+
+  it("accepts an ISO-less stock when the box ISO is typed in", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { cameraBagItemRow } = await seedBasics(db);
+    const stockRow = await seedStock(db, { iso: null, formats: null });
+
+    const result = await createRollCore(db, OWNER, { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id, boxIso: 100 }, NOW);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("rejects an update that leaves the roll with no box ISO, and defaults its format", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+    const isoLess = await seedStock(db, { iso: null, formats: null });
+    const created = await createRollCore(db, OWNER, { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id }, NOW);
+    if (!created.ok) throw new Error("setup failed");
+
+    const rejected = await updateRollCore(db, OWNER, { rollId: created.rollId, expectedVersion: 1, stockId: isoLess.id, cameraBagItemId: cameraBagItemRow.id }, NOW);
+    expect(rejected).toEqual({ ok: false, error: "validation" });
+
+    const accepted = await updateRollCore(db, OWNER, { rollId: created.rollId, expectedVersion: 1, stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id }, NOW);
+    expect(accepted).toEqual({ ok: true });
+    const [rollRow] = await db.select().from(roll).where(eq(roll.id, created.rollId));
+    expect(rollRow).toMatchObject({ boxIso: 400, format: "35mm" });
   });
 });

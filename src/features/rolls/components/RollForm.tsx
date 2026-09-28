@@ -408,7 +408,10 @@ export function RollForm({ mode, roll }: RollFormProps) {
     }
   }
 
-  const canSave = effectiveStockId !== null && selectedCameraBagItemId !== null && !saving;
+  // ROLL-1 (owner 28.09.2026): box ISO is required — prefilled from the
+  // film, so it only blocks Save when the film has no ISO or it's cleared.
+  const boxIsoValid = boxIsoNumber !== null && Number.isInteger(boxIsoNumber) && boxIsoNumber > 0;
+  const canSave = effectiveStockId !== null && selectedCameraBagItemId !== null && boxIsoValid && !saving;
 
   // D3/D14: the calendar itself blocks what the server would reject
   // anyway — a future day (Vietnam calendar). Only relevant to the new-
@@ -759,6 +762,46 @@ export function RollForm({ mode, roll }: RollFormProps) {
         </fieldset>
         </div>
 
+        {/* ROLL-1 (owner 28.09.2026): format and box ISO are required, always
+            prefilled — format from the stock (N10), box ISO from its ISO. */}
+        <fieldset className={styles.fieldset}>
+          <legend className={styles.legendRow}>
+            <span className={styles.legendLabel}>{t("essentialsLegend")}</span>
+            <span className={styles.required}>{t("required")}</span>
+          </legend>
+          <div className={styles.two}>
+            <div className={styles.field}>
+              <span className={styles.fieldLabel}>{t("formatLabel")}</span>
+              <div className={styles.seg} role="group" aria-label={t("formatLabel")}>
+                {FORMATS.map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={effectiveFormat === value}
+                    onClick={() => {
+                      setFormat(value);
+                      setExposuresOverride(value === "35mm" ? "36" : "12");
+                    }}
+                  >
+                    {value}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <Field
+              label={t("boxIsoLabel")}
+              mono
+              inputMode="numeric"
+              required
+              value={boxIso}
+              onChange={(event) => {
+                setBoxIsoOverride(event.target.value);
+              }}
+            />
+          </div>
+          {!boxIsoValid && effectiveStockId !== null ? <p className={styles.fieldHint}>{t("boxIsoRequired")}</p> : null}
+        </fieldset>
+
         {mode === "past" ? (
           <fieldset className={styles.fieldset}>
             <legend className={styles.legendLabel}>{t("monthLegend")}</legend>
@@ -849,42 +892,12 @@ export function RollForm({ mode, roll }: RollFormProps) {
             </fieldset>
 
             <div className={styles.two}>
-              <div className={styles.field}>
-                <span className={styles.fieldLabel}>{t("formatLabel")}</span>
-                <div className={styles.seg} role="group" aria-label={t("formatLabel")}>
-                  {FORMATS.map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      aria-pressed={effectiveFormat === value}
-                      onClick={() => {
-                        setFormat(value);
-                        setExposuresOverride(value === "35mm" ? "36" : "12");
-                      }}
-                    >
-                      {value}
-                    </button>
-                  ))}
-                </div>
-              </div>
               <Field
                 label={t("exposuresLabel")}
                 mono
                 inputMode="numeric"
                 value={exposures}
                 onChange={(event) => setExposuresOverride(event.target.value)}
-              />
-            </div>
-
-            <div className={styles.two}>
-              <Field
-                label={t("boxIsoLabel")}
-                mono
-                inputMode="numeric"
-                value={boxIso}
-                onChange={(event) => {
-                  setBoxIsoOverride(event.target.value);
-                }}
               />
               <Field
                 label={t("shotIsoLabel")}

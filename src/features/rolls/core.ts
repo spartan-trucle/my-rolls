@@ -11,6 +11,22 @@ import { formatPushPull, pushPullStops } from "@/features/rolls/push-pull";
 /** Same two formats CAT-2's custom stock entries know about (D4). */
 const FORMATS = ["35mm", "120"] as const;
 
+/**
+ * ROLL-1 (owner, 28.09.2026): box ISO and format are required but always
+ * prefilled — box ISO from the stock's catalogue ISO, format from the
+ * stock (120 when it only comes in 120, else 35mm). Only a stock with no
+ * catalogue ISO and no typed-in ISO is rejected.
+ */
+function resolveIsoAndFormat(
+  input: { boxIso?: number; format?: (typeof FORMATS)[number] },
+  stockRow: { iso: number | null; formats: string[] | null },
+): { boxIso: number; format: (typeof FORMATS)[number] } | null {
+  const boxIso = input.boxIso ?? stockRow.iso;
+  if (boxIso === null) return null;
+  const only120 = (stockRow.formats?.length ?? 0) > 0 && stockRow.formats!.every((value) => value === "120");
+  return { boxIso, format: input.format ?? (only120 ? "120" : "35mm") };
+}
+
 /** R2-4: a past-mode "Chụp khoảng khi nào" month + year pick. `month` is 1–12. */
 const monthYearSchema = z.object({
   month: z.number().int().min(1).max(12),
@@ -265,6 +281,9 @@ export async function createRollCore<TQueryResult extends PgQueryResultHKT>(
     finalStockRow = stockRow;
   }
 
+  const isoAndFormat = resolveIsoAndFormat(input, finalStockRow);
+  if (!isoAndFormat) return { ok: false, error: "validation" };
+
   const resolvedDates = resolveDates(input, now);
   if (!resolvedDates.ok) return { ok: false, error: "validation" };
   const { shotFrom, shotTo, datePrecision } = resolvedDates;
@@ -278,7 +297,7 @@ export async function createRollCore<TQueryResult extends PgQueryResultHKT>(
   // same as before R2-5.
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      return await attemptCreateRoll(db, userId, input, finalStockRow, { shotFrom, shotTo, datePrecision });
+      return await attemptCreateRoll(db, userId, { ...input, ...isoAndFormat }, finalStockRow, { shotFrom, shotTo, datePrecision });
     } catch (error) {
       if (attempt === 0 && isUniqueViolation(error)) continue;
       throw error;
@@ -366,7 +385,7 @@ async function attemptCreateRoll<TQueryResult extends PgQueryResultHKT>(
         number: nextNumber,
         name: input.name ?? null,
         canisterColor: finalStockRow.canisterColor ?? null,
-        boxIso: input.boxIso ?? finalStockRow.iso ?? null,
+        boxIso: input.boxIso ?? null,
         shotIso: input.shotIso ?? null,
         exposures: input.exposures ?? null,
         format: input.format ?? null,
@@ -664,6 +683,9 @@ export async function updateRollCore<TQueryResult extends PgQueryResultHKT>(
     finalStockRow = stockRow;
   }
 
+  const isoAndFormat = resolveIsoAndFormat(input, finalStockRow);
+  if (!isoAndFormat) return { ok: false, error: "validation" };
+
   const hasMonthKeys = input.shotFromMonth !== undefined || input.shotToMonth !== undefined;
   const resolvedDates = resolveDates(
     { ...input, mode: hasMonthKeys || input.shotFrom !== undefined ? "past" : "new" } as TCreateRollInput,
@@ -697,10 +719,10 @@ export async function updateRollCore<TQueryResult extends PgQueryResultHKT>(
       lensId: input.lensId ?? null,
       name: input.name ?? null,
       canisterColor: finalStockRow.canisterColor ?? null,
-      boxIso: input.boxIso ?? finalStockRow.iso ?? null,
+      boxIso: isoAndFormat.boxIso,
       shotIso: input.shotIso ?? null,
       exposures: input.exposures ?? null,
-      format: input.format ?? null,
+      format: isoAndFormat.format,
       locations: input.locations ?? null,
       shotFrom: dates.shotFrom,
       shotTo: dates.shotTo,

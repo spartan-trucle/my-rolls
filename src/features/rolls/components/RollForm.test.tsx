@@ -364,6 +364,29 @@ describe("RollForm", () => {
     expect(screen.getAllByText("KODAK GOLD 200 · PENTAX K1000 · ISO 200").length).toBeGreaterThan(0);
   });
 
+  it("ROLL-1 (owner 28.09.2026): shows ISO hộp and định dạng as required, outside 'Thêm chi tiết', prefilled from the film", async () => {
+    listBag.mockResolvedValue([GOLD, K1000]);
+    const { user } = setup();
+
+    await findFilmChip("Gold 200");
+    expect(screen.getByRole("button", { name: /^Thêm chi tiết/ })).toHaveAttribute("aria-expanded", "false");
+
+    expect(screen.getByRole("button", { name: "35mm" })).toHaveAttribute("aria-pressed", "true");
+    const boxIso = screen.getByLabelText("ISO hộp");
+    expect(boxIso).toHaveValue("200");
+    expect(screen.getAllByText("Bắt buộc")).toHaveLength(3);
+
+    const save = screen.getByRole("button", { name: "Lưu cuộn" });
+    expect(save).toBeEnabled();
+
+    await user.clear(boxIso);
+    expect(save).toBeDisabled();
+    expect(screen.getByText("Nhập ISO hộp để lưu cuộn.")).toBeInTheDocument();
+
+    await user.type(boxIso, "400");
+    expect(save).toBeEnabled();
+  });
+
   it("prefills format 35mm and exposures 36, still editable, and submits them uncut when left alone", async () => {
     listBag.mockResolvedValue([GOLD, K1000]);
     createRoll.mockResolvedValue({ ok: true, rollId: "roll-2", number: 1, remainingQty: null });
