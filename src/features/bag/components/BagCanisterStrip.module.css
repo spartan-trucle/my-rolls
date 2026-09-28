@@ -13,6 +13,11 @@
   overflow-x: auto;
 }
 
+/* Empty shelf: keep a canister's height so the ledge doesn't jump. */
+.pocketEmpty {
+  min-height: 72px;
+}
+
 .strip {
   display: flex;
   align-items: flex-end;

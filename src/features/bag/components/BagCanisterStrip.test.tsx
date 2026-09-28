@@ -4,9 +4,10 @@ import { renderWithIntl } from "@/i18n/test-utils";
 import { BagCanisterStrip } from "./BagCanisterStrip";
 
 describe("BagCanisterStrip", () => {
-  it("renders nothing when there are no unloaded rolls", () => {
-    const { container } = renderWithIntl(<BagCanisterStrip canisters={[]} unloadedRolls={0} />);
-    expect(container).toBeEmptyDOMElement();
+  it("shows the empty shelf, with no canisters, when there are no unloaded rolls (owner 28.09.2026)", () => {
+    renderWithIntl(<BagCanisterStrip canisters={[]} unloadedRolls={0} />);
+    expect(screen.queryAllByRole("listitem")).toHaveLength(0);
+    expect(screen.getByText("chưa có cuộn nào chờ nạp")).toBeInTheDocument();
   });
 
   it("draws one canister per unloaded roll, across stocks", () => {

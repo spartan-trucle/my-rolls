@@ -220,6 +220,19 @@ describe("setStockQtyCore", () => {
     expect(row.qty).toBe(3);
   });
 
+  it("removes the film from the bag (soft delete) when qty is set to 0 (owner 28.09.2026)", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const item = await seedStockBagItem(db);
+    await setStockQtyCore(db, OWNER, { bagItemId: item.id, qty: 2 });
+
+    const result = await setStockQtyCore(db, OWNER, { bagItemId: item.id, qty: 0 });
+
+    expect(result).toEqual({ ok: true, qty: 0 });
+    const [row] = await db.select().from(bagItem).where(eq(bagItem.id, item.id));
+    expect(row.deletedAt).not.toBeNull();
+  });
+
   it("accepts null to stop counting", async () => {
     const { db, client } = await createTestDb();
     cleanup = () => client.close();

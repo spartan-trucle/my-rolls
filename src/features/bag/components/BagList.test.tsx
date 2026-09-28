@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/i18n/test-utils";
@@ -244,13 +244,35 @@ describe("BagList", () => {
     expect(screen.getAllByText("Chưa chụp cuộn nào")).toHaveLength(2); // neither stock has any rolls shot
   });
 
-  it("BAG-2: stepping the stock qty calls setStockQty and updates the displayed count", async () => {
-    setStockQty.mockResolvedValue({ ok: true, qty: 1 });
-    const { user } = setup([stockEntry()]);
+  it("BAG-2 (owner 28.09.2026): the row has an edit button, no inline −/+; the dialog saves the new count", async () => {
+    setStockQty.mockResolvedValue({ ok: true, qty: 3 });
+    const { user } = setup([{ ...stockEntry(), qty: 1 }]);
 
-    await user.click(screen.getByRole("button", { name: /Tăng số cuộn/ }));
+    expect(screen.queryByRole("button", { name: /Tăng số cuộn/ })).toBeNull();
+    expect(screen.getByText("×1")).toBeInTheDocument();
 
-    expect(setStockQty).toHaveBeenCalledWith({ bagItemId: "bag-stock-1", qty: 1 });
-    await waitFor(() => expect(screen.getByText("1")).toBeInTheDocument());
+    await user.click(screen.getByRole("button", { name: "Sửa số cuộn Kodak Gold 200" }));
+    const dialog = screen.getByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Tăng số cuộn Kodak Gold 200" }));
+    await user.click(within(dialog).getByRole("button", { name: "Tăng số cuộn Kodak Gold 200" }));
+    expect(setStockQty).not.toHaveBeenCalled();
+    await user.click(within(dialog).getByRole("button", { name: "Lưu" }));
+
+    expect(setStockQty).toHaveBeenCalledWith({ bagItemId: "bag-stock-1", qty: 3 });
+    await waitFor(() => expect(screen.getByText("×3")).toBeInTheDocument());
+  });
+
+  it("BAG-2 (owner 28.09.2026): saving a count of 0 takes the film off the list", async () => {
+    setStockQty.mockResolvedValue({ ok: true, qty: 0 });
+    const { user } = setup([{ ...stockEntry(), qty: 1 }, cameraEntry()]);
+
+    await user.click(screen.getByRole("button", { name: "Sửa số cuộn Kodak Gold 200" }));
+    const dialog = screen.getByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Giảm số cuộn Kodak Gold 200" }));
+    expect(within(dialog).getByText("Về 0 là film rời khỏi túi.")).toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "Lưu" }));
+
+    expect(setStockQty).toHaveBeenCalledWith({ bagItemId: "bag-stock-1", qty: 0 });
+    await waitFor(() => expect(screen.queryByText("Kodak Gold 200")).toBeNull());
   });
 });

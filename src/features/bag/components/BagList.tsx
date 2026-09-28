@@ -8,7 +8,7 @@ import { ResponsiveDialog } from "@/components/overlay/ResponsiveDialog";
 import { listBag, removeFromBag } from "@/features/bag/actions";
 import { BagCanisterStrip } from "@/features/bag/components/BagCanisterStrip";
 import { ExpiryYearField } from "@/features/bag/components/ExpiryYearField";
-import { StockQtyStepper } from "@/features/bag/components/StockQtyStepper";
+import { StockQtyEdit } from "@/features/bag/components/StockQtyEdit";
 import { summarizeBag, type TBagEntry } from "@/features/bag/queries";
 import { CataloguePicker } from "@/features/catalogue/components/CataloguePicker";
 import { CustomEntryForm, type TCustomEntryKind } from "@/features/catalogue/components/CustomEntryForm";
@@ -117,6 +117,11 @@ export function BagList({ initialEntries }: BagListProps) {
 
   /** Patches one stock bag item's qty/expiryYear in place, after the server confirms the change. */
   function updateStockEntry(bagItemId: string, patch: Partial<{ qty: number | null; expiryYear: number | null }>) {
+    // Owner 28.09.2026: a count saved as 0 took the film out of the bag.
+    if (patch.qty === 0) {
+      setEntries((prev) => prev.filter((entry) => entry.bagItemId !== bagItemId));
+      return;
+    }
     setEntries((prev) =>
       prev.map((entry) =>
         entry.kind === "stock" && entry.bagItemId === bagItemId ? { ...entry, ...patch } : entry,
@@ -264,7 +269,7 @@ export function BagList({ initialEntries }: BagListProps) {
                         onChange={(expiryYear) => updateStockEntry(entry.bagItemId, { expiryYear })}
                       />
                     </span>
-                    <StockQtyStepper
+                    <StockQtyEdit
                       bagItemId={entry.bagItemId}
                       qty={entry.qty ?? null}
                       stockName={entryName(entry)}

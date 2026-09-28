@@ -160,9 +160,12 @@ export async function setStockQtyCore<TQueryResult extends PgQueryResultHKT>(
     return { ok: false, error: "validation" };
   }
 
+  // Owner 28.09.2026: a film counted down to 0 leaves the bag (soft
+  // delete, D9) rather than sitting there as "hết"; re-adding it later is
+  // a normal `addToBag`.
   const [row] = await db
     .update(bagItem)
-    .set({ qty: input.qty })
+    .set(input.qty === 0 ? { qty: 0, deletedAt: new Date() } : { qty: input.qty })
     .where(
       and(
         eq(bagItem.id, input.bagItemId),

@@ -704,6 +704,27 @@ describe("createRollCore — BAG-2 decrement on load (R2-3)", () => {
     expect(bagRow.qty).toBe(2);
   });
 
+  it("removes the film from the bag when the last counted roll is loaded (owner 28.09.2026)", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+    await db.insert(bagItem).values({ userId: OWNER, kind: "stock", refId: stockRow.id, qty: 1 });
+
+    const result = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+
+    expect(result.ok && result.remainingQty).toBe(0);
+    const [bagRow] = await db
+      .select()
+      .from(bagItem)
+      .where(and(eq(bagItem.userId, OWNER), eq(bagItem.refId, stockRow.id)));
+    expect(bagRow.deletedAt).not.toBeNull();
+  });
+
   it("leaves qty alone and returns remainingQty null when the stock isn't counted (qty null)", async () => {
     const { db, client } = await createTestDb();
     cleanup = () => client.close();

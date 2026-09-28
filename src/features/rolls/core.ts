@@ -359,7 +359,12 @@ async function attemptCreateRoll<TQueryResult extends PgQueryResultHKT>(
       }
     } else if (existingBagItem[0].qty !== null && existingBagItem[0].qty > 0) {
       remainingQty = existingBagItem[0].qty - 1;
-      await tx.update(bagItem).set({ qty: remainingQty }).where(eq(bagItem.id, existingBagItem[0].id));
+      // Owner 28.09.2026: loading the last counted roll takes the film out
+      // of the bag (soft delete), same as setting its count to 0.
+      await tx
+        .update(bagItem)
+        .set(remainingQty === 0 ? { qty: 0, deletedAt: new Date() } : { qty: remainingQty })
+        .where(eq(bagItem.id, existingBagItem[0].id));
     }
 
     // R2-5: the next per-user roll number, over every row (live or soft-
