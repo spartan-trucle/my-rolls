@@ -7,10 +7,11 @@ export type TProxyDecision = { type: "allow" } | { type: "redirect"; to: string 
 const PUBLIC_PATHS = new Set(["/", "/sign-in", "/sign-up", "/terms", "/privacy"]);
 
 /**
- * Public path prefixes — Better Auth's own routes, health checks, and dev
+ * Public path prefixes — Better Auth's own routes, health checks, Vercel
+ * Cron (checked by `CRON_SECRET` in the route, Phase 2 plan D17) and dev
  * tools.
  */
-const PUBLIC_PREFIXES = ["/api/auth", "/api/health", "/dev"];
+const PUBLIC_PREFIXES = ["/api/auth", "/api/health", "/api/cron", "/dev"];
 
 function isPublicPath(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) return true;

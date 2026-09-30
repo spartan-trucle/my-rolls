@@ -23,6 +23,10 @@ describe("decideProxyAccess", () => {
       expect(decideProxyAccess("/api/health", signedIn)).toEqual({ type: "allow" });
     });
 
+    it("allows /api/cron/* (Vercel Cron has no session; the route checks CRON_SECRET)", () => {
+      expect(decideProxyAccess("/api/cron/cleanup-uploads", signedIn)).toEqual({ type: "allow" });
+    });
+
     it.each(["/dev/design-system", "/dev/anything/nested"])("allows %s under /dev", (pathname) => {
       expect(decideProxyAccess(pathname, signedIn)).toEqual({ type: "allow" });
     });
