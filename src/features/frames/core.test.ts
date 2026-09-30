@@ -74,6 +74,35 @@ describe("moveFrameCore (SCAN-2 reorder)", () => {
   });
 });
 
+describe("moveFrameCore with gaps and pending frames (review #3)", () => {
+  it("moves by place among ready, live frames and renumbers them 1..N", async () => {
+    const { db, frames, roll: r } = await setup(4);
+    await db.update(frame).set({ deletedAt: new Date() }).where(eq(frame.id, frames[1].id));
+    await db.update(frame).set({ status: "pending" }).where(eq(frame.id, frames[2].id));
+    // Ready and live: frames[0] (pos 1) and frames[3] (pos 4). Move the last one to place 1.
+    expect(await moveFrameCore(db, USER, { frameId: frames[3].id, toPosition: 1 })).toEqual({ ok: true });
+    const live = await db.select().from(frame).where(eq(frame.rollId, r.id)).orderBy(frame.position);
+    const ready = live.filter((f) => f.deletedAt === null && f.status === "ready");
+    expect(ready.map((f) => [f.id, f.position])).toEqual([
+      [frames[3].id, 1],
+      [frames[0].id, 2],
+    ]);
+  });
+
+  it("clamps to the number of ready frames, not every row", async () => {
+    const { db, frames, roll: r } = await setup(3);
+    await db.update(frame).set({ status: "pending" }).where(eq(frame.id, frames[2].id));
+    await moveFrameCore(db, USER, { frameId: frames[0].id, toPosition: 3 });
+    const ready = (await db.select().from(frame).where(eq(frame.rollId, r.id)).orderBy(frame.position)).filter(
+      (f) => f.status === "ready",
+    );
+    expect(ready.map((f) => [f.id, f.position])).toEqual([
+      [frames[1].id, 1],
+      [frames[0].id, 2],
+    ]);
+  });
+});
+
 describe("deleteFrameCore / restoreFrameCore (D23)", () => {
   it("soft-deletes and restores the owner's frame only", async () => {
     const { db, frames } = await setup(2);

@@ -47,6 +47,11 @@ describe("FrameView (FrameView board)", () => {
     expect(screen.getByRole("link", { name: /Xem bản gốc 100%/ })).toHaveAttribute("href", "/api/frames/f2/original");
   });
 
+  it("counts 'Tấm n/total' by place in the list, not by stored position (review #3)", () => {
+    render(<FrameView rollId="r1" rollLabel="Cuộn #16" frames={[frame(1), frame(36)]} index={1} />);
+    expect(screen.getByText("Tấm 2/2")).toBeInTheDocument();
+  });
+
   it("moves between frames with the buttons and the arrow keys", async () => {
     renderAt(1);
     expect(screen.getByRole("link", { name: "Tấm trước" })).toHaveAttribute("href", "/rolls/r1/frames/f1");

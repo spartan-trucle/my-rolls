@@ -1,8 +1,8 @@
 import "server-only";
 
-import { and, asc, count, eq, gt, gte, inArray, isNull, lt, lte, sql } from "drizzle-orm";
+import { and, asc, count, eq, inArray, isNull } from "drizzle-orm";
 import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
-import { frame, mistake, note } from "@/db/schema";
+import { frame, mistake, note, roll } from "@/db/schema";
 import type { TDb } from "@/features/shared/db";
 import { bumpRollVersion, ownedFrame, ownsRoll } from "@/features/shared/roll-access";
 
@@ -31,8 +31,10 @@ export async function setFrameMarksCore<TQueryResult extends PgQueryResultHKT>(
 }
 
 /**
- * SCAN-2 "can be reordered", as "Đổi vị trí" in FrameView: moves one frame and shifts the
- * frames between its old and new position by one, in one transaction. Past the end = last.
+ * SCAN-2 "can be reordered", as "Đổi vị trí" in FrameView. `toPosition` is a place (1..N) among
+ * the roll's ready, live frames, the list the user sees. The roll row is locked and those frames
+ * are renumbered 1..N in the new order, so gaps from deletes or pending uploads can't skew the
+ * move and two tabs can't interleave (review #3). Past the end = last.
  */
 export async function moveFrameCore<TQueryResult extends PgQueryResultHKT>(
   db: TDb<TQueryResult>,
@@ -40,30 +42,26 @@ export async function moveFrameCore<TQueryResult extends PgQueryResultHKT>(
   input: { frameId: string; toPosition: number },
 ): Promise<TFrameResult> {
   const row = await ownedFrame(db, userId, input.frameId);
-  if (!row) return { ok: false, error: "not_found" };
+  if (!row || row.status !== "ready") return { ok: false, error: "not_found" };
 
   await db.transaction(async (tx) => {
-    const [{ value: total }] = await tx
-      .select({ value: count() })
+    await tx.select({ id: roll.id }).from(roll).where(eq(roll.id, row.rollId)).for("update");
+    const ordered = await tx
+      .select({ id: frame.id, position: frame.position })
       .from(frame)
-      .where(and(eq(frame.rollId, row.rollId), isNull(frame.deletedAt)));
-    const to = Math.min(Math.max(1, Math.trunc(input.toPosition)), total);
-    const from = row.position;
-    if (to === from) return;
+      .where(and(eq(frame.rollId, row.rollId), eq(frame.status, "ready"), isNull(frame.deletedAt)))
+      .orderBy(asc(frame.position), asc(frame.createdAt));
 
-    const live = and(eq(frame.rollId, row.rollId), isNull(frame.deletedAt));
-    if (to < from) {
-      await tx
-        .update(frame)
-        .set({ position: sql`${frame.position} + 1` })
-        .where(and(live, gte(frame.position, to), lt(frame.position, from)));
-    } else {
-      await tx
-        .update(frame)
-        .set({ position: sql`${frame.position} - 1` })
-        .where(and(live, gt(frame.position, from), lte(frame.position, to)));
+    const ids = ordered.map((f) => f.id).filter((id) => id !== row.id);
+    const to = Math.min(Math.max(1, Math.trunc(input.toPosition)), ids.length + 1);
+    ids.splice(to - 1, 0, row.id);
+
+    const current = new Map(ordered.map((f) => [f.id, f.position]));
+    for (const [i, id] of ids.entries()) {
+      if (current.get(id) !== i + 1) {
+        await tx.update(frame).set({ position: i + 1, updatedAt: new Date() }).where(eq(frame.id, id));
+      }
     }
-    await tx.update(frame).set({ position: to, updatedAt: new Date() }).where(eq(frame.id, row.id));
   });
   await bumpRollVersion(db, row.rollId);
   return { ok: true };

@@ -34,7 +34,7 @@ export function FrameView({ rollId, rollLabel, frames, index, oopsSlot, notesSlo
   const [marks, setMarks] = useState({ isKeeper: frame.isKeeper, isBlank: frame.isBlank });
   const [error, setError] = useState<string | null>(null);
   const [moving, setMoving] = useState(false);
-  const [target, setTarget] = useState(String(frame.position));
+  const [target, setTarget] = useState(String(index + 1));
   const [deleted, setDeleted] = useState(false);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -98,7 +98,7 @@ export function FrameView({ rollId, rollLabel, frames, index, oopsSlot, notesSlo
         <Link href={`/rolls/${rollId}`} className={styles.back}>
           {t("back", { roll: rollLabel })}
         </Link>
-        <span className={styles.pos}>{t("position", { n: frame.position, total: frames.length })}</span>
+        <span className={styles.pos}>{t("position", { n: index + 1, total: frames.length })}</span>
       </div>
 
       <div className={styles.stage}>
