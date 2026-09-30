@@ -95,7 +95,14 @@ interface IEntry {
   prepared?: IPreparedFile;
   slot?: ISlotResponse["slots"][number];
   requesting?: boolean;
+  /** Review #6: fresh slots were already fetched once after a 403 (expired URL). */
+  reslotted?: boolean;
+  /** Review #4: the objects are up; only the confirm call failed, so a retry re-confirms. */
+  uploaded?: boolean;
 }
+
+/** R2 answers an expired presigned URL with 403; retrying the same URL can't work. */
+const isExpired = (err: unknown) => err instanceof Error && err.message === "PUT 403";
 
 /** A thumbnail is a nicety: if the platform can't make an object URL, the row shows a blank tile. */
 function thumbnailUrl(blob: Blob): string | undefined {
@@ -162,7 +169,7 @@ export function createUploadQueue(deps: IUploadDeps, onChange: (state: IUploadQu
         await deps.put(url, body, contentType, onProgress);
         return;
       } catch (err) {
-        if (attempt >= PUT_BACKOFF_MS.length) throw err;
+        if (isExpired(err) || attempt >= PUT_BACKOFF_MS.length) throw err;
         await deps.sleep(PUT_BACKOFF_MS[attempt]);
       }
     }
@@ -214,6 +221,31 @@ export function createUploadQueue(deps: IUploadDeps, onChange: (state: IUploadQu
     });
   }
 
+  /**
+   * Review #4: a network error keeps the slot (`uploaded`), so a retry asks again about the same
+   * frame instead of uploading a second copy. "Missing" drops the slot: the file must go up again.
+   * `onMissing` decides what a retry does when the objects really aren't there.
+   */
+  async function confirmEntry(entry: IEntry, onMissing: "fail" | "reupload") {
+    const slot = entry.slot!;
+    update(entry, { status: "confirming", progress: 0.95 });
+    try {
+      const { ready } = await deps.confirm([slot.frameId]);
+      if (ready.includes(slot.frameId)) {
+        entry.uploaded = false;
+        update(entry, { status: "done", progress: 1 });
+        return;
+      }
+      entry.slot = undefined;
+      entry.uploaded = false;
+      if (onMissing === "reupload") update(entry, { status: "queued", progress: 0 });
+      else fail(entry, "confirm", new Error("objects missing"));
+    } catch (err) {
+      entry.uploaded = true;
+      fail(entry, "confirm", err);
+    }
+  }
+
   function startNetwork(entry: IEntry) {
     const slot = entry.slot!;
     update(entry, { status: "uploading", progress: 0 });
@@ -223,17 +255,17 @@ export function createUploadQueue(deps: IUploadDeps, onChange: (state: IUploadQu
         await putWithRetry(slot.gridUrl, entry.prepared!.grid, entry.prepared!.copyType);
         await putWithRetry(slot.viewUrl, entry.prepared!.view, entry.prepared!.copyType);
       } catch (err) {
+        // Review #6: an expired URL gets fresh slots once, without asking the user.
+        if (isExpired(err) && !entry.reslotted) {
+          entry.reslotted = true;
+          entry.slot = undefined;
+          update(entry, { status: "queued", progress: 0 });
+          return;
+        }
         fail(entry, "put", err);
         return;
       }
-      update(entry, { status: "confirming", progress: 0.95 });
-      try {
-        const { ready } = await deps.confirm([slot.frameId]);
-        if (ready.includes(slot.frameId)) update(entry, { status: "done", progress: 1 });
-        else fail(entry, "confirm", new Error("objects missing"));
-      } catch (err) {
-        fail(entry, "confirm", err);
-      }
+      await confirmEntry(entry, "fail");
     });
   }
 
@@ -299,9 +331,17 @@ export function createUploadQueue(deps: IUploadDeps, onChange: (state: IUploadQu
     retry(fileId: string) {
       const entry = entries.find((e) => e.view.id === fileId);
       if (!entry || entry.view.status !== "failed") return;
-      if (entry.view.error === "copies") entry.prepared = undefined;
+      const stage = entry.view.error;
+      update(entry, { error: undefined });
+      // Review #4: the objects went up and only the confirm call failed: ask again, don't re-upload.
+      if (stage === "confirm" && entry.uploaded && entry.slot) {
+        run(() => confirmEntry(entry, "reupload"));
+        return;
+      }
+      if (stage === "copies") entry.prepared = undefined;
       entry.slot = undefined;
-      update(entry, { status: "queued", error: undefined, progress: 0 });
+      entry.reslotted = false;
+      update(entry, { status: "queued", progress: 0 });
       pump();
     },
 

@@ -210,4 +210,72 @@ describe("upload queue", () => {
     await queue.idle();
     expect(queue.isBusy()).toBe(false);
   });
+
+  it("retrying after a confirm failure re-confirms the same frame, without new slots or a re-upload (review #4)", async () => {
+    let confirmCalls = 0;
+    const d = deps({
+      confirm: vi.fn(async (ids: string[]) => {
+        confirmCalls++;
+        if (confirmCalls === 1) throw new Error("network");
+        return { ready: ids, missing: [] };
+      }),
+    });
+    const { queue, last } = await run(d, [jpg("1.jpg")]);
+    const file = last.batches[0].files[0];
+    expect(file).toMatchObject({ status: "failed", error: "confirm" });
+    const slotCalls = (d.requestSlots as ReturnType<typeof vi.fn>).mock.calls.length;
+    const putCalls = (d.put as ReturnType<typeof vi.fn>).mock.calls.length;
+
+    queue.retry(file.id);
+    await queue.idle();
+
+    expect(queue.getState().batches[0].files[0].status).toBe("done");
+    expect((d.requestSlots as ReturnType<typeof vi.fn>).mock.calls.length).toBe(slotCalls);
+    expect((d.put as ReturnType<typeof vi.fn>).mock.calls.length).toBe(putCalls);
+    expect((d.confirm as ReturnType<typeof vi.fn>).mock.calls.map((c) => c[0])).toEqual([["frame-1"], ["frame-1"]]);
+  });
+
+  it("re-uploads with fresh slots when the re-confirm finds the objects missing", async () => {
+    let confirmCalls = 0;
+    const d = deps({
+      confirm: vi.fn(async (ids: string[]) => {
+        confirmCalls++;
+        if (confirmCalls === 1) throw new Error("network");
+        if (confirmCalls === 2) return { ready: [], missing: ids };
+        return { ready: ids, missing: [] };
+      }),
+    });
+    const { queue, last } = await run(d, [jpg("1.jpg")]);
+    queue.retry(last.batches[0].files[0].id);
+    await queue.idle();
+    expect(queue.getState().batches[0].files[0].status).toBe("done");
+    expect((d.requestSlots as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(2);
+  });
+
+  it("gets fresh slots once, by itself, when R2 rejects an expired URL with 403 (review #6)", async () => {
+    let expired = true;
+    const d = deps({
+      put: vi.fn(async (url: string) => {
+        if (expired && url.startsWith("put://o/")) {
+          expired = false;
+          throw new Error("PUT 403");
+        }
+      }),
+    });
+    const { last } = await run(d, [jpg("1.jpg")]);
+    expect(last.batches[0].files[0].status).toBe("done");
+    expect((d.requestSlots as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(2);
+    expect(d.sleep).not.toHaveBeenCalled();
+  });
+
+  it("fails after a second 403, rather than looping", async () => {
+    const d = deps({
+      put: vi.fn(async (url: string) => {
+        if (url.startsWith("put://o/")) throw new Error("PUT 403");
+      }),
+    });
+    const { last } = await run(d, [jpg("1.jpg")]);
+    expect(last.batches[0].files[0]).toMatchObject({ status: "failed", error: "put" });
+    expect((d.requestSlots as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(2);
+  });
 });
