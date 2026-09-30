@@ -26,3 +26,31 @@ describe("upload http deps", () => {
     expect(fetchMock.mock.calls[0][0]).toBe("/api/uploads/confirm");
   });
 });
+
+describe("putObject timeout (review #5)", () => {
+  it("sets an XHR timeout that grows with the body, so a stalled PUT fails instead of hanging", async () => {
+    const created: Array<{ timeout: number }> = [];
+    class FakeXHR {
+      timeout = 0;
+      upload = { onprogress: null };
+      status = 200;
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      ontimeout: (() => void) | null = null;
+      constructor() {
+        created.push(this);
+      }
+      open() {}
+      setRequestHeader() {}
+      send() {
+        this.ontimeout?.();
+      }
+    }
+    vi.stubGlobal("XMLHttpRequest", FakeXHR);
+    const { putObject } = await import("./http");
+    await expect(putObject("https://r2/put", new Blob([new Uint8Array(10 * 1024 * 1024)]), "image/jpeg")).rejects.toThrow("timeout");
+    await putObject("https://r2/put", new Blob(["x"]), "image/jpeg").catch(() => {});
+    expect(created[0].timeout).toBeGreaterThan(created[1].timeout);
+    expect(created[1].timeout).toBeGreaterThanOrEqual(60_000);
+  });
+});

@@ -29,6 +29,9 @@ export function putObject(url: string, body: Blob, contentType: string, onProgre
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("PUT", url);
+    // Review #5: a stalled mobile upload must fail (and be retried) rather than hold a slot
+    // forever. One minute, plus time for the body at a slow 25 KB/s.
+    xhr.timeout = 60_000 + Math.ceil(body.size / 25_000) * 1_000;
     xhr.setRequestHeader("Content-Type", contentType);
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) onProgress?.(e.loaded / e.total);
