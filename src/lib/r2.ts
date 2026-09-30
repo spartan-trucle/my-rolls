@@ -4,10 +4,18 @@ import { randomUUID } from "node:crypto";
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { z } from "zod";
+import {
+  ALLOWED_UPLOAD_TYPES,
+  MAX_UPLOAD_BYTES,
+  type TAllowedUploadType,
+} from "@/features/uploads/limits";
 
-/** Suggested default of roadmap decision 2 (D32) — Known conflict #2, still open (due 01.11). */
-export const ALLOWED_UPLOAD_CONTENT_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
-export type TAllowedUploadContentType = (typeof ALLOWED_UPLOAD_CONTENT_TYPES)[number];
+/**
+ * Roadmap decision 2 (settled 30.09.2026): JPEG, PNG and WebP up to 10 MB. The values live in
+ * `features/uploads/limits.ts` so the browser (validate.ts) and this signer can't drift apart.
+ */
+export const ALLOWED_UPLOAD_CONTENT_TYPES = ALLOWED_UPLOAD_TYPES;
+export type TAllowedUploadContentType = TAllowedUploadType;
 
 const EXTENSION_BY_CONTENT_TYPE: Record<TAllowedUploadContentType, string> = {
   "image/jpeg": "jpg",
@@ -15,7 +23,6 @@ const EXTENSION_BY_CONTENT_TYPE: Record<TAllowedUploadContentType, string> = {
   "image/webp": "webp",
 };
 
-const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB (roadmap decision 2 / D32)
 const PUT_URL_EXPIRES_IN_SECONDS = 600; // 10 min (D34)
 const GET_URL_EXPIRES_IN_SECONDS = 300; // 5 min (D34)
 
