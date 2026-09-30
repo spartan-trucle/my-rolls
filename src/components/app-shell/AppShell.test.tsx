@@ -17,8 +17,8 @@ describe("AppShell", () => {
     // Both chrome pieces exist in the DOM; CSS breakpoints (untestable in
     // jsdom) decide which one is visible at a given width.
     expect(screen.getAllByRole("navigation", { name: "Điều hướng chính" }).length).toBeGreaterThan(0);
-    // Both TopNav (desktop) and PhoneTopBar (G1) render the wordmark; CSS
-    // breakpoints (untestable in jsdom) decide which is visible.
-    expect(screen.getAllByText("Cuộn").length).toBeGreaterThan(0);
+    // Owner 30.09.2026: no phone top bar — the bottom tabs already reach Kệ
+    // and Tôi — so only TopNav (desktop) draws the wordmark.
+    expect(screen.getAllByText("Cuộn")).toHaveLength(1);
   });
 });

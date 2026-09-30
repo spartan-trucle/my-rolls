@@ -53,8 +53,8 @@ function GoogleGIcon() {
 
 /**
  * `/profile` (F4, Design finding 5), per the `Profile` / `ProfileWeb`
- * boards: a phone-only "Hồ sơ" row with the quick theme toggle (the phone
- * top bar is hidden on this route), the Google avatar with the name as the
+ * boards: a phone-only "Hồ sơ" row with the quick theme toggle (phone has
+ * no app top bar), the Google avatar with the name as the
  * page's one `h1`, the email and join date, the roll-count tile, "Túi của
  * tôi" (cameras with rolls shot, films as named chips), then "Cài đặt"
  * (the `Sáng`/`Tối` control, "Sửa tên hiển thị ›" linking to

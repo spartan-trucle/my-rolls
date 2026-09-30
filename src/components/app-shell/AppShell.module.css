@@ -11,14 +11,10 @@
   padding: var(--space-4) var(--space-4) var(--space-8);
 }
 
-/* Phone: PhoneTopBar + BottomTabs, no TopNav. Scoped under `.shell` so these
+/* Phone: BottomTabs only, no TopNav. Scoped under `.shell` so these
    beat each component's own `display` rule, whose stylesheet may load later. */
 .shell > .topNav {
   display: none;
-}
-
-.shell > .phoneTopBar {
-  padding: var(--space-4) var(--space-4) 0;
 }
 
 .shell > .bottomTabs {
@@ -27,14 +23,10 @@
   bottom: 0;
 }
 
-/* Desktop: TopNav, no PhoneTopBar or BottomTabs. */
+/* Desktop: TopNav, no BottomTabs. */
 @media (min-width: 1024px) {
   .shell > .topNav {
     display: flex;
-  }
-
-  .shell > .phoneTopBar {
-    display: none;
   }
 
   .shell > .bottomTabs {

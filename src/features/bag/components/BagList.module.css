@@ -27,7 +27,10 @@
   }
 }
 
+/* Desktop only: on phone the section headings carry the same numbers
+   (owner 30.09.2026, Bag board). */
 .countsLine {
+  display: none;
   margin: 0;
   font-family: var(--font-mono);
   font-size: 12px;
@@ -35,6 +38,12 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--ink-muted);
+}
+
+@media (min-width: 1024px) {
+  .countsLine {
+    display: block;
+  }
 }
 
 .search {
