@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
-import { bagItem, camera, lens, roll, stock, user } from "@/db/schema";
+import { bagItem, camera, lens, mistake, roll, stock, user } from "@/db/schema";
 import { createTestDb } from "@/db/test-db";
 import { toSearchText } from "@/lib/search-text";
 import { getProfileSummary, listBag, summarizeBag } from "./queries";
@@ -194,6 +194,47 @@ describe("listBag", () => {
     expect(entries.find((entry) => entry.kind === "camera")).toMatchObject({ rollsShot: 2 });
     expect(entries.find((entry) => entry.kind === "stock")).toMatchObject({ rollsShot: 2 });
     expect(entries.find((entry) => entry.kind === "lens")).toMatchObject({ rollsShot: 1 });
+  });
+
+  it("gives each camera its most frequent live mistake type, or null (BAG-3, Phase 2 D25)", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+
+    const [stockRow] = await db
+      .insert(stock)
+      .values({ brand: "Kodak", name: "Gold 200", searchText: toSearchText("Kodak Gold 200") })
+      .returning();
+    const [cameraRow] = await db
+      .insert(camera)
+      .values({ brand: "Pentax", model: "K1000", searchText: toSearchText("Pentax K1000") })
+      .returning();
+    const [quietCameraRow] = await db
+      .insert(camera)
+      .values({ brand: "Nikon", model: "FM2", searchText: toSearchText("Nikon FM2") })
+      .returning();
+    const [bodyBag] = await db.insert(bagItem).values({ userId: OWNER, kind: "camera", refId: cameraRow.id }).returning();
+    await db.insert(bagItem).values({ userId: OWNER, kind: "camera", refId: quietCameraRow.id });
+
+    const [r1] = await db.insert(roll).values({ userId: OWNER, stockId: stockRow.id, cameraBagItemId: bodyBag.id }).returning();
+    const [r2] = await db.insert(roll).values({ userId: OWNER, stockId: stockRow.id, cameraBagItemId: bodyBag.id }).returning();
+    const [gone] = await db
+      .insert(roll)
+      .values({ userId: OWNER, stockId: stockRow.id, cameraBagItemId: bodyBag.id, deletedAt: new Date() })
+      .returning();
+    await db.insert(mistake).values([
+      { userId: OWNER, rollId: r1.id, frameId: null, type: "light_leak" },
+      { userId: OWNER, rollId: r2.id, frameId: null, type: "light_leak" },
+      { userId: OWNER, rollId: r2.id, frameId: null, type: "wrong_iso" },
+      { userId: OWNER, rollId: r1.id, frameId: null, type: "missed_focus", deletedAt: new Date() },
+      { userId: OWNER, rollId: gone.id, frameId: null, type: "missed_focus" },
+    ]);
+
+    const entries = await listBag(db, OWNER);
+    const cameras = entries.filter((entry) => entry.kind === "camera");
+    expect(cameras.find((e) => e.kind === "camera" && e.camera.model === "K1000")).toMatchObject({
+      topMistake: { type: "light_leak", count: 2 },
+    });
+    expect(cameras.find((e) => e.kind === "camera" && e.camera.model === "FM2")).toMatchObject({ topMistake: null });
   });
 });
 

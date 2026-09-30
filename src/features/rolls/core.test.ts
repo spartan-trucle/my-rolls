@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { and, eq } from "drizzle-orm";
-import { bagItem, camera, lens, roll, stock } from "@/db/schema";
+import { bagItem, camera, frame, lens, roll, scanSet, stock } from "@/db/schema";
 import { createTestDb } from "@/db/test-db";
 import { toSearchText } from "@/lib/search-text";
 import { createRollCore, getRollCore, listRollsCore, peekNextRollNumberCore, updateRollCore } from "./core";
@@ -1254,5 +1254,33 @@ describe("box ISO and format are required, prefilled from the stock (ROLL-1, own
     expect(accepted).toEqual({ ok: true });
     const [rollRow] = await db.select().from(roll).where(eq(roll.id, created.rollId));
     expect(rollRow).toMatchObject({ boxIso: 400, format: "35mm" });
+  });
+});
+
+describe("frameCount on a roll entry (Phase 2 B5, HomeUploading)", () => {
+  let cleanup: (() => Promise<void>) | undefined;
+
+  afterEach(async () => {
+    await cleanup?.();
+    cleanup = undefined;
+  });
+
+  it("counts only ready, live frames", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+    const [r] = await db.insert(roll).values({ userId: OWNER, stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id }).returning();
+    const [set] = await db.insert(scanSet).values({ userId: OWNER, rollId: r.id }).returning();
+    const base = { userId: OWNER, rollId: r.id, scanSetId: set.id, fileName: "a.jpg", contentType: "image/jpeg", bytes: 1 };
+    await db.insert(frame).values([
+      { ...base, position: 1, originalKey: "o1", gridKey: "g1", viewKey: "v1", status: "ready" },
+      { ...base, position: 2, originalKey: "o2", gridKey: "g2", viewKey: "v2", status: "ready" },
+      { ...base, position: 3, originalKey: "o3", gridKey: "g3", viewKey: "v3", status: "pending" },
+      { ...base, position: 4, originalKey: "o4", gridKey: "g4", viewKey: "v4", status: "ready", deletedAt: new Date() },
+    ]);
+
+    const [entry] = await listRollsCore(db, OWNER);
+    expect(entry.frameCount).toBe(2);
+    expect((await getRollCore(db, OWNER, r.id))?.frameCount).toBe(2);
   });
 });
