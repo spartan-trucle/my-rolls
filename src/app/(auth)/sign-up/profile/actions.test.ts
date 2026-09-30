@@ -64,10 +64,10 @@ describe("updateDisplayNameAction", () => {
     expect(updateUser).toHaveBeenCalledWith({ body: { name: "Trúc Lê" }, headers: fakeRequestHeaders });
   });
 
-  it("redirects home after a successful update", async () => {
+  it("redirects to /onboarding/bag after a successful update (Phase 0 D17)", async () => {
     await updateDisplayNameAction({}, formDataWithName("Trúc Lê"));
 
-    expect(redirectMock).toHaveBeenCalledWith("/");
+    expect(redirectMock).toHaveBeenCalledWith("/onboarding/bag");
   });
 
   it("treats a missing name field the same as empty", async () => {

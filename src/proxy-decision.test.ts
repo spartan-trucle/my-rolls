@@ -54,6 +54,13 @@ describe("decideProxyAccess", () => {
       });
     });
 
+    it("sends /profile to /sign-in (F4: behind sign-in like every other app page)", () => {
+      expect(decideProxyAccess("/profile", signedIn)).toEqual({
+        type: "redirect",
+        to: "/sign-in",
+      });
+    });
+
     it("sends any other protected route to /sign-in", () => {
       expect(decideProxyAccess("/shelf", signedIn)).toEqual({
         type: "redirect",

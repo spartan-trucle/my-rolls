@@ -1,0 +1,69 @@
+/* Design system `.rc-can` (components/bundle.css), 1:1 — keep in step with
+   `RollCard.module.css`'s `.can*`. The leader pokes 9px past the right
+   edge; callers leave room for it. */
+.canister {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 72px;
+  margin-left: 2px;
+}
+
+.cap {
+  display: block;
+  width: 22px;
+  height: 7px;
+  margin: 0 auto;
+  background: var(--film);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.body {
+  position: relative;
+  display: block;
+  height: 65px;
+  overflow: hidden;
+  background: var(--rc-stock, var(--stock-gold));
+  border-radius: var(--radius-sm);
+}
+
+.body::before,
+.body::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: var(--film);
+}
+
+.body::before {
+  top: 0;
+}
+
+.body::after {
+  bottom: 0;
+}
+
+.label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 22px;
+  padding: 3px 0;
+  font: 700 12px/1 var(--font-mono);
+  text-align: center;
+  color: var(--on-print);
+  background: var(--print);
+}
+
+.leader {
+  position: absolute;
+  right: -9px;
+  top: 30px;
+  width: 11px;
+  height: 22px;
+  background: var(--film);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}

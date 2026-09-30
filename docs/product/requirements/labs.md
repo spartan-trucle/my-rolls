@@ -42,6 +42,6 @@ Labs: LLAB, Croplab and Cinephile branches checked; "47+" identified; more labs 
 
 ## Open issues
 
-- PRD Q3 / roadmap decision 4: launch with checked labs only, district and city, no services (decide by 01.11.2026).
-- LAB-2 collects services, address and a Facebook/Maps link, but the ADR `lab` table only has `name`. Either add the columns or trim LAB-2 to match decision 4.
-- LAB-3 wants optional process, push/pull, scanner, resolution, file format and price on the scan set; the ADR `scan_set` has none of them. [Compare](compare.md) needs scanner and process, so it's cheaper to store them from day one.
+- PRD Q3 / roadmap decision 4: launch with checked labs only, district and city, no services (decide by 01.11.2026). Still open — the [lab research](../../../.planning/content/seed-catalogue.md#labs) found services for most seeded labs, so decision 4 could relax to "services where a source states them" (content track, due 01.11).
+- ~~LAB-2 collects services, address and a Facebook/Maps link, but the ADR `lab` table only has `name`. Either add the columns or trim LAB-2 to match decision 4.~~ **Resolved 27.09.2026 (Trúc), Known conflict #6, Phase 1 plan D5:** `address`, `link_url`, `services text[]` and `accepts_mail` added to both `lab` and `lab_branch`; `lab_branch.district` holds the new phường (2025 reform), `lab_branch.area_hint` keeps the old quận for display.
+- LAB-3 wants optional process, push/pull, scanner, resolution, file format and price on the scan set; the ADR `scan_set` has none of them. [Compare](compare.md) needs scanner and process, so it's cheaper to store them from day one. Still open — `scan_set` is Phase 2 (LAB-3), out of this migration.

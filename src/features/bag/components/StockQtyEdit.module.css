@@ -1,0 +1,134 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.badge {
+  font: 700 12px/1 var(--font-mono);
+  color: var(--ink);
+}
+
+.editButton {
+  appearance: none;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.editButton:hover {
+  color: var(--ink);
+}
+
+.editButton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.dialog {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-6) var(--space-4);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid var(--line-strong);
+  background: var(--paper-raised);
+}
+
+.stepButton {
+  appearance: none;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  font: 600 20px/1 var(--font-sans);
+  cursor: pointer;
+}
+
+.stepButton:disabled {
+  color: var(--ink-muted);
+  cursor: default;
+  opacity: 0.45;
+}
+
+.stepButton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.count {
+  min-width: 48px;
+  text-align: center;
+  font: 700 18px/1 var(--font-mono);
+}
+
+.hint {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-muted);
+}
+
+.error {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--pin);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  align-self: stretch;
+  justify-content: flex-end;
+}
+
+/* Removing sits apart from Huỷ / Lưu, on the left, in the pin colour. */
+.remove {
+  appearance: none;
+  min-height: 44px;
+  margin-right: auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--pin);
+  font: 600 14px/20px var(--font-sans);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.remove:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.remove:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}

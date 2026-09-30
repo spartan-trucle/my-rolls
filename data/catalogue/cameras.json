@@ -1,0 +1,329 @@
+[
+  {
+    "slug": "canon-af35m-autoboy",
+    "brand": "Canon",
+    "model": "AF35M (Autoboy)",
+    "type": "point-and-shoot",
+    "format": "35mm"
+  },
+  {
+    "slug": "olympus-mju-ii",
+    "brand": "Olympus",
+    "model": "mju II",
+    "type": "point-and-shoot",
+    "format": "35mm"
+  },
+  {
+    "slug": "olympus-mju-i",
+    "brand": "Olympus",
+    "model": "mju I",
+    "type": "point-and-shoot",
+    "format": "35mm"
+  },
+  {
+    "slug": "olympus-trip-35",
+    "brand": "Olympus",
+    "model": "Trip 35",
+    "type": "point-and-shoot",
+    "format": "35mm"
+  },
+  {
+    "slug": "konica-big-mini",
+    "brand": "Konica",
+    "model": "Big Mini",
+    "type": "point-and-shoot",
+    "format": "35mm"
+  },
+  {
+    "slug": "konica-c35",
+    "brand": "Konica",
+    "model": "C35",
+    "type": "point-and-shoot",
+    "format": "35mm"
+  },
+  {
+    "slug": "yashica-t4",
+    "brand": "Yashica",
+    "model": "T4",
+    "type": "point-and-shoot",
+    "format": "35mm"
+  },
+  {
+    "slug": "nikon-l35af",
+    "brand": "Nikon",
+    "model": "L35AF",
+    "type": "point-and-shoot",
+    "format": "35mm"
+  },
+  {
+    "slug": "pentax-espio-mini",
+    "brand": "Pentax",
+    "model": "Espio Mini",
+    "type": "point-and-shoot",
+    "format": "35mm"
+  },
+  {
+    "slug": "contax-t2",
+    "brand": "Contax",
+    "model": "T2",
+    "type": "point-and-shoot",
+    "format": "35mm"
+  },
+  {
+    "slug": "kodak-m35",
+    "brand": "Kodak",
+    "model": "M35",
+    "type": "point-and-shoot",
+    "format": "35mm"
+  },
+  {
+    "slug": "kodak-ektar-h35",
+    "brand": "Kodak",
+    "model": "Ektar H35",
+    "type": "half-frame",
+    "format": "35mm"
+  },
+  {
+    "slug": "pentax-17",
+    "brand": "Pentax",
+    "model": "17",
+    "type": "half-frame",
+    "format": "35mm"
+  },
+  {
+    "slug": "olympus-pen-ee-3",
+    "brand": "Olympus",
+    "model": "Pen EE-3",
+    "type": "half-frame",
+    "format": "35mm"
+  },
+  {
+    "slug": "olympus-pen-ft",
+    "brand": "Olympus",
+    "model": "Pen FT",
+    "type": "half-frame",
+    "format": "35mm"
+  },
+  {
+    "slug": "pentax-k1000",
+    "brand": "Pentax",
+    "model": "K1000",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "pentax-mx",
+    "brand": "Pentax",
+    "model": "MX",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "nikon-fm2",
+    "brand": "Nikon",
+    "model": "FM2",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "nikon-fm",
+    "brand": "Nikon",
+    "model": "FM",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "nikon-fe",
+    "brand": "Nikon",
+    "model": "FE",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "nikon-f3",
+    "brand": "Nikon",
+    "model": "F3",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "nikon-f100",
+    "brand": "Nikon",
+    "model": "F100",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "canon-ae-1-program",
+    "brand": "Canon",
+    "model": "AE-1 Program",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "canon-ae-1",
+    "brand": "Canon",
+    "model": "AE-1",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "canon-eos-3000",
+    "brand": "Canon",
+    "model": "EOS 3000",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "minolta-x-700",
+    "brand": "Minolta",
+    "model": "X-700",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "minolta-x-300",
+    "brand": "Minolta",
+    "model": "X-300",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "olympus-om-1",
+    "brand": "Olympus",
+    "model": "OM-1",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "olympus-om-10",
+    "brand": "Olympus",
+    "model": "OM-10",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "zenit-12xp",
+    "brand": "Zenit",
+    "model": "12XP",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "praktica-mtl-5",
+    "brand": "Praktica",
+    "model": "MTL 5",
+    "type": "slr",
+    "format": "35mm"
+  },
+  {
+    "slug": "canon-canonet-ql17-giii",
+    "brand": "Canon",
+    "model": "Canonet QL17 GIII",
+    "type": "rangefinder",
+    "format": "35mm"
+  },
+  {
+    "slug": "yashica-electro-35",
+    "brand": "Yashica",
+    "model": "Electro 35",
+    "type": "rangefinder",
+    "format": "35mm"
+  },
+  {
+    "slug": "olympus-35-rc",
+    "brand": "Olympus",
+    "model": "35 RC",
+    "type": "rangefinder",
+    "format": "35mm"
+  },
+  {
+    "slug": "leica-m6",
+    "brand": "Leica",
+    "model": "M6",
+    "type": "rangefinder",
+    "format": "35mm"
+  },
+  {
+    "slug": "yashica-mat-124g",
+    "brand": "Yashica",
+    "model": "Mat-124G",
+    "type": "tlr",
+    "format": "120"
+  },
+  {
+    "slug": "seagull-4a-103",
+    "brand": "Seagull",
+    "model": "4A-103",
+    "type": "tlr",
+    "format": "120"
+  },
+  {
+    "slug": "mamiya-rb67",
+    "brand": "Mamiya",
+    "model": "RB67",
+    "type": "medium-format",
+    "format": "120"
+  },
+  {
+    "slug": "pentax-67",
+    "brand": "Pentax",
+    "model": "67",
+    "type": "medium-format",
+    "format": "120"
+  },
+  {
+    "slug": "holga-120n",
+    "brand": "Holga",
+    "model": "120N",
+    "type": "toy",
+    "format": "120"
+  },
+  {
+    "slug": "lomography-diana-f",
+    "brand": "Lomography",
+    "model": "Diana F+",
+    "type": "toy",
+    "format": "120"
+  },
+  {
+    "slug": "kodak-funsaver",
+    "brand": "Kodak",
+    "model": "FunSaver",
+    "type": "single-use",
+    "format": "35mm",
+    "fixedStockSlug": "kodak-800-funsaver-film-800"
+  },
+  {
+    "slug": "fujifilm-quicksnap-flash-400",
+    "brand": "Fujifilm",
+    "model": "QuickSnap Flash 400",
+    "type": "single-use",
+    "format": "35mm",
+    "fixedStockSlug": "fujifilm-superia-x-tra-400-400"
+  },
+  {
+    "slug": "ilford-hp5-plus-single-use",
+    "brand": "Ilford",
+    "model": "HP5 Plus Single Use",
+    "type": "single-use",
+    "format": "35mm",
+    "fixedStockSlug": "ilford-hp5-plus-400"
+  },
+  {
+    "slug": "ilford-xp2-super-single-use",
+    "brand": "Ilford",
+    "model": "XP2 Super Single Use",
+    "type": "single-use",
+    "format": "35mm",
+    "fixedStockSlug": "ilford-xp2-super-400"
+  },
+  {
+    "slug": "lomography-simple-use-color-negative",
+    "brand": "Lomography",
+    "model": "Simple Use (Color Negative)",
+    "type": "single-use",
+    "format": "35mm",
+    "fixedStockSlug": "lomography-color-negative-400-400"
+  }
+]

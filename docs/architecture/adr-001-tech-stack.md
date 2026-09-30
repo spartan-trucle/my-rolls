@@ -120,18 +120,19 @@ Frames left pending for 24 hours are deleted by the nightly cron, along with the
 | Table | Key columns | Notes |
 |---|---|---|
 | `user` | id, name, email, email_verified, image, created_at | Owned by Better Auth, plus `session`, `account` and `verification`. The Google subject ID lives in `account.account_id`; `name` is the display name the user can change |
-| `stock` | id, owner_id?, brand, name, iso, format, type, canister_photo_key | `owner_id` null = seeded catalogue; set = private custom |
-| `camera` | id, owner_id?, brand, model, format | Same seeded / private split |
-| `bag_item` | user_id, stock_id?, camera_id? | The túi |
-| `lab` / `lab_branch` | lab: id, owner_id?, name · branch: id, lab_id, district, city | District and city only, per PRD |
-| `roll` | id, user_id, stock_id, camera_id, name, canister_color, shot_from, shot_to, notes, memory, version | Only stock and camera required |
+| `stock` | id, owner_id?, slug, brand, name, iso, formats[], type, canister_color, canister_photo_key, status, search_text | `owner_id` null = seeded catalogue; set = private custom. `formats[]` (Known conflict #6, D4): one stock can come in 35mm and 120 |
+| `camera` | id, owner_id?, slug, brand, model, type, format, fixed_stock_id?, status, search_text | Same seeded / private split. `fixed_stock_id` (Known conflict #6, D20) is set only for single-use cameras, whose film is fixed |
+| `lens` | id, owner_id, brand, model, focal_length | Known conflict #6, D3: custom entries only, no seeded lens catalogue in the MVP |
+| `bag_item` | id, user_id, kind (camera \| lens \| stock), ref_id, qty?, expiry_year? | The túi. `kind` says which of `camera`/`lens`/`stock` `ref_id` points into (Known conflict #6, D3). `qty`/`expiry_year` (Round 2, migration `0003`, BAG-2) only mean anything on a `stock` row: the film pocket count and expiry year, `null` = not counted |
+| `lab` / `lab_branch` | lab: id, owner_id?, slug, name, address, link_url, services[], accepts_mail, search_text · branch: id, lab_id, name, district, area_hint, city, address, link_url, services[], accepts_mail, search_text | Known conflict #6, D5: address/link/services/accepts_mail added to both; `district` holds the new phường (2025 reform), `area_hint` keeps the old quận for display |
+| `roll` | id, user_id, stock_id, camera_bag_item_id, lens_id?, number?, name, canister_color, box_iso?, shot_iso?, exposures?, format?, locations[]?, shot_from, shot_to, date_precision?, notes, memory, version | Only stock and camera required. `camera_bag_item_id` (Known conflict #6, D2) points at the owner's bag item, not the catalogue camera, so two bodies of one model stay apart. Push/pull is computed from `box_iso`/`shot_iso`, never stored (D17). `number` (Round 2, migration `0003`, R2-5) is the per-user "Cuộn #N", assigned once at creation and never reused (unique partial index on `user_id, number`, backfilled for pre-existing rows). `date_precision` (R2-4) is `day` \| `month` \| `null` ("Không nhớ"): past-mode dates can now be picked as a month + year, stored as that month's first/last instant, instead of an exact day |
 | `scan_set` | id, roll_id, lab_branch_id, scanned_at | Lab + branch recorded from day one |
 | `frame` | id, scan_set_id, user_id, position, original_key, grid_key, view_key, width, height, exif, mark, note, status | `mark` = keeper / oops / blank / none |
 | `share_link` | id, roll_id, token, allow_download, created_at, revoked_at | Opens tracked in PostHog, not here |
 
 The library grid is one query over `frame` joined to `roll`, newest first. `user_id` is copied onto `frame` so an index on (`user_id`, `mark`, `created_at`) serves the library-wide tấm ưng view without a join.
 
-**Auth tables are an exception to the house database rules** (decided 25.09.2026, Trúc). Better Auth's `user`, `session`, `account` and `verification` keep the library's own shape: text ids that Better Auth generates, foreign keys to `user` with `ON DELETE CASCADE`, and hard deletes, which AUTH-2 needs to really remove an account. Their timestamps are `timestamptz`, and lookups are indexed (migration `0001`). Every Cuộn table from Phase 1 on (`stock`, `roll`, `frame`…) follows the house rules instead: no foreign keys, `uuid_generate_v4()` ids, soft deletes and partial indexes.
+**Auth tables are an exception to the house database rules** (decided 25.09.2026, Trúc). Better Auth's `user`, `session`, `account` and `verification` keep the library's own shape: text ids that Better Auth generates, foreign keys to `user` with `ON DELETE CASCADE`, and hard deletes, which AUTH-2 needs to really remove an account. Their timestamps are `timestamptz`, and lookups are indexed (migration `0001`). Every Cuộn table from Phase 1 on (`stock`, `camera`, `lens`, `bag_item`, `lab`, `lab_branch`, `roll`, `frame`…) follows the house rules instead: no foreign keys, `uuid_generate_v4()` ids, soft deletes and partial indexes.
 
 > **Open conflicts with the PRD:** mistake tagging, share-token hashing, TIFF support and GPS on downloads. See [Known conflicts](../README.md#known-conflicts-between-sources).
 

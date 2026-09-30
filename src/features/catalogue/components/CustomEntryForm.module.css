@@ -1,0 +1,292 @@
+/*
+ * `.root` gives the form a real flex column of its own (heading, sections,
+ * footer) filling `ResponsiveDialog`'s `.content`, the same fix as
+ * `CataloguePicker.module.css`'s `.root` — without it `.scroll`'s
+ * `flex-grow` had nothing to grow inside.
+ */
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.scroll {
+  flex-grow: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-4) var(--space-4) var(--space-6);
+}
+
+.headingRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.headingBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-display-l);
+  font-weight: 500;
+}
+
+.lead {
+  margin: 0;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--ink-muted);
+}
+
+@media (min-width: 1024px) {
+  .scroll {
+    padding: 28px 32px 20px;
+    gap: var(--space-6);
+  }
+}
+
+.seg {
+  display: inline-flex;
+  align-self: flex-start;
+  border: 1.5px solid var(--ink);
+}
+
+.seg button {
+  appearance: none;
+  border: 0;
+  min-height: 40px;
+  min-width: 72px;
+  padding: 0 var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--ink);
+  font: 600 14px/1 var(--font-sans);
+  cursor: pointer;
+}
+
+.seg button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.seg button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.canisterPreview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* E6 (audit, CustomEntryWeb): desktop pairs the fields two-up (brand |
+   name, ISO | qty stepper, type | format) — DOM order already matches,
+   so a plain 2-col grid auto-places them without a rewrite. The preview
+   spans both columns. */
+@media (min-width: 1024px) {
+  .section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    column-gap: var(--space-6);
+    row-gap: var(--space-6);
+  }
+
+  .canisterPreview {
+    grid-column: 1 / -1;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.legend {
+  padding: 0;
+  margin: 0 0 var(--space-2);
+  font: 600 12px/16px var(--font-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  box-sizing: border-box;
+  border: 1.5px solid var(--line-strong);
+  background: var(--paper-raised);
+  color: var(--ink);
+  font: 500 14px/1 var(--font-sans);
+  cursor: pointer;
+  user-select: none;
+}
+
+.chip[data-checked="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.chip:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  margin: 0;
+  pointer-events: none;
+}
+
+.fieldHint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ink-muted);
+}
+
+.qtyStepper {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.qtyStepper button {
+  appearance: none;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper-raised);
+  border: 0;
+  color: var(--ink);
+  font: 600 18px/1 var(--font-sans);
+  cursor: pointer;
+}
+
+.qtyStepper button:disabled {
+  color: var(--ink-muted);
+  opacity: 0.6;
+  cursor: default;
+}
+
+.qtyStepper span {
+  min-width: 32px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.backButton {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: var(--space-2) 0;
+  color: var(--cobalt);
+  font: 600 14px/1 var(--font-sans);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.noteBox {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+  padding: var(--space-3) var(--space-4);
+  background: var(--cobalt-soft);
+  color: var(--ink);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.noteBox svg {
+  color: var(--cobalt);
+  margin-top: 1px;
+}
+
+.formError {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--pin);
+}
+
+.footer {
+  flex: 0 0 auto;
+  padding: var(--space-3) var(--space-4) var(--space-6);
+  border-top: 1px solid var(--line);
+  background: var(--paper-raised);
+}
+
+.save {
+  appearance: none;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cobalt);
+  color: var(--on-cobalt);
+  border: 0;
+  font: 600 15px/1 var(--font-sans);
+  cursor: pointer;
+}
+
+.save:disabled {
+  opacity: 0.7;
+  cursor: default;
+}

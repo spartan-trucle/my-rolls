@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Other agents' git worktrees under .claude/worktrees/ carry their own
+    // checkout, node_modules and .next build output — never this repo's
+    // lint scope.
+    ".claude/worktrees/**",
   ]),
 ]);
 

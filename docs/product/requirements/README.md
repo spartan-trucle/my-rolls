@@ -16,15 +16,15 @@ Back to: [PRD overview](../prd.md) · [Docs index](../../README.md)
 |---|---|---|---|---|
 | AUTH-1 | P0 | Google sign-in | Phase 0 | [auth](auth.md) |
 | AUTH-2 | P1 | Delete account | v1.1a | [auth](auth.md) |
-| ROLL-1 | P0 | New roll, two required fields | Phase 1 | [rolls](rolls.md) |
+| ROLL-1 | P0 | New roll: film, camera, box ISO and format required (ISO and format prefilled) | Phase 1 | [rolls](rolls.md) |
 | ROLL-2 | P0 | Add a past roll | Phase 1 | [rolls](rolls.md) |
 | ROLL-3 | P1 | Bulk import of old rolls | v1.1a | [rolls](rolls.md) |
 | ROLL-4 | P1 | Roll status steps | v1.1b | [rolls](rolls.md) |
 | ROLL-5 | P1 | Cover frame + "load the same again" | v1.1a | [rolls](rolls.md) |
 | ROLL-6 | P2 | Per-frame exposure log | Later | [rolls](rolls.md) |
 | BAG-1 | P0 | The bag, bag-first picker | Phase 1 | [bag](bag.md) |
-| BAG-2 | P1 | Film pocket counts | v1.1b | [bag](bag.md) |
-| BAG-3 | P1 | Camera card | v1.1b | [bag](bag.md) |
+| BAG-2 | P0 | Film pocket counts | Phase 1 | [bag](bag.md) |
+| BAG-3 | P0 | Camera card | Phase 1 | [bag](bag.md) |
 | BAG-4 | P2 | Bag share card | Later | [bag](bag.md) |
 | CAT-1 | P0 | Seeded catalogue, accent-free search | Phase 1 | [catalogue](catalogue.md) |
 | CAT-2 | P0 | Custom stock or camera | Phase 1 | [catalogue](catalogue.md) |

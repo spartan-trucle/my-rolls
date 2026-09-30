@@ -1,0 +1,1350 @@
+[
+  {
+    "slug": "kodak-gold-200-200",
+    "brand": "Kodak",
+    "name": "Gold 200",
+    "iso": 200,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-colorplus-200-200",
+    "brand": "Kodak",
+    "name": "ColorPlus 200",
+    "iso": 200,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-ultramax-400-400",
+    "brand": "Kodak",
+    "name": "UltraMax 400",
+    "iso": 400,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-portra-160-160",
+    "brand": "Kodak",
+    "name": "Portra 160",
+    "iso": 160,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-portra-400-400",
+    "brand": "Kodak",
+    "name": "Portra 400",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-portra-800-800",
+    "brand": "Kodak",
+    "name": "Portra 800",
+    "iso": 800,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-ektar-100-100",
+    "brand": "Kodak",
+    "name": "Ektar 100",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-pro-image-100-100",
+    "brand": "Kodak",
+    "name": "Pro Image 100",
+    "iso": 100,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-kodacolor-100-100",
+    "brand": "Kodak",
+    "name": "Kodacolor 100",
+    "iso": 100,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-kodacolor-200-200",
+    "brand": "Kodak",
+    "name": "Kodacolor 200",
+    "iso": 200,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "fujifilm-superia-x-tra-400-400",
+    "brand": "Fujifilm",
+    "name": "Superia X-TRA 400",
+    "iso": 400,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "green",
+    "status": "current"
+  },
+  {
+    "slug": "fujifilm-fujicolor-c200-200",
+    "brand": "Fujifilm",
+    "name": "Fujicolor C200",
+    "iso": 200,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "green",
+    "status": "discontinued"
+  },
+  {
+    "slug": "fujifilm-fujicolor-200-200",
+    "brand": "Fujifilm",
+    "name": "Fujicolor 200",
+    "iso": 200,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "green",
+    "status": "current"
+  },
+  {
+    "slug": "fujifilm-fujifilm-400-400",
+    "brand": "Fujifilm",
+    "name": "Fujifilm 400",
+    "iso": 400,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "green",
+    "status": "current"
+  },
+  {
+    "slug": "fujifilm-pro-400h-400",
+    "brand": "Fujifilm",
+    "name": "Pro 400H",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "green",
+    "status": "discontinued"
+  },
+  {
+    "slug": "lomography-color-negative-100-100",
+    "brand": "Lomography",
+    "name": "Color Negative 100",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "lomography-color-negative-400-400",
+    "brand": "Lomography",
+    "name": "Color Negative 400",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "lomography-color-negative-800-800",
+    "brand": "Lomography",
+    "name": "Color Negative 800",
+    "iso": 800,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "lomography-lomochrome-purple-400",
+    "brand": "Lomography",
+    "name": "LomoChrome Purple",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "lomography-lomochrome-metropolis-400",
+    "brand": "Lomography",
+    "name": "LomoChrome Metropolis",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "harman-phoenix-200-200",
+    "brand": "Harman",
+    "name": "Phoenix 200",
+    "iso": 200,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "agfa-vista-plus-200-200",
+    "brand": "Agfa",
+    "name": "Vista Plus 200",
+    "iso": 200,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "discontinued"
+  },
+  {
+    "slug": "kodak-800-funsaver-film-800",
+    "brand": "Kodak",
+    "name": "800 (FunSaver film)",
+    "iso": 800,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-vision3-500t-500",
+    "brand": "Kodak",
+    "name": "Vision3 500T",
+    "iso": 500,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-vision3-250d-250",
+    "brand": "Kodak",
+    "name": "Vision3 250D",
+    "iso": 250,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-vision3-200t-200",
+    "brand": "Kodak",
+    "name": "Vision3 200T",
+    "iso": 200,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-vision3-50d-50",
+    "brand": "Kodak",
+    "name": "Vision3 50D",
+    "iso": 50,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "cinestill-800t-800",
+    "brand": "CineStill",
+    "name": "800T",
+    "iso": 800,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "cinestill-400d-400",
+    "brand": "CineStill",
+    "name": "400D",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "cinestill-50d-50",
+    "brand": "CineStill",
+    "name": "50D",
+    "iso": 50,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-ektachrome-e100-100",
+    "brand": "Kodak",
+    "name": "Ektachrome E100",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "slide",
+    "canisterColor": "blue",
+    "status": "current"
+  },
+  {
+    "slug": "fujifilm-velvia-50-50",
+    "brand": "Fujifilm",
+    "name": "Velvia 50",
+    "iso": 50,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "slide",
+    "canisterColor": "blue",
+    "status": "current"
+  },
+  {
+    "slug": "fujifilm-velvia-100-100",
+    "brand": "Fujifilm",
+    "name": "Velvia 100",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "slide",
+    "canisterColor": "blue",
+    "status": "current"
+  },
+  {
+    "slug": "fujifilm-provia-100f-100",
+    "brand": "Fujifilm",
+    "name": "Provia 100F",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "slide",
+    "canisterColor": "blue",
+    "status": "current"
+  },
+  {
+    "slug": "ilford-hp5-plus-400",
+    "brand": "Ilford",
+    "name": "HP5 Plus",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "ilford-fp4-plus-125",
+    "brand": "Ilford",
+    "name": "FP4 Plus",
+    "iso": 125,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "ilford-delta-100-100",
+    "brand": "Ilford",
+    "name": "Delta 100",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "ilford-delta-400-400",
+    "brand": "Ilford",
+    "name": "Delta 400",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "ilford-delta-3200-3200",
+    "brand": "Ilford",
+    "name": "Delta 3200",
+    "iso": 3200,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "ilford-pan-f-plus-50",
+    "brand": "Ilford",
+    "name": "Pan F Plus",
+    "iso": 50,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "ilford-xp2-super-400",
+    "brand": "Ilford",
+    "name": "XP2 Super",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "kentmere-pan-400-400",
+    "brand": "Kentmere",
+    "name": "Pan 400",
+    "iso": 400,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "kentmere-pan-100-100",
+    "brand": "Kentmere",
+    "name": "Pan 100",
+    "iso": 100,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-tri-x-400-400",
+    "brand": "Kodak",
+    "name": "Tri-X 400",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-t-max-100-100",
+    "brand": "Kodak",
+    "name": "T-Max 100",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-t-max-400-400",
+    "brand": "Kodak",
+    "name": "T-Max 400",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "kodak-t-max-p3200-3200",
+    "brand": "Kodak",
+    "name": "T-Max P3200",
+    "iso": 3200,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "fujifilm-neopan-acros-100-ii-100",
+    "brand": "Fujifilm",
+    "name": "Neopan Acros 100 II",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "foma-fomapan-100-100",
+    "brand": "Foma",
+    "name": "Fomapan 100",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "foma-fomapan-400-400",
+    "brand": "Foma",
+    "name": "Fomapan 400",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "reflx-lab-50d-ahu-50",
+    "brand": "Reflx Lab",
+    "name": "50D AHU",
+    "iso": 50,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "reflx-lab-320d-ahu-320",
+    "brand": "Reflx Lab",
+    "name": "320D AHU",
+    "iso": 320,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "reflx-lab-640t-ahu-640",
+    "brand": "Reflx Lab",
+    "name": "640T AHU",
+    "iso": 640,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "reflx-lab-250d-250",
+    "brand": "Reflx Lab",
+    "name": "250D",
+    "iso": 250,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "reflx-lab-5203-50d-50",
+    "brand": "Reflx Lab",
+    "name": "5203 50D",
+    "iso": 50,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "reflx-lab-500t-500",
+    "brand": "Reflx Lab",
+    "name": "500T",
+    "iso": 500,
+    "formats": [
+      "120"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "reflx-lab-200t-200-120",
+    "brand": "Reflx Lab",
+    "name": "200T",
+    "iso": 200,
+    "formats": [
+      "120"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "reflx-lab-50d-50-120",
+    "brand": "Reflx Lab",
+    "name": "50D",
+    "iso": 50,
+    "formats": [
+      "120"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "reflx-lab-800t-800",
+    "brand": "Reflx Lab",
+    "name": "800T",
+    "iso": 800,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "discontinued"
+  },
+  {
+    "slug": "reflx-lab-400d-400",
+    "brand": "Reflx Lab",
+    "name": "400D",
+    "iso": 400,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "discontinued"
+  },
+  {
+    "slug": "reflx-lab-200t-200-35mm",
+    "brand": "Reflx Lab",
+    "name": "200T",
+    "iso": 200,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "discontinued"
+  },
+  {
+    "slug": "reflx-lab-pro-100-100",
+    "brand": "Reflx Lab",
+    "name": "Pro 100",
+    "iso": 100,
+    "formats": [
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "reflx-lab-double-x-250",
+    "brand": "Reflx Lab",
+    "name": "Double X",
+    "iso": 250,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "reflx-lab-pan200-infrared-200",
+    "brand": "Reflx Lab",
+    "name": "PAN200 Infrared",
+    "iso": 200,
+    "formats": [
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "reflx-lab-diablo-100-100",
+    "brand": "Reflx Lab",
+    "name": "Diablo 100",
+    "iso": 100,
+    "formats": [
+      "35mm"
+    ],
+    "type": "special-effect",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "reflx-lab-zarya-100-100",
+    "brand": "Reflx Lab",
+    "name": "Zarya 100",
+    "iso": 100,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "reflx-lab-zarya-400-400",
+    "brand": "Reflx Lab",
+    "name": "Zarya 400",
+    "iso": 400,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "alien-film-aeronega-100-100",
+    "brand": "Alien Film",
+    "name": "Aeronega 100",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "rosfilm-400-400",
+    "brand": "Rosfilm",
+    "name": "400",
+    "iso": 400,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "santacolor-100-100",
+    "brand": "SantaColor",
+    "name": "100",
+    "iso": 100,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "santacolor-800-800",
+    "brand": "SantaColor",
+    "name": "800",
+    "iso": 800,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "candido-50-50",
+    "brand": "Candido",
+    "name": "50",
+    "iso": 50,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "candido-200-200",
+    "brand": "Candido",
+    "name": "200",
+    "iso": 200,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "candido-400-400",
+    "brand": "Candido",
+    "name": "400",
+    "iso": 400,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "candido-800-800",
+    "brand": "Candido",
+    "name": "800",
+    "iso": 800,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "dubblefilm-cinema-800",
+    "brand": "dubblefilm",
+    "name": "Cinema",
+    "iso": 800,
+    "formats": [
+      "35mm"
+    ],
+    "type": "cine",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "lucky-c200-200",
+    "brand": "Lucky",
+    "name": "C200",
+    "iso": 200,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "lucky-c400-400",
+    "brand": "Lucky",
+    "name": "C400",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "lucky-shd-100-100",
+    "brand": "Lucky",
+    "name": "SHD 100",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "lucky-shd-400-400",
+    "brand": "Lucky",
+    "name": "SHD 400",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "wolfen-nc400-400",
+    "brand": "Wolfen",
+    "name": "NC400",
+    "iso": 400,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "current"
+  },
+  {
+    "slug": "wolfen-np100-100",
+    "brand": "Wolfen",
+    "name": "NP100",
+    "iso": 100,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "limited-run"
+  },
+  {
+    "slug": "wolfen-p400-400",
+    "brand": "Wolfen",
+    "name": "P400",
+    "iso": 400,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "wolfen-un54-100",
+    "brand": "Wolfen",
+    "name": "UN54",
+    "iso": 100,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "harman-phoenix-ii-200",
+    "brand": "Harman",
+    "name": "Phoenix II",
+    "iso": 200,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "adox-cms-20-ii-12",
+    "brand": "Adox",
+    "name": "CMS 20 II",
+    "iso": 12,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "adox-chs-100-ii-100",
+    "brand": "Adox",
+    "name": "CHS 100 II",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "adox-scala-50-50",
+    "brand": "Adox",
+    "name": "Scala 50",
+    "iso": 50,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "adox-color-mission-200-200",
+    "brand": "Adox",
+    "name": "Color Mission 200",
+    "iso": 200,
+    "formats": [
+      "35mm"
+    ],
+    "type": "color-negative",
+    "canisterColor": "gold",
+    "status": "discontinued"
+  },
+  {
+    "slug": "rollei-rpx-25-25",
+    "brand": "Rollei",
+    "name": "RPX 25",
+    "iso": 25,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "rollei-rpx-100-100",
+    "brand": "Rollei",
+    "name": "RPX 100",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "rollei-rpx-400-400",
+    "brand": "Rollei",
+    "name": "RPX 400",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "rollei-retro-80s-80",
+    "brand": "Rollei",
+    "name": "Retro 80S",
+    "iso": 80,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "rollei-retro-400s-400",
+    "brand": "Rollei",
+    "name": "Retro 400S",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "rollei-superpan-200-200",
+    "brand": "Rollei",
+    "name": "Superpan 200",
+    "iso": 200,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "kosmo-foto-mono-100",
+    "brand": "Kosmo Foto",
+    "name": "Mono",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "kosmo-foto-agent-shadow-400",
+    "brand": "Kosmo Foto",
+    "name": "Agent Shadow",
+    "iso": 400,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "ferrania-p30-80",
+    "brand": "Ferrania",
+    "name": "P30",
+    "iso": 80,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "ferrania-p33-160",
+    "brand": "Ferrania",
+    "name": "P33",
+    "iso": 160,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "lomography-lady-grey-400",
+    "brand": "Lomography",
+    "name": "Lady Grey",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "lomography-earl-grey-100",
+    "brand": "Lomography",
+    "name": "Earl Grey",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "lomography-berlin-kino-400",
+    "brand": "Lomography",
+    "name": "Berlin Kino",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "lomography-potsdam-kino-100",
+    "brand": "Lomography",
+    "name": "Potsdam Kino",
+    "iso": 100,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "street-candy-atm400-400",
+    "brand": "Street Candy",
+    "name": "ATM400",
+    "iso": 400,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "svema-fpp-foto-100-100",
+    "brand": "Svema (FPP)",
+    "name": "Foto 100",
+    "iso": 100,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "svema-fpp-foto-400-400",
+    "brand": "Svema (FPP)",
+    "name": "Foto 400",
+    "iso": 400,
+    "formats": [
+      "35mm"
+    ],
+    "type": "bw",
+    "canisterColor": "mono",
+    "status": "current"
+  },
+  {
+    "slug": "kono-delight-art-100-100",
+    "brand": "KONO!",
+    "name": "Delight ART 100",
+    "iso": 100,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "rose",
+    "status": "current"
+  },
+  {
+    "slug": "kono-delight-art-400-400",
+    "brand": "KONO!",
+    "name": "Delight ART 400",
+    "iso": 400,
+    "formats": [
+      "35mm",
+      "120"
+    ],
+    "type": "color-negative",
+    "canisterColor": "rose",
+    "status": "current"
+  }
+]

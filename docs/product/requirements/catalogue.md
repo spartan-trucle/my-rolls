@@ -39,4 +39,4 @@ From the [roadmap content track](../../roadmap.md#content-track-runs-alongside):
 ## Open issues
 
 - PRD Q5: canister photos show real brand logos. The suggested default is to keep them as reference photos and leave drawn canisters unbranded (decide by 23.11.2026).
-- PRD `format[]` is an array (one stock in 35mm and 120); the ADR `format` is a single value.
+- ~~PRD `format[]` is an array (one stock in 35mm and 120); the ADR `format` is a single value.~~ **Resolved 27.09.2026 (Trúc), Known conflict #6, Phase 1 plan D4:** `stock.formats text[]`, the PRD's shape, not the ADR's single `format`.

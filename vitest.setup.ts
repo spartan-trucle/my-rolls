@@ -20,3 +20,31 @@ if (typeof window !== "undefined" && !window.matchMedia) {
     dispatchEvent: () => false,
   });
 }
+
+// jsdom reflects <dialog>'s `open` attribute but has never implemented
+// showModal()/close() themselves (https://github.com/jsdom/jsdom/issues/3294).
+// ResponsiveDialog (D1) calls both directly, so stub them here rather than in
+// every test: showModal sets `open` (jsdom's real getter/setter already
+// handles the attribute), close clears it and fires the native "close" event
+// ResponsiveDialog listens for, same as a real browser.
+// jsdom has no ResizeObserver. Radix `Popover`'s Popper positioning (used
+// by `DatePicker`, D3 owner feedback) reads it on mount; a no-op stub is
+// enough since jsdom never actually lays anything out to observe.
+if (typeof window !== "undefined" && !window.ResizeObserver) {
+  window.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
+
+if (typeof HTMLDialogElement !== "undefined" && !HTMLDialogElement.prototype.showModal) {
+  HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function (this: HTMLDialogElement) {
+    if (!this.open) return;
+    this.removeAttribute("open");
+    this.dispatchEvent(new Event("close"));
+  };
+}

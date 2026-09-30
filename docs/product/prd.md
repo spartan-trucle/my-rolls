@@ -1,13 +1,13 @@
 # Cuộn PRD (MVP) — overview
 
-> **Source:** [Cuộn PRD v0.4](https://claude.ai/artifact/9rfAShmDJUP9uFaDLikmu8) · Draft for review · Owner Trúc Lê · updated 24.09.2026
+> **Source:** [Cuộn PRD v0.4](https://claude.ai/artifact/9rfAShmDJUP9uFaDLikmu8) · Draft for review · Owner Trúc Lê · updated 27.09.2026 (artifact version 6: BAG-2 and BAG-3 raised to P0)
 > This page summarises the PRD. The requirement-level detail lives in the [deep-dives](requirements/README.md). When the wording here and the artifact differ, the artifact wins.
 
 Related: [Roadmap](../roadmap.md) · [ADR-001](../architecture/adr-001-tech-stack.md) · [Design system](../design/design-system.md) · [Wireframes](../design/wireframes.md)
 
 Cuộn (Vietnamese for "roll") is a home for film rolls, made for Vietnamese film shooters and free to use. You log a roll from your bag in under a minute, keep it as a canister on your shelf, and share it as a story card and a link friends open without an account. Compare rolls and labs once there is enough data.
 
-**Scope:** 55 requirements, 26 of them must-haves (P0) for the MVP.
+**Scope:** 55 requirements, 28 of them must-haves (P0) for the MVP.
 
 ## Summary
 
@@ -86,7 +86,7 @@ Each area has a deep-dive with its requirements, flows, data, designs and open i
 |---|---|---|---|
 | Sign-in | [auth.md](requirements/auth.md) | 1 / 1 / 0 | |
 | Rolls | [rolls.md](requirements/rolls.md) | 2 / 3 / 1 | |
-| Bag (Túi) | [bag.md](requirements/bag.md) | 1 / 2 / 1 | ✓ |
+| Bag (Túi) | [bag.md](requirements/bag.md) | 3 / 0 / 1 | ✓ |
 | Catalogue | [catalogue.md](requirements/catalogue.md) | 2 / 2 / 1 | |
 | Labs | [labs.md](requirements/labs.md) | 3 / 2 / 0 | |
 | Scans & storage | [scans.md](requirements/scans.md) | 4 / 1 / 1 | |
@@ -173,8 +173,8 @@ Most targets are set after a month of real data. Two are design limits held from
 
 | Release | Priority | Contents |
 |---|---|---|
-| MVP | All P0 | Google sign-in · new and past rolls, bag-first picker · bag, seeded catalogue, custom stocks and cameras · lab directory with branches, custom labs · full-size upload, tấm ưng, oops, notes, memory · canister shelf · film strip and grid views for rolls, library and friends · share link, friend view, link preview · story cards Dải phim, Phiếu cuộn |
-| v1.1 | P1 | Story cards Ảnh dán, Oops · community submissions with one review queue · import many old rolls · film pocket counts and camera cards · Compare: filters, side by side, slider · share settings and link expiry · roll status steps, rescans |
+| MVP | All P0 | Google sign-in · new and past rolls, bag-first picker · bag, seeded catalogue, custom stocks and cameras · film pocket counts and camera cards · lab directory with branches, custom labs · full-size upload, tấm ưng, oops, notes, memory · canister shelf · film strip and grid views for rolls, library and friends · share link, friend view, link preview · story cards Dải phim, Phiếu cuộn |
+| v1.1 | P1 | Story cards Ảnh dán, Oops · community submissions with one review queue · import many old rolls · Compare: filters, side by side, slider · share settings and link expiry · roll status steps, rescans |
 | Later | P2 | Colour profiles and lab/stock views · pooled mistake stats per camera · comments, reactions, collections · import from Drive / WeTransfer · per-frame exposure log · bag share card |
 
 Dates and the v1.1a / v1.1b / v1.2 split are in the [roadmap](../roadmap.md#after-launch).

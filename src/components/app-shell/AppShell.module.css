@@ -1,0 +1,47 @@
+.shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: var(--space-4) var(--space-4) var(--space-8);
+}
+
+/* Phone: PhoneTopBar + BottomTabs, no TopNav. Scoped under `.shell` so these
+   beat each component's own `display` rule, whose stylesheet may load later. */
+.shell > .topNav {
+  display: none;
+}
+
+.shell > .phoneTopBar {
+  padding: var(--space-4) var(--space-4) 0;
+}
+
+.shell > .bottomTabs {
+  display: grid;
+  position: sticky;
+  bottom: 0;
+}
+
+/* Desktop: TopNav, no PhoneTopBar or BottomTabs. */
+@media (min-width: 1024px) {
+  .shell > .topNav {
+    display: flex;
+  }
+
+  .shell > .phoneTopBar {
+    display: none;
+  }
+
+  .shell > .bottomTabs {
+    display: none;
+  }
+
+  .content {
+    padding: var(--space-8) 120px var(--space-12);
+  }
+}

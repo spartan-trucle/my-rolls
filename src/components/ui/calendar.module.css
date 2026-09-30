@@ -1,0 +1,153 @@
+.root {
+  --rdp-accent-color: var(--cobalt);
+  box-sizing: border-box;
+  font-family: var(--font-sans);
+  color: var(--ink);
+}
+
+.months {
+  display: flex;
+  flex-direction: column;
+}
+
+.month {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.monthCaption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 32px;
+}
+
+.captionLabel {
+  font: 600 14px/1 var(--font-sans);
+  text-transform: capitalize;
+  color: var(--ink);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navButton {
+  appearance: none;
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  padding: 0;
+}
+
+.navButton:hover {
+  background: var(--scrap);
+}
+
+.navButton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.navButton:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.grid {
+  border-collapse: collapse;
+}
+
+.weekdays {
+  display: flex;
+}
+
+.weekday {
+  width: 36px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 600 11px/1 var(--font-sans);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.weeks {
+  display: flex;
+  flex-direction: column;
+}
+
+.week {
+  display: flex;
+}
+
+.day {
+  width: 36px;
+  height: 36px;
+  padding: 2px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.dayButton {
+  appearance: none;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink);
+  font: 400 14px/1 var(--font-sans);
+  cursor: pointer;
+}
+
+.dayButton:hover {
+  background: var(--scrap);
+}
+
+.dayButton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.day[data-today="true"] .dayButton {
+  border: 1px solid var(--line-strong);
+}
+
+.day[data-outside="true"] .dayButton {
+  color: var(--ink-muted);
+  opacity: 0.6;
+}
+
+.day[data-selected="true"] .dayButton {
+  background: var(--cobalt);
+  color: var(--on-cobalt);
+}
+
+.day[data-disabled="true"] .dayButton {
+  color: var(--ink-muted);
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.day[data-disabled="true"] .dayButton:hover {
+  background: transparent;
+}

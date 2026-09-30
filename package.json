@@ -17,15 +17,18 @@
     "r2:smoke": "tsx --conditions=react-server scripts/r2-smoke.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "vercel-build": "pnpm db:migrate && next build",
+    "db:seed": "tsx --conditions=react-server scripts/seed-catalogue.ts",
+    "vercel-build": "pnpm db:migrate && pnpm db:seed && next build",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1139.0",
     "@aws-sdk/s3-request-presigner": "^3.1139.0",
     "@neondatabase/serverless": "^1.1.0",
+    "@radix-ui/react-popover": "^1.1.23",
     "@vercel/functions": "^3.9.9",
     "better-auth": "^1.7.5",
+    "date-fns": "^4.4.0",
     "drizzle-orm": "^0.45.3",
     "next": "16.3.6",
     "next-intl": "^4.14.6",
@@ -33,11 +36,13 @@
     "posthog-js": "^1.434.12",
     "posthog-node": "^5.53.0",
     "react": "19.2.8",
+    "react-day-picker": "^10.0.1",
     "react-dom": "19.2.8",
     "server-only": "^0.0.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@next/env": "^16.3.6",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.2",

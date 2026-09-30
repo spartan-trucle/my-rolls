@@ -1,11 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const captureExceptionImmediate = vi.fn().mockResolvedValue(undefined);
+const captureImmediate = vi.fn().mockResolvedValue(undefined);
 const shutdown = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("posthog-node", () => ({
   PostHog: vi.fn().mockImplementation(function PostHogMock(this: unknown) {
-    return Object.assign(this as object, { captureExceptionImmediate, shutdown });
+    return Object.assign(this as object, { captureExceptionImmediate, captureImmediate, shutdown });
   }),
 }));
 
@@ -13,6 +14,7 @@ describe("getPostHogServerClient", () => {
   beforeEach(() => {
     vi.resetModules();
     captureExceptionImmediate.mockClear();
+    captureImmediate.mockClear();
     shutdown.mockClear();
   });
 
@@ -64,6 +66,7 @@ describe("reportServerError", () => {
   beforeEach(() => {
     vi.resetModules();
     captureExceptionImmediate.mockClear();
+    captureImmediate.mockClear();
     shutdown.mockClear();
   });
 
@@ -97,5 +100,62 @@ describe("reportServerError", () => {
       expect.objectContaining({ path: "/api/dev/boom", method: "GET" }),
     );
     expect(shutdown).not.toHaveBeenCalled();
+  });
+});
+
+describe("captureServerEvent", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    captureExceptionImmediate.mockClear();
+    captureImmediate.mockClear();
+    shutdown.mockClear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("no-ops without throwing when the client is null (no key set)", async () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "");
+
+    const { captureServerEvent } = await import("./posthog-server");
+
+    await expect(
+      captureServerEvent({ distinctId: "user-1", event: "roll_created", properties: { mode: "new" } }),
+    ).resolves.toBeUndefined();
+    expect(captureImmediate).not.toHaveBeenCalled();
+  });
+
+  it("awaits captureImmediate with distinctId, event and properties", async () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test_key");
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_HOST", "https://us.i.posthog.com");
+
+    const { captureServerEvent } = await import("./posthog-server");
+
+    await captureServerEvent({
+      distinctId: "user-1",
+      event: "roll_created",
+      properties: { mode: "new", duration_ms: 1234 },
+    });
+
+    expect(captureImmediate).toHaveBeenCalledTimes(1);
+    expect(captureImmediate).toHaveBeenCalledWith({
+      distinctId: "user-1",
+      event: "roll_created",
+      properties: { mode: "new", duration_ms: 1234 },
+    });
+    expect(shutdown).not.toHaveBeenCalled();
+  });
+
+  it("swallows a capture failure instead of throwing (D16: analytics must never fail the caller)", async () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test_key");
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_HOST", "https://us.i.posthog.com");
+    captureImmediate.mockRejectedValueOnce(new Error("network down"));
+
+    const { captureServerEvent } = await import("./posthog-server");
+
+    await expect(
+      captureServerEvent({ distinctId: "user-1", event: "roll_created" }),
+    ).resolves.toBeUndefined();
   });
 });

@@ -1,0 +1,95 @@
+/*
+ * A bottom sheet below 1024px (top offset 44px, radius-lg top corners, as
+ * on CatalogueSearch.dc.html's `.sheet`), a centred 840px dialog at
+ * 1024px and up (CatalogueSearchWeb.dc.html's `.dlg`). Built on the
+ * native <dialog>: showModal() gives us the focus trap, Esc and the
+ * ::backdrop layer for free, so this file only positions the box and its
+ * backdrop colour.
+ */
+.dialog {
+  position: fixed;
+  inset: 0;
+  top: 44px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: none;
+  padding: 0;
+  border: none;
+  background: var(--paper-raised);
+  color: var(--ink);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--shadow-lift);
+}
+
+/* The board's own local `--scrim` token (t-light/t-dark): not part of
+   tokens.css yet, so mirrored here rather than invented as a new global. */
+.dialog::backdrop {
+  background: rgba(31, 26, 22, 0.55);
+}
+
+[data-theme="dark"] .dialog::backdrop {
+  background: rgba(0, 0, 0, 0.66);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .dialog::backdrop {
+    background: rgba(0, 0, 0, 0.66);
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+@media (min-width: 1024px) {
+  .dialog {
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    width: 840px;
+    max-width: calc(100vw - var(--space-12));
+    /* CatalogueSearchWeb.dc.html's `.dlg`: a constant 772px box, only
+       shrinking on a shorter viewport — never grown or shrunk to fit
+       whatever's inside, so the picker's list scrolls in place instead
+       of the whole dialog resizing per query (fix 2). */
+    height: min(772px, calc(100dvh - var(--space-16) * 2));
+    max-height: calc(100dvh - var(--space-16) * 2);
+    border-radius: var(--radius-lg);
+  }
+
+  .compact {
+    width: 480px;
+    height: auto;
+    max-height: calc(100dvh - var(--space-16) * 2);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dialog {
+    opacity: 1;
+    transition:
+      opacity 0.18s ease,
+      display 0.18s allow-discrete,
+      overlay 0.18s allow-discrete;
+  }
+
+  .dialog:not([open]) {
+    opacity: 0;
+  }
+
+  @starting-style {
+    .dialog[open] {
+      opacity: 0;
+    }
+  }
+}
