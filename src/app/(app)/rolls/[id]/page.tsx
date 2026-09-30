@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getRoll } from "@/features/rolls/actions";
 import { RollPage } from "@/features/rolls/components/RollPage";
+import { listRollFramesAction } from "@/features/frames/actions";
 import { getScanSetForRollAction } from "@/features/scan-sets/actions";
 
 export const metadata: Metadata = {
@@ -25,7 +26,7 @@ export default async function RollDetailPage({ params, searchParams }: PageProps
   const query = await searchParams;
   const justSaved = query.saved === "1";
 
-  const scanSet = await getScanSetForRollAction(roll.id);
+  const [scanSet, frames] = await Promise.all([getScanSetForRollAction(roll.id), listRollFramesAction(roll.id)]);
 
-  return <RollPage roll={roll} justSaved={justSaved} openUpload={query.upload === "1"} scanSet={scanSet} />;
+  return <RollPage roll={roll} justSaved={justSaved} openUpload={query.upload === "1"} scanSet={scanSet} frames={frames} />;
 }

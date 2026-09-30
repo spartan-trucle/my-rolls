@@ -252,3 +252,9 @@
     letter-spacing: -0.02em;
   }
 }
+
+/* Phase 2 F3: the frames section (RollFrames board). */
+.frames { grid-column: 1 / -1; }
+.sectionHead { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4); }
+.sectionLink { color: var(--cobalt); font-weight: 600; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
+.sectionHint { margin: 0 0 var(--space-3); color: var(--ink-muted); font-size: var(--text-body-sm); line-height: var(--text-body-sm--line-height); }

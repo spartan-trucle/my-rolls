@@ -5,6 +5,8 @@ import { Canister } from "@/components/canister/Canister";
 import { cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
 import type { IRollEntry } from "@/features/rolls/core";
 import { formatRollDate } from "@/features/rolls/format-date";
+import { FrameGrid } from "@/features/frames/components/FrameGrid";
+import type { IRollFrame } from "@/features/frames/core";
 import { RollScans } from "@/features/scan-sets/components/RollScans";
 import type { IScanSetSummary } from "@/features/scan-sets/core";
 import { pushPullStops } from "@/features/rolls/push-pull";
@@ -18,6 +20,8 @@ export interface RollPageProps {
   openUpload?: boolean;
   /** The roll's scan set (LAB-3), or null before the first upload. */
   scanSet?: IScanSetSummary | null;
+  /** Ready frames by position (SCAN-4), empty before the first upload. */
+  frames?: IRollFrame[];
 }
 
 function DetailRow({ label, value }: { label: string; value: string | null }) {
@@ -42,9 +46,12 @@ function joinMeta(parts: Array<string | false | null | undefined>): string | nul
  * (SCAN-1). `getRollPageContent` (the page itself) already 404s a missing
  * or another user's roll; this only renders one that was found.
  */
-export async function RollPage({ roll, justSaved = false, openUpload = false, scanSet = null }: RollPageProps) {
+export async function RollPage({ roll, justSaved = false, openUpload = false, scanSet = null, frames = [] }: RollPageProps) {
   const t = await getTranslations("rolls.page");
   const tTypes = await getTranslations("catalogue.types");
+  const tFrames = await getTranslations("frames");
+  const keeperCount = frames.filter((f) => f.isKeeper).length;
+  const oopsCount = frames.filter((f) => f.isOops).length;
 
   const stockTypeLabel = roll.stock ? stockTypeLabelKey(roll.stock.type) : null;
   const cameraTypeLabel = roll.camera ? cameraTypeLabelKey(roll.camera.type) : null;
@@ -131,9 +138,20 @@ export async function RollPage({ roll, justSaved = false, openUpload = false, sc
           </div>
 
           <div className={styles.stamps}>
-            {(roll.frameCount ?? 0) === 0 ? (
+            {frames.length === 0 && (roll.frameCount ?? 0) === 0 ? (
               <Stamp tone="ink" icon="upload" label={t("waitingScan")}>
                 {t("waitingScan")}
+              </Stamp>
+            ) : null}
+            {frames.length > 0 ? <Stamp tone="ink">{tFrames("stampFrames", { count: frames.length })}</Stamp> : null}
+            {keeperCount > 0 ? (
+              <Stamp tone="keeper" icon="keeper" label={tFrames("stampKeepers", { count: keeperCount })}>
+                {keeperCount}
+              </Stamp>
+            ) : null}
+            {oopsCount > 0 ? (
+              <Stamp tone="oops" icon="oops" label={tFrames("stampOops", { count: oopsCount })}>
+                {oopsCount}
               </Stamp>
             ) : null}
             {roll.pushPull && roll.pushPull !== "0" ? (
@@ -179,6 +197,21 @@ export async function RollPage({ roll, justSaved = false, openUpload = false, sc
             <div className={styles.ledge} />
             <div className={styles.ledgeBase} />
           </div>
+
+          {frames.length > 0 ? (
+            <section aria-labelledby="roll-frames-heading" className={`${styles.section} ${styles.frames}`}>
+              <div className={styles.sectionHead}>
+                <h2 id="roll-frames-heading" className={styles.sectionHeading}>
+                  {tFrames("heading")}
+                </h2>
+                <a href="#roll-scan-heading" className={styles.sectionLink}>
+                  {tFrames("addScans")}
+                </a>
+              </div>
+              <p className={styles.sectionHint}>{tFrames("sortHint")}</p>
+              <FrameGrid rollId={roll.id} frames={frames} />
+            </section>
+          ) : null}
 
           <section aria-labelledby="roll-scan-heading" className={`${styles.section} ${styles.scan}`}>
             <h2 id="roll-scan-heading" className={styles.sectionHeading}>
