@@ -454,8 +454,6 @@
   },
   "rolls": {
     "form": {
-      "modeGroupLabel": "Cuộn này",
-      "modeNew": "Đang trong máy",
       "modePast": "Đã chụp xong",
       "newHeading": "Cuộn mới",
       "newLead": "Chọn film và máy trong túi là lưu được. Phần còn lại điền sau cũng được.",

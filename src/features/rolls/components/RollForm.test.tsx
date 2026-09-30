@@ -156,6 +156,29 @@ describe("RollForm", () => {
     expect(posthogCapture).toHaveBeenCalledWith("roll_form_opened", { mode: "past" });
   });
 
+  it("'Đã chụp xong' is a checkbox: unchecked on a new roll, ticking it switches to the past-roll form (owner 30.09.2026)", async () => {
+    listBag.mockResolvedValue([]);
+    const { user } = setup("new");
+
+    const box = screen.getByRole("checkbox", { name: "Đã chụp xong" });
+    expect(box).not.toBeChecked();
+    expect(screen.queryByRole("link", { name: "Đang trong máy" })).toBeNull();
+
+    await user.click(box);
+    expect(push).toHaveBeenCalledWith("/rolls/new?mode=past");
+  });
+
+  it("'Đã chụp xong' starts checked on the past-roll form; unticking goes back to a new roll", async () => {
+    listBag.mockResolvedValue([]);
+    const { user } = setup("past");
+
+    const box = screen.getByRole("checkbox", { name: "Đã chụp xong" });
+    expect(box).toBeChecked();
+
+    await user.click(box);
+    expect(push).toHaveBeenCalledWith("/rolls/new");
+  });
+
   it("shows the film and camera type as a Vietnamese label, never the raw slug", async () => {
     listBag.mockResolvedValue([GOLD, HP5, K1000]);
     setup();
@@ -473,13 +496,13 @@ describe("RollForm", () => {
       lens: null,
     };
 
-    it("prefills from the roll, hides the mode toggle, and calls updateRoll with the expected version", async () => {
+    it("prefills from the roll, hides the mode checkbox, and calls updateRoll with the expected version", async () => {
       listBag.mockResolvedValue([GOLD, K1000]);
       updateRoll.mockResolvedValue({ ok: true });
       const { user } = setup("new", existingRoll);
 
       expect((await screen.findAllByText("CUỘN #5")).length).toBeGreaterThan(0);
-      expect(screen.queryByRole("link", { name: "Đang trong máy" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("checkbox", { name: "Đã chụp xong" })).not.toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Lưu thay đổi" })).toBeInTheDocument();
 
       await user.click(screen.getByRole("button", { name: "Lưu thay đổi" }));

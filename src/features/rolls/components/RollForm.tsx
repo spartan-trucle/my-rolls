@@ -560,14 +560,17 @@ export function RollForm({ mode, roll }: RollFormProps) {
         </div>
 
         {!isEdit ? (
-          <div className={styles.seg} role="group" aria-label={t("modeGroupLabel")}>
-            <Link href="/rolls/new" aria-current={mode === "new" ? "page" : undefined}>
-              {t("modeNew")}
-            </Link>
-            <Link href="/rolls/new?mode=past" aria-current={mode === "past" ? "page" : undefined}>
-              {t("modePast")}
-            </Link>
-          </div>
+          // Owner 30.09.2026 (PastRoll board comment): one "Đã chụp xong"
+          // checkbox instead of the two-way toggle. Each mode is its own URL,
+          // so ticking it navigates, as the toggle's links did.
+          <label className={styles.pastCheck}>
+            <input
+              type="checkbox"
+              checked={mode === "past"}
+              onChange={(event) => router.push(event.target.checked ? "/rolls/new?mode=past" : "/rolls/new")}
+            />
+            <span>{t("modePast")}</span>
+          </label>
         ) : null}
         </div>
 
