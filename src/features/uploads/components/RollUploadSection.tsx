@@ -1,12 +1,14 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ResponsiveDialog } from "@/components/overlay/ResponsiveDialog";
 import { UploadDrop } from "@/design-system";
 import { ALLOWED_UPLOAD_TYPES } from "../limits";
 import { collectDroppedFiles } from "../client/drop";
 import { useUploads } from "../client/UploadProvider";
+import { summarizeBatch } from "./format";
 import { UploadList } from "./UploadList";
 import styles from "./RollUploadSection.module.css";
 
@@ -28,6 +30,17 @@ export function RollUploadSection({ rollId, rollLabel, frameCount, onOpenScanSet
   const { batches, start, retry, retryAll } = useUploads();
   const [open, setOpen] = useState(initialOpen);
   const batch = [...batches].reverse().find((b) => b.rollId === rollId) ?? null;
+  const router = useRouter();
+  const refreshedFor = useRef<string | null>(null);
+  const finished = batch ? summarizeBatch(batch).finished : false;
+
+  // Review #2: once this roll's batch settles, re-render the server page so the new frames,
+  // counts and frame numbering show, and the next drop starts from the right frame count.
+  useEffect(() => {
+    if (!batch || !finished || refreshedFor.current === batch.id) return;
+    refreshedFor.current = batch.id;
+    router.refresh();
+  }, [batch, finished, router]);
 
   const onFiles = (files: File[]) => {
     start(rollId, files, frameCount + 1, rollLabel);

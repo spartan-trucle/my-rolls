@@ -11,6 +11,8 @@ const uploads = vi.hoisted(() => ({
   retryAll: vi.fn(),
 }));
 vi.mock("../client/UploadProvider", () => ({ useUploads: () => uploads }));
+const refresh = vi.hoisted(() => vi.fn());
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
 
 import { RollUploadSection } from "./RollUploadSection";
 
@@ -61,5 +63,16 @@ describe("RollUploadSection", () => {
       dataTransfer: { items: [{ kind: "file", webkitGetAsEntry: () => entry }], files: [f] },
     });
     await vi.waitFor(() => expect(uploads.start).toHaveBeenCalledWith("r1", [f], 1, "Cuộn #16"));
+  });
+
+  it("refreshes the roll page once when this roll's batch finishes, so new frames show (review #2)", () => {
+    const f = (status: "queued" | "done") => ({ id: status, name: "a.jpg", bytes: 1, status, progress: 0 });
+    uploads.batches = [{ id: "b1", rollId: "r1", startedAt: 0, files: [f("queued")] }];
+    const { rerender } = render(<RollUploadSection rollId="r1" rollLabel="Cuộn #16" frameCount={0} />);
+    expect(refresh).not.toHaveBeenCalled();
+    uploads.batches = [{ id: "b1", rollId: "r1", startedAt: 0, files: [f("done")] }];
+    rerender(<RollUploadSection rollId="r1" rollLabel="Cuộn #16" frameCount={0} />);
+    rerender(<RollUploadSection rollId="r1" rollLabel="Cuộn #16" frameCount={0} />);
+    expect(refresh).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull, max } from "drizzle-orm";
 import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { frame, roll, scanSet } from "@/db/schema";
@@ -29,7 +29,8 @@ const slotFileSchema = z.object({
   width: z.number().int().positive(),
   height: z.number().int().positive(),
   exif: z.record(z.string(), z.unknown()),
-  position: z.number().int().positive(),
+  /** Ignored: the server numbers frames after the roll's highest position (review #2). */
+  position: z.number().int().positive().optional(),
   copyType: z.enum(COPY_TYPES),
   gridBytes: z.number().int().positive().max(MAX_UPLOAD_BYTES),
   viewBytes: z.number().int().positive().max(MAX_UPLOAD_BYTES),
@@ -97,51 +98,62 @@ export async function requestSlotsCore<TQueryResult extends PgQueryResultHKT>(
     files.push(parsed.data);
   }
 
-  const [owned] = await db
-    .select({ id: roll.id })
-    .from(roll)
-    .where(and(eq(roll.id, input.rollId), eq(roll.userId, userId), isNull(roll.deletedAt)))
-    .limit(1);
-  if (!owned) return { ok: false, error: "not_found" };
+  // One transaction with the roll row locked: two slot requests for the same roll (parallel
+  // groups, two tabs) can't hand out the same positions or race for the scan set.
+  const created = await db.transaction(async (tx) => {
+    const [owned] = await tx
+      .select({ id: roll.id })
+      .from(roll)
+      .where(and(eq(roll.id, input.rollId), eq(roll.userId, userId), isNull(roll.deletedAt)))
+      .for("update")
+      .limit(1);
+    if (!owned) return null;
 
-  let scanSetId = await liveScanSetId(db, input.rollId);
-  if (!scanSetId) {
-    const [created] = await db
-      .insert(scanSet)
-      .values({ userId, rollId: input.rollId })
-      .onConflictDoNothing()
-      .returning({ id: scanSet.id });
-    // Two first batches can race for the one live scan set (D7); the loser reads the winner's.
-    scanSetId = created?.id ?? (await liveScanSetId(db, input.rollId));
-    if (!scanSetId) return { ok: false, error: "not_found" };
-  }
+    let scanSetId = await liveScanSetId(tx, input.rollId);
+    if (!scanSetId) {
+      const [inserted] = await tx
+        .insert(scanSet)
+        .values({ userId, rollId: input.rollId })
+        .onConflictDoNothing()
+        .returning({ id: scanSet.id });
+      scanSetId = inserted?.id ?? (await liveScanSetId(tx, input.rollId));
+      if (!scanSetId) return null;
+    }
 
-  const rows = files.map((f) => {
-    const id = randomUUID();
-    const copyExt = EXTENSION[f.copyType];
-    return {
-      file: f,
-      values: {
-        id,
-        userId,
-        rollId: input.rollId,
-        scanSetId: scanSetId!,
-        position: f.position,
-        fileName: f.fileName,
-        contentType: f.contentType,
-        bytes: f.bytes,
-        sha256: f.sha256,
-        width: f.width,
-        height: f.height,
-        exif: f.exif,
-        originalKey: `originals/${userId}/${id}.${EXTENSION[f.contentType]}`,
-        gridKey: `grid/${randomUUID()}.${copyExt}`,
-        viewKey: `view/${randomUUID()}.${copyExt}`,
-      },
-    };
+    // Review #2: positions come from the server, after every frame the roll ever had
+    // (deleted ones too, so a restored frame never collides), in the order the files came.
+    const [{ top }] = await tx.select({ top: max(frame.position) }).from(frame).where(eq(frame.rollId, input.rollId));
+    const firstPosition = (top ?? 0) + 1;
+
+    const rows = files.map((f, i) => {
+      const id = randomUUID();
+      const copyExt = EXTENSION[f.copyType];
+      return {
+        file: f,
+        values: {
+          id,
+          userId,
+          rollId: input.rollId,
+          scanSetId: scanSetId!,
+          position: firstPosition + i,
+          fileName: f.fileName,
+          contentType: f.contentType,
+          bytes: f.bytes,
+          sha256: f.sha256,
+          width: f.width,
+          height: f.height,
+          exif: f.exif,
+          originalKey: `originals/${userId}/${id}.${EXTENSION[f.contentType]}`,
+          gridKey: `grid/${randomUUID()}.${copyExt}`,
+          viewKey: `view/${randomUUID()}.${copyExt}`,
+        },
+      };
+    });
+    await tx.insert(frame).values(rows.map((r) => r.values));
+    return { scanSetId, rows };
   });
-
-  await db.insert(frame).values(rows.map((r) => r.values));
+  if (!created) return { ok: false, error: "not_found" };
+  const { scanSetId, rows } = created;
 
   const slots = await Promise.all(
     rows.map(async ({ file: f, values: v }) => {

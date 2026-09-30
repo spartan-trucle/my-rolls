@@ -122,6 +122,31 @@ describe("requestSlotsCore", () => {
   });
 });
 
+describe("requestSlotsCore positions (review #2)", () => {
+  it("numbers new frames after the roll's highest position, ignoring the client's numbers", async () => {
+    const { db, rollId } = await setup();
+    await requestSlotsCore(db, USER, { rollId, files: [file(1), file(2)] }, { sign });
+    // A stale client sends position 1 again for its next batch.
+    await requestSlotsCore(db, USER, { rollId, files: [file(3, { position: 1 }), file(4, { position: 2 })] }, { sign });
+    const rows = await db.select().from(frame).orderBy(frame.position);
+    expect(rows.map((r) => [r.fileName, r.position])).toEqual([
+      ["01.jpg", 1],
+      ["02.jpg", 2],
+      ["03.jpg", 3],
+      ["04.jpg", 4],
+    ]);
+  });
+
+  it("counts deleted frames too, so a restored frame never collides", async () => {
+    const { db, rollId } = await setup();
+    await requestSlotsCore(db, USER, { rollId, files: [file(1), file(2)] }, { sign });
+    await db.update(frame).set({ deletedAt: new Date() }).where(eq(frame.position, 2));
+    await requestSlotsCore(db, USER, { rollId, files: [file(3)] }, { sign });
+    const rows = await db.select().from(frame).orderBy(frame.position);
+    expect(rows.map((r) => r.position)).toEqual([1, 2, 3]);
+  });
+});
+
 describe("confirmFramesCore", () => {
   async function withSlots(db: TTestDb, rollId: string, n = 2) {
     const result = await requestSlotsCore(db, USER, { rollId, files: Array.from({ length: n }, (_, i) => file(i + 1)) }, { sign });
