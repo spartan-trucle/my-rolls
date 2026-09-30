@@ -196,6 +196,13 @@
   --text-title: 22px;
   --text-title--line-height: 28px;
   --text-title--font-weight: 600;
+  --text-display-mobile: 28px;
+  --text-display-mobile--line-height: 32px;
+  --text-display-mobile--font-weight: 500;
+  --text-display-mobile--letter-spacing: -0.01em;
+  --text-title-mobile: 20px;
+  --text-title-mobile--line-height: 26px;
+  --text-title-mobile--font-weight: 600;
   --text-body: 16px;
   --text-body--line-height: 24px;
   --text-body--font-weight: 400;
@@ -206,6 +213,12 @@
   --text-label--line-height: 16px;
   --text-label--font-weight: 600;
   --text-label--letter-spacing: 0.08em;
+  --text-body-mobile: 14px;
+  --text-body-mobile--line-height: 20px;
+  --text-body-mobile--font-weight: 400;
+  --text-body-sm-mobile: 13px;
+  --text-body-sm-mobile--line-height: 18px;
+  --text-body-sm-mobile--font-weight: 400;
   --text-meta: 13px;
   --text-meta--line-height: 18px;
   --text-meta--font-weight: 400;
@@ -259,4 +272,33 @@
   --color-stock-blue: var(--stock-blue);
   --color-stock-mono: var(--stock-mono);
   --color-stock-rose: var(--stock-rose);
+}
+
+@media (max-width: 599px) {
+  :root {
+    --text-body: var(--text-body-mobile);
+    --text-body--line-height: var(--text-body-mobile--line-height);
+    --text-body--font-weight: var(--text-body-mobile--font-weight);
+    --text-body--letter-spacing: normal;
+    --text-body-sm: var(--text-body-sm-mobile);
+    --text-body-sm--line-height: var(--text-body-sm-mobile--line-height);
+    --text-body-sm--font-weight: var(--text-body-sm-mobile--font-weight);
+    --text-body-sm--letter-spacing: normal;
+    --text-title: var(--text-title-mobile);
+    --text-title--line-height: var(--text-title-mobile--line-height);
+    --text-title--font-weight: var(--text-title-mobile--font-weight);
+    --text-title--letter-spacing: normal;
+    --text-display-xl: var(--text-display-mobile);
+    --text-display-xl--line-height: var(--text-display-mobile--line-height);
+    --text-display-xl--font-weight: var(--text-display-mobile--font-weight);
+    --text-display-xl--letter-spacing: var(--text-display-mobile--letter-spacing);
+    --text-display-l: var(--text-display-mobile);
+    --text-display-l--line-height: var(--text-display-mobile--line-height);
+    --text-display-l--font-weight: var(--text-display-mobile--font-weight);
+    --text-display-l--letter-spacing: var(--text-display-mobile--letter-spacing);
+    --text-display-hero: 40px;
+    --text-display-hero--line-height: 44px;
+    --text-display-hero--font-weight: 500;
+    --text-display-hero--letter-spacing: -0.015em;
+  }
 }

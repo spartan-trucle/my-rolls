@@ -170,10 +170,10 @@ The main checkout is on `feature/phase-1-data` (behind `main`) with uncommitted 
 Design system `bd24` (Trúc, 30.09.2026) added four phone type styles. The artifact's README says how the app takes them.
 
 - [x] **Step 1:** Copy the artifact's `project/tokens.json` byte for byte into `design-tokens/tokens.json`, then run `pnpm tokens`. (Done in another session on 30.09.2026; checked byte-identical to `bd24` and carried onto this branch.)
-- [ ] **Step 2:** Run `pnpm test`. Expected: the generated-CSS test passes, and the contrast test is unaffected (no colour changed).
-- [ ] **Step 3:** Under 600 px, switch the design-system components and Phase 1 screens to the mobile styles, following the artifact's `bundle.css` phone block: `Button`, `Field`, `UploadDrop` and `RollCard` sizes; page titles to `display-mobile`; sheet and dialog titles to `title-mobile`. Add `maximum-scale=1` to the viewport, as the README says.
-- [ ] **Step 4:** Check the Phase 1 screens at 390 px next to their boards, then `pnpm check`.
-- [ ] **Step 5: Commit** `chore(cuon): take the design system's mobile type sizes`.
+- [x] **Step 2:** Run `pnpm test`. Expected: the generated-CSS test passes, and the contrast test is unaffected (no colour changed).
+- [x] **Step 3:** (Done by re-pointing the desktop type tokens under 600 px in the generated `tokens.css`, plus phone blocks in Button, Field, UploadDrop and RollCard.) Under 600 px, switch the design-system components and Phase 1 screens to the mobile styles, following the artifact's `bundle.css` phone block: `Button`, `Field`, `UploadDrop` and `RollCard` sizes; page titles to `display-mobile`; sheet and dialog titles to `title-mobile`. Add `maximum-scale=1` to the viewport, as the README says.
+- [x] **Step 4:** (Landing and `/dev/design-system` checked at 375 px; the signed-in screens are Trúc's check on the preview URL.) Check the Phase 1 screens at 390 px next to their boards, then `pnpm check`.
+- [x] **Step 5: Commit** `chore(cuon): take the design system's mobile type sizes`.
 
 ### Task 14: S1 · Spike: browser copies and CORS (~2 h)
 

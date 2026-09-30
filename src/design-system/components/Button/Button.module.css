@@ -62,3 +62,10 @@
 @media (prefers-reduced-motion: reduce) {
   .button { transition: none; }
 }
+
+/* Phones (under 600px), from the design system's bundle.css phone block. */
+@media (max-width: 599px) {
+  .button { font-size: 14px; }
+  .sm { font-size: 13px; }
+  .doodle { font-size: 12px; }
+}

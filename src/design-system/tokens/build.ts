@@ -35,6 +35,46 @@ export function fontStack(tokens: TokensFile, family: FontFamilyToken): string {
   return tokens.type.families[family].replace(/^"[^"]+"/, `var(${FONT_VARIABLES[family]})`);
 }
 
+/**
+ * Under 600px each desktop style steps down to its phone style (design system README, Type).
+ * Re-pointing the desktop variables means every CSS Module and utility follows without a
+ * media query of its own. `display-hero` is the exception: it drops to display-l's desktop
+ * values, which are written out because display-l itself is re-pointed on phones.
+ */
+const PHONE_STYLES: Array<[desktop: string, mobile: string]> = [
+  ["body", "body-mobile"],
+  ["body-sm", "body-sm-mobile"],
+  ["title", "title-mobile"],
+  ["display-xl", "display-mobile"],
+  ["display-l", "display-mobile"],
+];
+
+function phoneTextStyles(tokens: TokensFile): string[] {
+  const styles = new Map(tokens.type.groups.flatMap((g) => g.styles).map((s) => [s.name, s]));
+  const pointed = PHONE_STYLES.flatMap(([desktop, mobile]) => {
+    const target = styles.get(mobile);
+    if (!target) throw new Error(`tokens.json has no "${mobile}" style for phones`);
+    return [
+      decl(`text-${desktop}`, `var(--text-${mobile})`),
+      decl(`text-${desktop}--line-height`, `var(--text-${mobile}--line-height)`),
+      decl(`text-${desktop}--font-weight`, `var(--text-${mobile}--font-weight)`),
+      decl(
+        `text-${desktop}--letter-spacing`,
+        target.letterSpacing ? `var(--text-${mobile}--letter-spacing)` : "normal",
+      ),
+    ];
+  });
+  const heroTarget = styles.get("display-l");
+  if (!heroTarget) throw new Error('tokens.json has no "display-l" style for the phone hero');
+  return [
+    ...pointed,
+    decl("text-display-hero", heroTarget.fontSize),
+    decl("text-display-hero--line-height", heroTarget.lineHeight),
+    decl("text-display-hero--font-weight", String(heroTarget.fontWeight)),
+    decl("text-display-hero--letter-spacing", heroTarget.letterSpacing ?? "normal"),
+  ];
+}
+
 export function buildTokensCss(tokens: TokensFile): string {
   const staticVars = [
     ...tokens.spacing.tokens.map((t) => decl(t.name, t.value)),
@@ -83,6 +123,10 @@ export function buildTokensCss(tokens: TokensFile): string {
     rule("@theme static", themeStatic),
     "",
     rule("@theme inline", themeInline),
+    "",
+    "@media (max-width: 599px) {",
+    rule(":root", phoneTextStyles(tokens), "  "),
+    "}",
     "",
   ].join("\n");
 }

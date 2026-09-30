@@ -17,7 +17,14 @@ vi.mock("next/font/google", () => {
   };
 });
 
-import RootLayout from "./layout";
+import RootLayout, { viewport } from "./layout";
+
+describe("viewport", () => {
+  // Design system bd24: inputs are 14px on phones, and iOS Safari zooms into inputs under 16px.
+  it("stops iOS focus zoom with maximum-scale=1", () => {
+    expect(viewport).toMatchObject({ width: "device-width", initialScale: 1, maximumScale: 1 });
+  });
+});
 
 describe("RootLayout", () => {
   it("sets no data-theme on <html> when the theme cookie is absent (follow the system)", async () => {

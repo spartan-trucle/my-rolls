@@ -33,3 +33,8 @@
   color: var(--ink-muted);
 }
 .error { color: var(--pin); }
+
+/* Phones (under 600px): inputs follow body-mobile through the tokens; mono input steps down too. */
+@media (max-width: 599px) {
+  .mono { font-size: 13px; }
+}

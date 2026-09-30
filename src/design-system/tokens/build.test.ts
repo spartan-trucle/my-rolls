@@ -6,11 +6,11 @@ import type { TokensFile } from "./types";
 const file: TokensFile = tokens;
 const css = buildTokensCss(file);
 
-/** Body of the first rule whose selector is exactly `selector`. */
-function block(selector: string): string {
-  const start = css.indexOf(`${selector} {`);
+/** Body of the first rule whose selector is exactly `selector`, in `source` (default: the whole file). */
+function block(selector: string, source: string = css): string {
+  const start = source.indexOf(`${selector} {`);
   expect(start, `missing block "${selector}"`).toBeGreaterThanOrEqual(0);
-  return css.slice(start, css.indexOf("}", start));
+  return source.slice(start, source.indexOf("}", start));
 }
 
 const resolve = (value: string) => value.replace(/^\{([a-z0-9-]+)\}$/, "var(--$1)");
@@ -96,6 +96,46 @@ describe("buildTokensCss", () => {
     // Single-hyphen-separated names only: excludes the --line-height companions,
     // which are also declared in px and would otherwise double-count.
     expect(theme.match(/--text-[a-z]+(?:-[a-z]+)*: \d+px;/g)).toHaveLength(styleCount);
+  });
+
+  describe("phones (under 600px)", () => {
+    const phone = () => {
+      const start = css.indexOf("@media (max-width: 599px) {");
+      expect(start, "missing the phone media block").toBeGreaterThanOrEqual(0);
+      return block(":root", css.slice(start));
+    };
+
+    it.each([
+      ["body", "body-mobile"],
+      ["body-sm", "body-sm-mobile"],
+      ["title", "title-mobile"],
+      ["display-xl", "display-mobile"],
+      ["display-l", "display-mobile"],
+    ])("points %s at %s, with its line height and weight", (desktop, mobile) => {
+      const root = phone();
+      expect(root).toContain(`--text-${desktop}: var(--text-${mobile});`);
+      expect(root).toContain(`--text-${desktop}--line-height: var(--text-${mobile}--line-height);`);
+      expect(root).toContain(`--text-${desktop}--font-weight: var(--text-${mobile}--font-weight);`);
+    });
+
+    it("drops display-hero to display-l's desktop size (40/44), not to display-mobile", () => {
+      const root = phone();
+      expect(root).toContain("--text-display-hero: 40px;");
+      expect(root).toContain("--text-display-hero--line-height: 44px;");
+      expect(root).toContain("--text-display-hero--letter-spacing: -0.015em;");
+    });
+
+    it("gives a mobile style with no tracking a reset, so the desktop tracking doesn't leak", () => {
+      expect(phone()).toContain("--text-display-xl--letter-spacing: var(--text-display-mobile--letter-spacing);");
+      expect(phone()).toContain("--text-title--letter-spacing: normal;");
+    });
+
+    it("leaves label, meta, edge and the notes alone", () => {
+      const root = phone();
+      for (const name of ["label", "meta", "edge", "note", "note-sm"]) {
+        expect(root).not.toContain(`--text-${name}:`);
+      }
+    });
   });
 
   it("emits the radius tokens under Tailwind's radius namespace", () => {

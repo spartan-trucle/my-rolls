@@ -28,3 +28,8 @@
 @media (prefers-reduced-motion: reduce) {
   .drop { transition: none; }
 }
+
+/* Phones (under 600px), from the design system's bundle.css phone block. */
+@media (max-width: 599px) {
+  .title { font-size: 20px; line-height: 26px; }
+}
