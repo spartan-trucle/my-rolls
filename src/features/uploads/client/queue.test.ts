@@ -3,7 +3,7 @@ import { createUploadQueue, type IPreparedFile, type ISlotRequestFile, type IUpl
 
 const jpg = (name: string, bytes = 100) => new File([new Uint8Array(bytes)], name, { type: "image/jpeg" });
 
-const prepared = (_file?: File): IPreparedFile => ({
+const prepared = (): IPreparedFile => ({
   sha256: "a".repeat(64),
   width: 3000,
   height: 2000,
@@ -17,7 +17,7 @@ const prepared = (_file?: File): IPreparedFile => ({
 function deps(overrides: Partial<IUploadDeps> = {}) {
   let frame = 0;
   const base: IUploadDeps = {
-    makeCopies: vi.fn(async (file: File) => prepared(file)),
+    makeCopies: vi.fn(async () => prepared()),
     requestSlots: vi.fn(async (_rollId: string, files: ISlotRequestFile[]) => ({
       slots: files.map((f) => ({
         clientId: f.clientId,
@@ -103,11 +103,11 @@ describe("upload queue", () => {
     let maxNetwork = 0;
     const tick = () => new Promise((r) => setTimeout(r, 0));
     const d = deps({
-      makeCopies: vi.fn(async (file: File) => {
+      makeCopies: vi.fn(async () => {
         maxCopying = Math.max(maxCopying, ++copying);
         await tick();
         copying--;
-        return prepared(file);
+        return prepared();
       }),
       put: vi.fn(async () => {
         await tick();
