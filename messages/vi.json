@@ -113,9 +113,11 @@
     "themeDark": "Tối",
     "editNameRow": "Sửa tên hiển thị",
     "signOutButton": "Đăng xuất",
-    "statRolls": "{count} cuộn",
+    "statRolls": "cuộn",
     "bagHeading": "Túi của tôi",
-    "bagEditLink": "Sửa túi ›",
+    "bagEditLink": "Sửa túi",
+    "bagCamerasLabel": "Máy ảnh · {count}",
+    "bagFilmsLabel": "Film · {count}",
     "bagCameraRolls": "{count} cuộn",
     "bagFilmSwatchesLabel": "Film trong túi",
     "editName": {

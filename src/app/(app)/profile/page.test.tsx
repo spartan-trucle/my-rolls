@@ -100,6 +100,6 @@ describe("ProfilePage", () => {
     renderPage(ui);
 
     expect(getProfileSummaryQuery).toHaveBeenCalledWith({ __brand: "fake-db" }, "u1");
-    expect(screen.getByText("7 cuộn")).toBeInTheDocument();
+    expect(screen.getByTestId("profile-stat-rolls")).toHaveTextContent(/^7cuộn$/);
   });
 });

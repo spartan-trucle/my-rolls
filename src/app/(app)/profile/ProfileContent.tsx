@@ -52,27 +52,24 @@ function GoogleGIcon() {
 }
 
 /**
- * `/profile` (F4, Design finding 5): the Google avatar, the display name,
- * the read-only email and join date, the theme control and sign out.
- * Deliberately nothing else — stats, "Túi của tôi", recent keepers,
- * language, share links and delete account belong to their own later
- * tasks. No bottom tab bar (F3).
- *
- * Matches the `Profile` / `ProfileDark` / `ProfileWeb` boards: a
- * phone-only quick theme toggle up top, an identity row with the name as
- * the page's one `h1`, a "Cài đặt" section (the `Sáng`/`Tối` segmented
- * control, then a "Sửa tên hiển thị ›" row that links to `/profile/name`
- * instead of an inline form), and a full-width outline sign-out button.
- * Desktop (`ProfileWeb`) turns the same content into a 400px left column
- * plus an empty right column reserved for the bag/keepers that come
- * later; the shared app header/nav is F3's to build, so this doesn't
- * render one — the segmented control (present at every width) is what
- * keeps the theme reachable on desktop without it.
+ * `/profile` (F4, Design finding 5), per the `Profile` / `ProfileWeb`
+ * boards: a phone-only "Hồ sơ" row with the quick theme toggle (the phone
+ * top bar is hidden on this route), the Google avatar with the name as the
+ * page's one `h1`, the email and join date, the roll-count tile, "Túi của
+ * tôi" (cameras with rolls shot, films as named chips), then "Cài đặt"
+ * (the `Sáng`/`Tối` control, "Sửa tên hiển thị ›" linking to
+ * `/profile/name`) and a full-width outline sign-out button. Recent
+ * keepers, tấm ưng/oops tiles, language, share links and delete account
+ * belong to later phases and stay hidden.
  */
 export function ProfileContent({ name, email, image, createdAt, summary }: ProfileContentProps) {
   const t = useTranslations("profile");
   const initial = name.trim().charAt(0).toUpperCase() || "?";
 
+  // Profile/ProfileWeb boards: phone reads identity → stats → "Túi của
+  // tôi" → "Cài đặt"; desktop puts identity, stats and settings in a 400px
+  // left column and the bag on the right. The parts are siblings in phone
+  // order, and the desktop grid places each one (see page.module.css).
   return (
     <div className={styles.shell}>
       <div className={styles.header}>
@@ -80,106 +77,118 @@ export function ProfileContent({ name, email, image, createdAt, summary }: Profi
         <ThemeToggle />
       </div>
 
-      <div className={styles.left}>
-        <div className={styles.identity}>
-          {image ? (
-            <Image
-              src={image}
-              alt={t("avatarAlt")}
-              width={80}
-              height={80}
-              className={styles.avatarImage}
-            />
-          ) : (
-            <span className={styles.avatarFallback} role="img" aria-label={t("avatarAlt")}>
-              {initial}
-            </span>
-          )}
-          <div className={styles.identityText}>
-            <h1 className={styles.name}>{name}</h1>
-            <span className={styles.emailRow}>
-              <GoogleGIcon />
-              {email}
-            </span>
-            <span className={styles.joined}>{t("joined", { date: formatJoinedDate(createdAt) })}</span>
-          </div>
+      <div className={styles.identity}>
+        {image ? (
+          <Image
+            src={image}
+            alt={t("avatarAlt")}
+            width={80}
+            height={80}
+            className={styles.avatarImage}
+          />
+        ) : (
+          <span className={styles.avatarFallback} role="img" aria-label={t("avatarAlt")}>
+            {initial}
+          </span>
+        )}
+        <div className={styles.identityText}>
+          <h1 className={styles.name}>{name}</h1>
+          <span className={styles.emailRow}>
+            <GoogleGIcon />
+            {email}
+          </span>
+          <span className={styles.joined}>{t("joined", { date: formatJoinedDate(createdAt) })}</span>
         </div>
-
-        {summary ? (
-          <div className={styles.statTile}>
-            <span className={styles.statValue}>{summary.rollCount}</span>
-            <span className={styles.statLabel}>{t("statRolls", { count: summary.rollCount })}</span>
-          </div>
-        ) : null}
-
-        <section aria-labelledby="profile-settings-heading">
-          <h2 id="profile-settings-heading" className={styles.settingsHeading}>
-            {t("settingsHeading")}
-          </h2>
-          <div className={styles.setrow}>
-            <span>{t("themeLabel")}</span>
-            <ThemeSegmented />
-          </div>
-          <Link href="/profile/name" className={styles.setrow}>
-            <span>{t("editNameRow")}</span>
-            <span className={styles.setrowValue}>›</span>
-          </Link>
-          <div className={styles.signOutWrap}>
-            <form action={signOutAction}>
-              <Button type="submit" variant="outline" className={styles.signOutButton}>
-                {t("signOutButton")}
-              </Button>
-            </form>
-          </div>
-        </section>
       </div>
 
-      {/* PR3/PR4/PR5/PR7/PR8: "Túi của tôi" is real; the rest (recent
-          keepers, share links, delete account) wait for their own tasks
-          and stay hidden rather than faked. */}
-      {summary && (summary.cameras.length > 0 || summary.stocks.length > 0) ? (
-        <div className={styles.right}>
-          <section aria-labelledby="profile-bag-heading">
-            <div className={styles.bagHeadingRow}>
-              <h2 id="profile-bag-heading" className={styles.settingsHeading}>
-                {t("bagHeading")}
-              </h2>
-              <Link href="/bag" className={styles.bagEditLink}>
-                {t("bagEditLink")}
-              </Link>
-            </div>
+      {/* PR1: the roll count as the board's boxed tile. Tấm ưng and oops
+          tiles wait for Phase 2 data and stay hidden rather than faked. */}
+      {summary ? (
+        <div className={styles.stats}>
+          <div className={styles.statTile} data-testid="profile-stat-rolls">
+            <span className={styles.statValue}>
+              <Icon name="roll" size={18} />
+              {summary.rollCount}
+            </span>
+            <span className={styles.statLabel}>{t("statRolls")}</span>
+          </div>
+        </div>
+      ) : null}
 
+      {/* PR3/PR4: "Túi của tôi" is real; recent keepers, share links and
+          delete account wait for their own tasks and stay hidden. */}
+      {summary && (summary.cameras.length > 0 || summary.stocks.length > 0) ? (
+        <section aria-labelledby="profile-bag-heading" className={styles.bag}>
+          <div className={styles.bagHeadingRow}>
+            <h2 id="profile-bag-heading" className={styles.settingsHeading}>
+              {t("bagHeading")}
+            </h2>
+            <Link href="/bag" className={styles.bagEditLink}>
+              {t("bagEditLink")}
+            </Link>
+          </div>
+
+          <div className={styles.bagGroups}>
             {summary.cameras.length > 0 ? (
-              <ul className={styles.bagCameraList}>
-                {summary.cameras.map((camera) => (
-                  <li key={camera.bagItemId} className={styles.bagCameraRow}>
-                    <Icon name="camera" size={16} />
-                    <span className={styles.bagCameraName}>
-                      {camera.brand} {camera.model}
-                    </span>
-                    <span className={styles.bagCameraCount}>
-                      {t("bagCameraRolls", { count: camera.rollsShot })}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <div className={styles.bagGroup}>
+                <span className={styles.bagGroupLabel}>{t("bagCamerasLabel", { count: summary.cameras.length })}</span>
+                <ul className={styles.bagCameraList}>
+                  {summary.cameras.map((camera) => (
+                    <li key={camera.bagItemId} className={styles.bagCameraRow}>
+                      <span className={styles.bagCameraIcon}>
+                        <Icon name="camera" size={18} />
+                      </span>
+                      <span className={styles.bagCameraName}>
+                        {camera.brand} {camera.model}
+                      </span>
+                      <span className={styles.bagCameraCount}>{t("bagCameraRolls", { count: camera.rollsShot })}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ) : null}
 
             {summary.stocks.length > 0 ? (
-              <ul className={styles.bagFilmSwatches} aria-label={t("bagFilmSwatchesLabel")}>
-                {summary.stocks.map((stock) => (
-                  <li
-                    key={stock.stockId}
-                    className={styles.bagFilmSwatch}
-                    style={{ "--rc-stock": `var(--stock-${stock.canisterColor ?? "gold"})` } as CSSProperties}
-                    title={`${stock.brand} ${stock.name}`}
-                  />
-                ))}
-              </ul>
+              <div className={styles.bagGroup}>
+                <span className={styles.bagGroupLabel}>{t("bagFilmsLabel", { count: summary.stocks.length })}</span>
+                <ul className={styles.bagFilmChips} aria-label={t("bagFilmSwatchesLabel")}>
+                  {summary.stocks.map((stock) => (
+                    <li key={stock.stockId} className={styles.bagFilmChip} title={`${stock.brand} ${stock.name}`}>
+                      <span
+                        className={styles.bagFilmCan}
+                        style={{ "--rc-stock": `var(--stock-${stock.canisterColor ?? "gold"})` } as CSSProperties}
+                        aria-hidden="true"
+                      />
+                      {stock.name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ) : null}
-          </section>
-        </div>
+          </div>
+        </section>
       ) : null}
+
+      <section aria-labelledby="profile-settings-heading" className={styles.settings}>
+        <h2 id="profile-settings-heading" className={styles.settingsHeading}>
+          {t("settingsHeading")}
+        </h2>
+        <div className={styles.setrow}>
+          <span>{t("themeLabel")}</span>
+          <ThemeSegmented />
+        </div>
+        <Link href="/profile/name" className={styles.setrow}>
+          <span>{t("editNameRow")}</span>
+          <span className={styles.setrowValue}>›</span>
+        </Link>
+        <div className={styles.signOutWrap}>
+          <form action={signOutAction}>
+            <Button type="submit" variant="outline" className={styles.signOutButton}>
+              {t("signOutButton")}
+            </Button>
+          </form>
+        </div>
+      </section>
     </div>
   );
 }

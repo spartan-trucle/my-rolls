@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/i18n/test-utils";
 
@@ -117,7 +117,9 @@ describe("ProfileContent", () => {
       />,
     );
 
-    expect(screen.getByText("7 cuộn")).toBeInTheDocument();
+    // Board: a boxed tile, roll icon + number, "cuộn" underneath — the number shown once.
+    const tile = screen.getByTestId("profile-stat-rolls");
+    expect(tile).toHaveTextContent(/^7cuộn$/);
   });
 
   it("PR3/PR4: shows 'Túi của tôi' with camera roll counts and a 'Sửa túi' link to /bag", () => {
@@ -137,9 +139,34 @@ describe("ProfileContent", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Túi của tôi" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Sửa túi ›" })).toHaveAttribute("href", "/bag");
+    expect(screen.getByRole("link", { name: "Sửa túi" })).toHaveAttribute("href", "/bag");
+    expect(screen.getByText("Máy ảnh · 1")).toBeInTheDocument();
     expect(screen.getByText("Pentax K1000")).toBeInTheDocument();
     expect(screen.getByText("3 cuộn")).toBeInTheDocument();
+    // Films as named chips, not bare colour dots.
+    expect(screen.getByText("Film · 1")).toBeInTheDocument();
+    expect(within(screen.getByRole("list", { name: "Film trong túi" })).getByText("Gold 200")).toBeInTheDocument();
+  });
+
+  it("puts 'Túi của tôi' before 'Cài đặt' (Profile board order)", () => {
+    renderWithIntl(
+      <ProfileContent
+        name="Trúc Lê"
+        email="truc@gmail.com"
+        image={null}
+        createdAt={CREATED_AT}
+        summary={{
+          rollCount: 5,
+          cameras: [{ bagItemId: "b1", brand: "Pentax", model: "K1000", rollsShot: 3 }],
+          stocks: [],
+          joinedAt: null,
+        }}
+      />,
+    );
+
+    const bag = screen.getByRole("heading", { name: "Túi của tôi" });
+    const settings = screen.getByRole("heading", { name: "Cài đặt" });
+    expect(bag.compareDocumentPosition(settings) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it("hides 'Túi của tôi' when the bag is empty, and stays hidden without a summary", () => {

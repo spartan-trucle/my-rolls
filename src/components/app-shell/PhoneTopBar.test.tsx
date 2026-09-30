@@ -29,4 +29,10 @@ describe("PhoneTopBar", () => {
     const { container } = render(<PhoneTopBar userInitial="T" />);
     expect(container).toBeEmptyDOMElement();
   });
+
+  it("renders nothing on /profile — the Profile board has its own 'Hồ sơ' header", () => {
+    usePathname.mockReturnValue("/profile");
+    const { container } = render(<PhoneTopBar userInitial="T" />);
+    expect(container).toBeEmptyDOMElement();
+  });
 });
