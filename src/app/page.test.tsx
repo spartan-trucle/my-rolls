@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+import { UploadProvider } from "@/features/uploads/client/UploadProvider";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import messages from "../../messages/vi.json";
 import type { IRollEntry } from "@/features/rolls/core";
@@ -36,7 +37,12 @@ vi.mock("next-intl/server", async () => {
 import Home, { generateMetadata } from "./page";
 
 function renderHome(ui: Awaited<ReturnType<typeof Home>>) {
-  return render(<NextIntlClientProvider locale="vi" messages={messages}>{ui}</NextIntlClientProvider>);
+  // The root layout provides the upload queue in the app (Phase 2 D16).
+  return render(
+    <NextIntlClientProvider locale="vi" messages={messages}>
+      <UploadProvider>{ui}</UploadProvider>
+    </NextIntlClientProvider>,
+  );
 }
 
 const signedInSession = {

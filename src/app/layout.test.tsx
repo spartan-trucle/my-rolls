@@ -26,7 +26,33 @@ describe("viewport", () => {
   });
 });
 
+import { isValidElement, type ReactElement, type ReactNode } from "react";
+import { UploadProvider } from "@/features/uploads/client/UploadProvider";
+
+/** Depth-first search of a rendered element tree for an element of `type`. */
+function findElement(node: ReactNode, type: unknown): ReactElement<{ children?: ReactNode }> | null {
+  if (!isValidElement<{ children?: ReactNode }>(node)) return null;
+  if (node.type === type) return node;
+  const children = node.props.children;
+  for (const child of Array.isArray(children) ? children : [children]) {
+    const found = findElement(child, type);
+    if (found) return found;
+  }
+  return null;
+}
+
 describe("RootLayout", () => {
+  it("wraps every page in one UploadProvider, so the queue survives Home ↔ roll navigation (Phase 2 D16)", async () => {
+    get.mockReturnValue(undefined);
+    const child = <div data-testid="page" />;
+
+    const element = await RootLayout({ children: child, params: Promise.resolve({}) });
+
+    const provider = findElement(element, UploadProvider);
+    expect(provider).not.toBeNull();
+    expect(findElement(provider!.props.children, "div")).toBe(child);
+  });
+
   it("sets no data-theme on <html> when the theme cookie is absent (follow the system)", async () => {
     get.mockReturnValue(undefined);
 

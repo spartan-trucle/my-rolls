@@ -2,7 +2,7 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithIntl as render } from "@/i18n/test-utils";
-import { useUploads } from "@/features/uploads/client/UploadProvider";
+import { UploadProvider, useUploads } from "@/features/uploads/client/UploadProvider";
 import { AppShell } from "./AppShell";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
@@ -10,9 +10,11 @@ vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
 describe("AppShell", () => {
   it("renders both the top nav and the bottom tabs, plus its children", () => {
     render(
-      <AppShell userInitial="T">
-        <p>Nội dung trang</p>
-      </AppShell>,
+      <UploadProvider>
+        <AppShell userInitial="T">
+          <p>Nội dung trang</p>
+        </AppShell>
+      </UploadProvider>,
     );
 
     expect(screen.getByText("Nội dung trang")).toBeInTheDocument();
@@ -24,15 +26,17 @@ describe("AppShell", () => {
     expect(screen.getAllByText("Cuộn").length).toBeGreaterThan(0);
   });
 
-  it("gives every page the upload queue, so a batch survives navigation (Phase 2 D16)", () => {
+  it("reads the upload queue from the root provider (Phase 2 D16)", () => {
     function Probe() {
       const { batches } = useUploads();
       return <p>{`uploads: ${batches.length}`}</p>;
     }
     render(
-      <AppShell userInitial="T">
-        <Probe />
-      </AppShell>,
+      <UploadProvider>
+        <AppShell userInitial="T">
+          <Probe />
+        </AppShell>
+      </UploadProvider>,
     );
     expect(screen.getByText("uploads: 0")).toBeInTheDocument();
   });
@@ -47,9 +51,11 @@ describe("AppShell", () => {
       );
     }
     render(
-      <AppShell userInitial="T">
-        <Starter />
-      </AppShell>,
+      <UploadProvider>
+        <AppShell userInitial="T">
+          <Starter />
+        </AppShell>
+      </UploadProvider>,
     );
     await userEvent.click(screen.getByRole("button", { name: "start" }));
     // jsdom has no Worker, so the copies fail and the tray settles on its failed state.

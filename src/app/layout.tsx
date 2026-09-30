@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
+import { UploadProvider } from "@/features/uploads/client/UploadProvider";
 import { themeCookieToDataTheme } from "@/lib/theme";
 import { fontVariables } from "./fonts";
 import "./globals.css";
@@ -26,7 +27,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="vi" className={fontVariables} data-theme={dataTheme} data-scroll-behavior="smooth">
       <body className="rc-paper min-h-dvh">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          {/* Phase 2 D16: one upload queue for the whole app. Home and the (app) pages each render
+              their own AppShell, so the provider lives here to survive navigating between them. */}
+          <UploadProvider>{children}</UploadProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

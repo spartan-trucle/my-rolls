@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import messages from "../../../messages/vi.json";
+import { UploadProvider } from "@/features/uploads/client/UploadProvider";
 
 const getSession = vi.hoisted(() => vi.fn());
 const redirect = vi.hoisted(() => vi.fn(() => { throw new Error("NEXT_REDIRECT"); }));
@@ -13,7 +14,12 @@ vi.mock("next/navigation", () => ({ redirect, usePathname: () => "/" }));
 import AppLayout from "./layout";
 
 function renderLayout(ui: Awaited<ReturnType<typeof AppLayout>>) {
-  return render(<NextIntlClientProvider locale="vi" messages={messages}>{ui}</NextIntlClientProvider>);
+  // The root layout provides the upload queue in the app (Phase 2 D16).
+  return render(
+    <NextIntlClientProvider locale="vi" messages={messages}>
+      <UploadProvider>{ui}</UploadProvider>
+    </NextIntlClientProvider>,
+  );
 }
 
 describe("(app) layout", () => {
