@@ -21,6 +21,9 @@ vi.mock("next/headers", () => ({
 vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
 
 vi.mock("@/features/rolls/actions", () => ({ listRolls }));
+vi.mock("@/features/uploads/components/RollUploadBadge", () => ({
+  RollUploadBadge: ({ rollId, frameCount }: { rollId: string; frameCount: number }) => <span>{`badge:${rollId}:${frameCount}`}</span>,
+}));
 
 // `getTranslations` needs Next's request scope; the real messages through next-intl's own translator stand in.
 vi.mock("next-intl/server", async () => {
@@ -118,6 +121,16 @@ describe("Home (/)", () => {
     // mapper folds it into the date it already renders.
     expect(screen.getByText(/12\.10\.25 · \+1/)).toBeInTheDocument();
     expect(screen.getByText(/12\.10\.25 · −⅓/)).toBeInTheDocument();
+  });
+
+  it("gives each roll card its upload badge with the frame count (Phase 2 HomeUploading)", async () => {
+    getSessionCookie.mockReturnValue("a-session-token");
+    getSession.mockResolvedValue(signedInSession);
+    listRolls.mockResolvedValue([makeRoll({ id: "roll-1", frameCount: 36 })]);
+
+    renderHome(await Home());
+
+    expect(screen.getByText("badge:roll-1:36")).toBeInTheDocument();
   });
 
   it("shows the empty state with a link to the first-roll onboarding when there are no rolls", async () => {

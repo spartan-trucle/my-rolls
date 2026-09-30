@@ -1,0 +1,15 @@
+/* Phone: above the bottom tabs. Desktop: bottom right (UploadTray board). */
+.tray { position: fixed; z-index: 40; left: var(--space-4); right: var(--space-4); bottom: calc(76px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: auto 1fr; gap: var(--space-3); align-items: center; min-height: 56px; padding: var(--space-3) var(--space-4); color: var(--ink); text-decoration: none; background: var(--paper-raised); border: 1.5px solid var(--ink); box-shadow: var(--shadow-lift); }
+.tray:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+.icon { display: grid; place-items: center; width: 32px; height: 32px; color: var(--on-cobalt); background: var(--cobalt); border-radius: var(--radius-pill); font-weight: 700; }
+.ok { background: var(--keeper); color: var(--on-keeper); }
+.bad { background: var(--pin); color: var(--on-pin); }
+.body { display: flex; flex-direction: column; gap: 4px; min-width: 0; font-size: var(--text-body-sm); line-height: var(--text-body-sm--line-height); font-weight: 600; }
+.meta { font-family: var(--font-mono); font-size: 11px; font-weight: 400; letter-spacing: 0.06em; color: var(--ink-muted); }
+.err { color: var(--pin); }
+.bar { display: block; height: 4px; background: var(--line); overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--cobalt); }
+
+@media (min-width: 1024px) {
+  .tray { left: auto; right: var(--space-6); bottom: var(--space-6); width: 360px; }
+}

@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithIntl as render } from "@/i18n/test-utils";
 import { useUploads } from "@/features/uploads/client/UploadProvider";
@@ -34,5 +35,24 @@ describe("AppShell", () => {
       </AppShell>,
     );
     expect(screen.getByText("uploads: 0")).toBeInTheDocument();
+  });
+
+  it("shows the upload tray on every page once a batch starts (Phase 2 D16)", async () => {
+    function Starter() {
+      const { start } = useUploads();
+      return (
+        <button type="button" onClick={() => start("r1", [new File(["x"], "1.jpg", { type: "image/jpeg" })], 1, "Cuộn #16")}>
+          start
+        </button>
+      );
+    }
+    render(
+      <AppShell userInitial="T">
+        <Starter />
+      </AppShell>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "start" }));
+    // jsdom has no Worker, so the copies fail and the tray settles on its failed state.
+    expect(await screen.findByRole("link", { name: /0\/1 xong · 1 tấm lỗi/ })).toHaveAttribute("href", "/rolls/r1?upload=1");
   });
 });

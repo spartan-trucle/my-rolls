@@ -30,11 +30,15 @@ export interface IUploadFile {
   /** 0..1, for the progress bar. */
   progress: number;
   error?: TUploadError;
+  /** An object URL of the 480 px copy, once made, for the list's thumbnail. Never the original. */
+  thumbUrl?: string;
 }
 
 export interface IUploadBatch {
   id: string;
   rollId: string;
+  /** "Cuộn #16", for the tray. */
+  rollLabel?: string;
   startedAt: number;
   files: IUploadFile[];
 }
@@ -91,6 +95,15 @@ interface IEntry {
   prepared?: IPreparedFile;
   slot?: ISlotResponse["slots"][number];
   requesting?: boolean;
+}
+
+/** A thumbnail is a nicety: if the platform can't make an object URL, the row shows a blank tile. */
+function thumbnailUrl(blob: Blob): string | undefined {
+  try {
+    return URL.createObjectURL(blob);
+  } catch {
+    return undefined;
+  }
 }
 
 let nextId = 0;
@@ -160,7 +173,7 @@ export function createUploadQueue(deps: IUploadDeps, onChange: (state: IUploadQu
     run(async () => {
       try {
         entry.prepared = await deps.makeCopies(entry.file);
-        update(entry, { status: "queued" });
+        update(entry, { status: "queued", thumbUrl: thumbnailUrl(entry.prepared.grid) });
       } catch (err) {
         fail(entry, "copies", err);
       }
@@ -261,10 +274,10 @@ export function createUploadQueue(deps: IUploadDeps, onChange: (state: IUploadQu
 
   return {
     /** Starts a batch for one roll. `startPosition` is the next frame number on that roll. */
-    start(rollId: string, files: File[], startPosition: number): string {
+    start(rollId: string, files: File[], startPosition: number, rollLabel?: string): string {
       const batchId = newId("batch");
       const { accepted, rejected } = validateFiles(files);
-      const batch: IUploadBatch = { id: batchId, rollId, startedAt: deps.now(), files: [] };
+      const batch: IUploadBatch = { id: batchId, rollId, rollLabel, startedAt: deps.now(), files: [] };
       batches.push(batch);
 
       orderByFileName(accepted).forEach((file, i) => {

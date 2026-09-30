@@ -5,12 +5,15 @@ import { Canister } from "@/components/canister/Canister";
 import { cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
 import type { IRollEntry } from "@/features/rolls/core";
 import { formatRollDate } from "@/features/rolls/format-date";
+import { RollUploadSection } from "@/features/uploads/components/RollUploadSection";
 import styles from "./RollPage.module.css";
 
 export interface RollPageProps {
   roll: IRollEntry;
   /** R1: the "Đã lên kệ." banner shows only right after saving (`?saved=1`), not on every later visit. */
   justSaved?: boolean;
+  /** The upload tray links here with `?upload=1` to reopen the upload list (Phase 2 D16). */
+  openUpload?: boolean;
 }
 
 function DetailRow({ label, value }: { label: string; value: string | null }) {
@@ -35,7 +38,7 @@ function joinMeta(parts: Array<string | false | null | undefined>): string | nul
  * (SCAN-1). `getRollPageContent` (the page itself) already 404s a missing
  * or another user's roll; this only renders one that was found.
  */
-export async function RollPage({ roll, justSaved = false }: RollPageProps) {
+export async function RollPage({ roll, justSaved = false, openUpload = false }: RollPageProps) {
   const t = await getTranslations("rolls.page");
   const tTypes = await getTranslations("catalogue.types");
 
@@ -120,9 +123,11 @@ export async function RollPage({ roll, justSaved = false }: RollPageProps) {
           </div>
 
           <div className={styles.stamps}>
-            <Stamp tone="ink" icon="upload" label={t("waitingScan")}>
-              {t("waitingScan")}
-            </Stamp>
+            {(roll.frameCount ?? 0) === 0 ? (
+              <Stamp tone="ink" icon="upload" label={t("waitingScan")}>
+                {t("waitingScan")}
+              </Stamp>
+            ) : null}
             {roll.pushPull && roll.pushPull !== "0" ? (
               <Stamp>{t(roll.pushPull.startsWith("−") ? "pushPullStampPull" : "pushPullStampPush", { pp: roll.pushPull })}</Stamp>
             ) : null}
@@ -171,11 +176,12 @@ export async function RollPage({ roll, justSaved = false }: RollPageProps) {
             <h2 id="roll-scan-heading" className={styles.sectionHeading}>
               {t("scanHeading")}
             </h2>
-            <div className={styles.scanPlaceholder}>
-              <Icon name="upload" size={28} />
-              <p className={styles.scanTitle}>{t("scanComingSoon")}</p>
-              <p className={styles.scanBody}>{t("scanComingSoonBody")}</p>
-            </div>
+            <RollUploadSection
+              rollId={roll.id}
+              rollLabel={numberedTitle ?? title}
+              frameCount={roll.frameCount ?? 0}
+              initialOpen={openUpload}
+            />
           </section>
         </div>
       </div>

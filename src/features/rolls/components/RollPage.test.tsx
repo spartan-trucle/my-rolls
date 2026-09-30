@@ -12,6 +12,12 @@ vi.mock("next-intl/server", async () => {
   };
 });
 
+vi.mock("@/features/uploads/components/RollUploadSection", () => ({
+  RollUploadSection: (props: { rollId: string; rollLabel: string; frameCount: number; initialOpen?: boolean }) => (
+    <div data-testid="upload-section">{`${props.rollId}|${props.rollLabel}|${props.frameCount}|${String(props.initialOpen)}`}</div>
+  ),
+}));
+
 import { RollPage } from "./RollPage";
 
 function makeRoll(overrides: Partial<IRollEntry>): IRollEntry {
@@ -46,7 +52,13 @@ describe("RollPage", () => {
     expect(screen.getByText("Kodak Gold 200 · Màu âm")).toBeInTheDocument();
     expect(screen.getByText("Pentax K1000 · Máy cơ SLR")).toBeInTheDocument();
     expect(screen.getAllByText("Chờ scan").length).toBeGreaterThan(0);
-    expect(screen.getByText("Sắp có")).toBeInTheDocument();
+  });
+
+  it("mounts the upload section for this roll, numbered after its frames (Phase 2 F1)", async () => {
+    render(await RollPage({ roll: makeRoll({ name: null, number: 16, frameCount: 12 }), openUpload: true }));
+    expect(screen.getByTestId("upload-section")).toHaveTextContent(`${makeRoll({}).id}|Cuộn #16|12|true`);
+    expect(screen.queryByText("Sắp có")).not.toBeInTheDocument();
+    expect(screen.queryAllByText("Chờ scan")).toHaveLength(0);
   });
 
   it("R2/N1: an unnamed roll shows 'Cuộn #N' as its title and offers to name it", async () => {

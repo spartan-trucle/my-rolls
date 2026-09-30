@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { UploadProvider } from "@/features/uploads/client/UploadProvider";
+import { ShellUploadTray } from "@/features/uploads/components/ShellUploadTray";
 import { BottomTabs } from "./BottomTabs";
 import styles from "./AppShell.module.css";
 import { PhoneTopBar } from "./PhoneTopBar";
@@ -28,6 +29,7 @@ export function AppShell({ children, userInitial }: AppShellProps) {
         <main className={styles.content}>{children}</main>
         <BottomTabs userInitial={userInitial} className={styles.bottomTabs} />
       </div>
+      <ShellUploadTray />
     </UploadProvider>
   );
 }

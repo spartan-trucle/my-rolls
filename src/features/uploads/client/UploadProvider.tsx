@@ -8,7 +8,7 @@ import { makeCopiesInWorker } from "./worker-client";
 
 interface IUploadsContext {
   batches: IUploadBatch[];
-  start: (rollId: string, files: File[], startPosition: number) => string;
+  start: (rollId: string, files: File[], startPosition: number, rollLabel?: string) => string;
   retry: (fileId: string) => void;
   retryAll: (batchId: string) => void;
 }
@@ -47,7 +47,7 @@ export function UploadProvider({ children, deps }: { children: ReactNode; deps?:
   const value = useMemo<IUploadsContext>(
     () => ({
       batches,
-      start: (rollId, files, startPosition) => queue.start(rollId, files, startPosition),
+      start: (rollId, files, startPosition, rollLabel) => queue.start(rollId, files, startPosition, rollLabel),
       retry: (fileId) => queue.retry(fileId),
       retryAll: (batchId) => queue.retryAll(batchId),
     }),

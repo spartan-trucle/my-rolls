@@ -24,5 +24,5 @@ export default async function RollDetailPage({ params, searchParams }: PageProps
   const query = await searchParams;
   const justSaved = query.saved === "1";
 
-  return <RollPage roll={roll} justSaved={justSaved} />;
+  return <RollPage roll={roll} justSaved={justSaved} openUpload={query.upload === "1"} />;
 }
