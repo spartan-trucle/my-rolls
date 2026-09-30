@@ -39,7 +39,9 @@ export async function cleanupPendingFramesCore<TQueryResult extends PgQueryResul
 
   await deps.deleteObjects({ bucket: "originals", keys: stale.map((f) => f.originalKey) });
   await deps.deleteObjects({ bucket: "public", keys: stale.flatMap((f) => [f.gridKey, f.viewKey]) });
-  await db.delete(frame).where(inArray(frame.id, stale.map((f) => f.id)));
+  // Review #8: only rows still pending. Confirm refuses frames older than 23 h, so this is a
+  // second guard for a row confirmed while the objects were being deleted.
+  await db.delete(frame).where(and(inArray(frame.id, stale.map((f) => f.id)), eq(frame.status, "pending")));
 
   return { deleted: stale.length };
 }

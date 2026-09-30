@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { eq } from "drizzle-orm";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { frame } from "@/db/schema";
 import { createTestDb, type TTestDb } from "@/db/test-db";
@@ -74,6 +75,17 @@ describe("cleanupPendingFramesCore (D17)", () => {
 
     expect(await cleanupPendingFramesCore(db, { now: NOW, deleteObjects })).toEqual({ deleted: 500 });
     expect(await db.select().from(frame)).toHaveLength(100);
+  });
+
+  it("never deletes a row that became ready while the cleanup ran (review #8)", async () => {
+    const db = await freshDb();
+    const [stale] = await seed(db, [{ status: "pending", age: 30 }]);
+    // The frame is confirmed between the cleanup's select and its row delete.
+    const deleteObjects = vi.fn(async () => {
+      await db.update(frame).set({ status: "ready" }).where(eq(frame.id, stale.id));
+    });
+    await cleanupPendingFramesCore(db, { now: NOW, deleteObjects });
+    expect(await db.select().from(frame)).toHaveLength(1);
   });
 
   it("deletes no rows when R2 fails, so no row is left pointing at a missing object", async () => {

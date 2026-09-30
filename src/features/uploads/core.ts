@@ -2,12 +2,16 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import { and, eq, inArray, isNull, max } from "drizzle-orm";
+
 import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { frame, roll, scanSet } from "@/db/schema";
 import type { TDb } from "@/features/shared/db";
 import type { TR2Bucket } from "@/lib/r2";
 import { ALLOWED_UPLOAD_TYPES, MAX_UPLOAD_BYTES } from "./limits";
+
+/** Review #8: a pending frame older than this can't be confirmed; the cleanup deletes at 24 h. */
+export const CONFIRM_CUTOFF_MS = 23 * 60 * 60 * 1000;
 
 /** D15: the browser asks for slots 12 files at a time. */
 export const MAX_FILES_PER_SLOT_REQUEST = 12;
@@ -200,6 +204,7 @@ export async function confirmFramesCore<TQueryResult extends PgQueryResultHKT>(
   const checked = await Promise.all(
     rows.map(async (row) => {
       if (row.status === "ready") return { id: row.id, ok: true };
+      if (Date.now() - row.createdAt.getTime() > CONFIRM_CUTOFF_MS) return { id: row.id, ok: false };
       const [original, grid, view] = await Promise.all([
         deps.head({ bucket: "originals", key: row.originalKey }),
         deps.head({ bucket: "public", key: row.gridKey }),

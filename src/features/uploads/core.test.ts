@@ -180,6 +180,16 @@ describe("confirmFramesCore", () => {
     expect(rows.every((r) => r.status === "pending")).toBe(true);
   });
 
+  it("refuses to confirm a frame pending for more than 23 h, so it can't race the 24 h cleanup (review #8)", async () => {
+    const { db, rollId } = await setup();
+    const [one] = await withSlots(db, rollId, 1);
+    await db.update(frame).set({ createdAt: new Date(Date.now() - 23.5 * 3_600_000) }).where(eq(frame.id, one.id));
+    const head = vi.fn(async ({ key }: { bucket: string; key: string }) => ({ contentLength: key === one.originalKey ? one.bytes : 10 }));
+    expect(await confirmFramesCore(db, USER, [one.id], { head })).toEqual({ ready: [], missing: [one.id] });
+    const [row] = await db.select().from(frame).where(eq(frame.id, one.id));
+    expect(row.status).toBe("pending");
+  });
+
   it("ignores another user's frame ids without listing them", async () => {
     const { db, rollId } = await setup();
     const [one] = await withSlots(db, rollId, 1);
