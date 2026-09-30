@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { saveNoteAction } from "../actions";
 import type { IRollNote } from "../core";
 import { formatNoteDate } from "./format";
@@ -13,14 +13,23 @@ export function FrameNotes({ rollId, frameId, notes: initial }: { rollId: string
   const [notes, setNotes] = useState(initial);
   const [draft, setDraft] = useState("");
 
+  const saving = useRef(false);
+
+  // Review #7: Enter and the blur that follows both call this; only one save may be in flight,
+  // and the draft clears before the await so the second call sees nothing to save.
   const add = async () => {
     const body = draft.trim();
-    if (!body) return;
-    const result = await saveNoteAction({ rollId, frameId, body }).catch(() => ({ ok: false as const }));
-    if (!result.ok) return;
-    const now = new Date();
-    setNotes([{ id: result.id, body, frameId, framePosition: null, createdAt: now, updatedAt: now }, ...notes]);
+    if (!body || saving.current) return;
+    saving.current = true;
     setDraft("");
+    const result = await saveNoteAction({ rollId, frameId, body }).catch(() => ({ ok: false as const }));
+    saving.current = false;
+    if (!result.ok) {
+      setDraft(body);
+      return;
+    }
+    const now = new Date();
+    setNotes((all) => [{ id: result.id, body, frameId, framePosition: null, createdAt: now, updatedAt: now }, ...all]);
   };
 
   return (

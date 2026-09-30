@@ -26,4 +26,17 @@ describe("FrameNotes (FrameView's notes)", () => {
     expect(await screen.findByText("lọt sáng góc phải")).toBeInTheDocument();
     expect(input).toHaveValue("");
   });
+
+  it("saves once when Enter is followed by a blur before the save returns (review #7)", async () => {
+    let finish: (v: unknown) => void = () => {};
+    saveNoteAction.mockReset();
+    saveNoteAction.mockImplementation(() => new Promise((r) => (finish = r)));
+    render(<FrameNotes rollId="r1" frameId="f5" notes={[]} />);
+    const input = screen.getByLabelText("Thêm ghi chú cho tấm này");
+    await userEvent.type(input, "lọt sáng{Enter}");
+    await userEvent.tab();
+    finish({ ok: true, id: "n3", updatedAt: new Date(), deleted: false });
+    expect(await screen.findByText("lọt sáng")).toBeInTheDocument();
+    expect(saveNoteAction).toHaveBeenCalledTimes(1);
+  });
 });
