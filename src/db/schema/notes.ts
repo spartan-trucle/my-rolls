@@ -1,5 +1,8 @@
 import { sql } from "drizzle-orm";
 import { index, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { MISTAKE_TYPES } from "@/features/mistakes/types";
+
+export { MISTAKE_TYPES, type TMistakeType } from "@/features/mistakes/types";
 
 /**
  * Phase 2 plan D6 (NOTE-1): several timestamped notes per roll or frame. `frame_id` null =
@@ -25,23 +28,6 @@ export const note = pgTable(
   ],
 );
 
-/** NOTE-2's 13 mistake types, in the requirement's order. Vietnamese labels: `mistakes.types.<slug>`. */
-export const MISTAKE_TYPES = [
-  "light_leak",
-  "blank_frame",
-  "double_exposure",
-  "missed_focus",
-  "underexposed",
-  "overexposed",
-  "wrong_iso",
-  "camera_shake",
-  "opened_back",
-  "rewound_early",
-  "lab_dust_scratches",
-  "lab_colour_cast",
-  "other",
-] as const;
-export type TMistakeType = (typeof MISTAKE_TYPES)[number];
 
 /**
  * Phase 2 plan D4, D5 (NOTE-2, Known conflict #4): one row per mistake type on a frame, or on

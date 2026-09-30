@@ -7,6 +7,9 @@ import type { IRollEntry } from "@/features/rolls/core";
 import { formatRollDate } from "@/features/rolls/format-date";
 import { FrameGrid } from "@/features/frames/components/FrameGrid";
 import type { IRollFrame } from "@/features/frames/core";
+import type { IRollMistake } from "@/features/mistakes/core";
+import type { IRollNote } from "@/features/notes/core";
+import { formatNoteDate } from "@/features/notes/components/format";
 import { RollScans } from "@/features/scan-sets/components/RollScans";
 import type { IScanSetSummary } from "@/features/scan-sets/core";
 import { pushPullStops } from "@/features/rolls/push-pull";
@@ -22,6 +25,10 @@ export interface RollPageProps {
   scanSet?: IScanSetSummary | null;
   /** Ready frames by position (SCAN-4), empty before the first upload. */
   frames?: IRollFrame[];
+  /** The roll's notes, newest first (NOTE-1). */
+  notes?: IRollNote[];
+  /** The roll's live mistakes (NOTE-2); roll-level ones are stamped on the header. */
+  mistakes?: IRollMistake[];
 }
 
 function DetailRow({ label, value }: { label: string; value: string | null }) {
@@ -46,10 +53,13 @@ function joinMeta(parts: Array<string | false | null | undefined>): string | nul
  * (SCAN-1). `getRollPageContent` (the page itself) already 404s a missing
  * or another user's roll; this only renders one that was found.
  */
-export async function RollPage({ roll, justSaved = false, openUpload = false, scanSet = null, frames = [] }: RollPageProps) {
+export async function RollPage({ roll, justSaved = false, openUpload = false, scanSet = null, frames = [], notes = [], mistakes = [] }: RollPageProps) {
   const t = await getTranslations("rolls.page");
   const tTypes = await getTranslations("catalogue.types");
   const tFrames = await getTranslations("frames");
+  const tNotes = await getTranslations("notes");
+  const tMistakes = await getTranslations("mistakes");
+  const rollMistakes = mistakes.filter((m) => m.frameId === null);
   const keeperCount = frames.filter((f) => f.isKeeper).length;
   const oopsCount = frames.filter((f) => f.isOops).length;
 
@@ -149,6 +159,11 @@ export async function RollPage({ roll, justSaved = false, openUpload = false, sc
                 {keeperCount}
               </Stamp>
             ) : null}
+            {rollMistakes.map((m) => (
+              <Stamp key={m.id} tone="oops" icon="oops" label={tMistakes(`types.${m.type}`)}>
+                {tMistakes(`types.${m.type}`)}
+              </Stamp>
+            ))}
             {oopsCount > 0 ? (
               <Stamp tone="oops" icon="oops" label={tFrames("stampOops", { count: oopsCount })}>
                 {oopsCount}
@@ -212,6 +227,35 @@ export async function RollPage({ roll, justSaved = false, openUpload = false, sc
               <FrameGrid rollId={roll.id} frames={frames} />
             </section>
           ) : null}
+
+          <section aria-labelledby="roll-memory-heading" className={`${styles.section} ${styles.notes}`}>
+            <div className={styles.sectionHead}>
+              <h2 id="roll-memory-heading" className={styles.sectionHeading}>
+                {tNotes("memoryHeading")}
+              </h2>
+              <Link href={`/rolls/${roll.id}/notes`} className={styles.sectionLink}>
+                {tNotes("previewEdit")}
+              </Link>
+            </div>
+            <p className={styles.memory}>{roll.memory ?? tNotes("previewMemoryEmpty")}</p>
+          </section>
+
+          <section aria-labelledby="roll-notes-heading" className={`${styles.section} ${styles.notes}`}>
+            <div className={styles.sectionHead}>
+              <h2 id="roll-notes-heading" className={styles.sectionHeading}>
+                {tNotes("notesHeading", { count: notes.length })}
+              </h2>
+              <Link href={`/rolls/${roll.id}/notes`} className={styles.sectionLink}>
+                {tNotes("previewAdd")}
+              </Link>
+            </div>
+            {notes.slice(0, 3).map((n) => (
+              <div key={n.id} className={styles.notePreview}>
+                <p>{n.body}</p>
+                <span>{formatNoteDate(n.createdAt)}</span>
+              </div>
+            ))}
+          </section>
 
           <section aria-labelledby="roll-scan-heading" className={`${styles.section} ${styles.scan}`}>
             <h2 id="roll-scan-heading" className={styles.sectionHeading}>

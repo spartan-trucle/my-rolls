@@ -3,6 +3,10 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { listRollFramesAction } from "@/features/frames/actions";
 import { FrameView } from "@/features/frames/components/FrameView";
+import { listRollMistakesAction } from "@/features/mistakes/actions";
+import { OopsControl } from "@/features/mistakes/components/OopsControl";
+import { listRollNotesAction } from "@/features/notes/actions";
+import { FrameNotes } from "@/features/notes/components/FrameNotes";
 import { getRoll } from "@/features/rolls/actions";
 
 export const metadata: Metadata = {
@@ -22,5 +26,17 @@ export default async function FramePage({ params }: PageProps<"/rolls/[id]/frame
   const t = await getTranslations("rolls.page");
   const rollLabel = roll.name ?? (roll.number != null ? t("titleFallback", { number: roll.number }) : t("detailFilm"));
 
-  return <FrameView rollId={roll.id} rollLabel={rollLabel} frames={frames} index={index} />;
+  const frame = frames[index];
+  const [mistakes, notes] = await Promise.all([listRollMistakesAction(roll.id), listRollNotesAction(roll.id)]);
+
+  return (
+    <FrameView
+      rollId={roll.id}
+      rollLabel={rollLabel}
+      frames={frames}
+      index={index}
+      oopsSlot={<OopsControl rollId={roll.id} frameId={frame.id} framePosition={frame.position} mistakes={mistakes} />}
+      notesSlot={<FrameNotes key={frame.id} rollId={roll.id} frameId={frame.id} notes={notes.filter((n) => n.frameId === frame.id)} />}
+    />
+  );
 }

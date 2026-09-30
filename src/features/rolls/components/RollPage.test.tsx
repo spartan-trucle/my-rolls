@@ -7,7 +7,7 @@ import type { IRollEntry } from "@/features/rolls/core";
 vi.mock("next-intl/server", async () => {
   const { createTranslator } = await import("next-intl");
   return {
-    getTranslations: async (namespace: "rolls.page" | "catalogue.types" | "frames") =>
+    getTranslations: async (namespace: "rolls.page" | "catalogue.types" | "frames" | "notes" | "mistakes") =>
       createTranslator({ locale: "vi", messages, namespace }),
   };
 });
@@ -89,6 +89,27 @@ describe("RollPage", () => {
     expect(screen.getByText("3 tấm")).toBeInTheDocument();
     expect(screen.getByLabelText("2 tấm ưng")).toBeInTheDocument();
     expect(screen.getByLabelText("1 oops")).toBeInTheDocument();
+  });
+
+  it("previews the memory and the latest notes, linking to the notes page (NOTE-1)", async () => {
+    const notes = [
+      { id: "n1", body: "đo sáng vùng tối", frameId: null, framePosition: null, createdAt: new Date("2026-10-12T03:00:00Z"), updatedAt: new Date() },
+    ];
+    render(await RollPage({ roll: makeRoll({ memory: "Đi Đà Lạt với nhóm bạn" }), notes: notes as never }));
+    expect(screen.getByText("Đi Đà Lạt với nhóm bạn")).toBeInTheDocument();
+    expect(screen.getByText("đo sáng vùng tối")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Ghi chú · 1" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "+ Thêm ghi chú" })).toHaveAttribute("href", `/rolls/${makeRoll({}).id}/notes`);
+  });
+
+  it("stamps roll-level mistakes on the header (NOTE-2)", async () => {
+    const mistakes = [
+      { id: "m1", frameId: null, type: "wrong_iso", note: null },
+      { id: "m2", frameId: "f1", type: "light_leak", note: null },
+    ];
+    render(await RollPage({ roll: makeRoll({}), mistakes: mistakes as never }));
+    expect(screen.getByText("Sai ISO")).toBeInTheDocument();
+    expect(screen.queryByText("Lọt sáng")).not.toBeInTheDocument();
   });
 
   it("has no frames section before any scans", async () => {

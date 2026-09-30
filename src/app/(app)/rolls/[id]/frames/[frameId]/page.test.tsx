@@ -14,6 +14,12 @@ vi.mock("@/features/rolls/actions", () => ({ getRoll }));
 vi.mock("@/features/frames/actions", () => ({ listRollFramesAction }));
 vi.mock("next/navigation", () => ({ notFound }));
 vi.mock("@/features/frames/components/FrameView", () => ({ FrameView }));
+const listRollMistakesAction = vi.hoisted(() => vi.fn().mockResolvedValue([]));
+const listRollNotesAction = vi.hoisted(() => vi.fn().mockResolvedValue([]));
+vi.mock("@/features/mistakes/actions", () => ({ listRollMistakesAction }));
+vi.mock("@/features/notes/actions", () => ({ listRollNotesAction }));
+vi.mock("@/features/mistakes/components/OopsControl", () => ({ OopsControl: () => null }));
+vi.mock("@/features/notes/components/FrameNotes", () => ({ FrameNotes: () => null }));
 vi.mock("next-intl/server", () => ({
   getTranslations: async () => (key: string, values?: { number?: number }) => (key === "titleFallback" ? `Cuộn #${values?.number}` : key),
 }));
@@ -29,6 +35,16 @@ describe("FramePage", () => {
     render(await FramePage(params("f2")));
     expect(listRollFramesAction).toHaveBeenCalledWith("r1");
     expect(screen.getByTestId("frame-view")).toHaveTextContent("1|Cuộn #16");
+  });
+
+  it("fills the oops and notes slots with this frame's data (Phase 2 F4)", async () => {
+    getRoll.mockResolvedValue({ id: "r1", name: null, number: 16 });
+    listRollFramesAction.mockResolvedValue([{ id: "f1", position: 1 }]);
+    listRollNotesAction.mockResolvedValue([{ id: "n1", frameId: "f1" }, { id: "n2", frameId: null }]);
+    render(await FramePage(params("f1")));
+    const props = FrameView.mock.lastCall?.[0] as { oopsSlot?: { props: Record<string, unknown> }; notesSlot?: { props: Record<string, unknown> } };
+    expect(props.oopsSlot?.props).toMatchObject({ rollId: "r1", frameId: "f1", framePosition: 1 });
+    expect(props.notesSlot?.props).toMatchObject({ frameId: "f1", notes: [{ id: "n1", frameId: "f1" }] });
   });
 
   it("404s for a frame not on this roll, or a roll that isn't the caller's", async () => {

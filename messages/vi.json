@@ -450,7 +450,8 @@
     "expiryLabel": "Năm hết hạn",
     "expirySave": "Lưu",
     "expiryClear": "Bỏ hạn dùng",
-    "expiryCancel": "Huỷ"
+    "expiryCancel": "Huỷ",
+    "cameraMistake": "{count} lần {type}"
   },
   "rolls": {
     "form": {
@@ -614,7 +615,21 @@
       "lab_dust_scratches": "Lab: bụi & xước",
       "lab_colour_cast": "Lab: ám màu",
       "other": "Khác"
-    }
+    },
+    "title": "Oops · {scope}",
+    "scopeFrame": "Tấm này",
+    "scopeRoll": "Cả cuộn",
+    "scopeGroup": "Gắn cho",
+    "frameScope": "Tấm {n}",
+    "legend": "Chọn một hay nhiều lỗi",
+    "noteLabel": "Ghi chú · {type}",
+    "notePlaceholder": "ở đâu trên tấm, vì sao…",
+    "save": "Lưu · giữ tấm này trong cuộn",
+    "clear": "Bỏ đánh dấu oops",
+    "close": "Đóng",
+    "open": "Oops?",
+    "saveFailed": "Chưa lưu được, thử lại nhé.",
+    "stamp": "{type}"
   },
   "uploads": {
     "totals": "{done}/{total} XONG · {moving} ĐANG TẢI · {waiting} CHỜ",
@@ -744,5 +759,28 @@
     "stampFrames": "{count} tấm",
     "stampKeepers": "{count} tấm ưng",
     "stampOops": "{count} oops"
+  },
+  "notes": {
+    "pageTitle": "Ghi chú & kỷ niệm",
+    "back": "‹ {roll}",
+    "memoryHeading": "Kỷ niệm",
+    "memoryLabel": "Kỷ niệm của cuộn này",
+    "memoryHint": "Ở đâu, với ai, chuyện gì đã xảy ra. Tự lưu khi bạn gõ.",
+    "saving": "Đang lưu…",
+    "savedAt": "Đã lưu {time}",
+    "failed": "Chưa lưu, thử lại",
+    "notesHeading": "Ghi chú · {count}",
+    "frameLink": "Tấm {n} ›",
+    "edit": "Sửa ghi chú: {text}",
+    "editLabel": "Sửa ghi chú",
+    "delete": "Xoá ghi chú: {text}",
+    "newLabel": "Ghi chú mới",
+    "newPlaceholder": "Thêm ghi chú…",
+    "add": "Lưu ghi chú",
+    "frameNotesHeading": "Ghi chú tấm này",
+    "frameNotePlaceholder": "Thêm ghi chú cho tấm này",
+    "previewEdit": "Sửa",
+    "previewAdd": "+ Thêm ghi chú",
+    "previewMemoryEmpty": "Chưa có kỷ niệm. ở đâu, với ai?"
   }
 }

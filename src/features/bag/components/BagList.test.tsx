@@ -244,6 +244,17 @@ describe("BagList", () => {
     expect(screen.getAllByText("Chưa chụp cuộn nào")).toHaveLength(2); // neither stock has any rolls shot
   });
 
+  it("BAG-3 (Phase 2 D25): a camera shows its most frequent mistake next to its roll count", () => {
+    setup([{ ...cameraEntry(), rollsShot: 12, topMistake: { type: "light_leak", count: 2 } }]);
+    expect(screen.getByText("12 cuộn · 2 lần lọt sáng")).toBeInTheDocument();
+  });
+
+  it("BAG-3: no mistake line for a camera with none", () => {
+    setup([{ ...cameraEntry(), rollsShot: 4, topMistake: null }]);
+    expect(screen.getByText("4 cuộn")).toBeInTheDocument();
+    expect(screen.queryByText(/lần/)).not.toBeInTheDocument();
+  });
+
   it("BAG-2 (owner 28.09.2026): the row has an edit button, no inline −/+; the dialog saves the new count", async () => {
     setStockQty.mockResolvedValue({ ok: true, qty: 3 });
     const { user } = setup([{ ...stockEntry(), qty: 1 }]);

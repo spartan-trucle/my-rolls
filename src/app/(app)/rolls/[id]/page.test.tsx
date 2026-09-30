@@ -12,6 +12,8 @@ vi.mock("@/features/rolls/components/RollPage", () => ({ RollPage }));
 vi.mock("@/features/scan-sets/actions", () => ({ getScanSetForRollAction }));
 const listRollFramesAction = vi.hoisted(() => vi.fn().mockResolvedValue([]));
 vi.mock("@/features/frames/actions", () => ({ listRollFramesAction }));
+vi.mock("@/features/notes/actions", () => ({ listRollNotesAction: vi.fn().mockResolvedValue([]) }));
+vi.mock("@/features/mistakes/actions", () => ({ listRollMistakesAction: vi.fn().mockResolvedValue([]) }));
 
 import RollDetailPage from "./page";
 

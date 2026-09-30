@@ -258,3 +258,10 @@
 .sectionHead { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4); }
 .sectionLink { color: var(--cobalt); font-weight: 600; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
 .sectionHint { margin: 0 0 var(--space-3); color: var(--ink-muted); font-size: var(--text-body-sm); line-height: var(--text-body-sm--line-height); }
+
+/* Phase 2 F4: memory and notes previews (RollFrames board). */
+.notes { grid-column: 1 / -1; }
+.memory { margin: 0; font-family: var(--font-hand); font-size: var(--text-note-sm); line-height: var(--text-note-sm--line-height); white-space: pre-line; }
+.notePreview { display: flex; justify-content: space-between; gap: var(--space-3); align-items: baseline; padding: var(--space-2) 0; border-bottom: 1px solid var(--line); }
+.notePreview p { margin: 0; }
+.notePreview span { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--ink-muted); }
