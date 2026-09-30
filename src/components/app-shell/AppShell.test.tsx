@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithIntl as render } from "@/i18n/test-utils";
+import { useUploads } from "@/features/uploads/client/UploadProvider";
 import { AppShell } from "./AppShell";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
@@ -20,5 +21,18 @@ describe("AppShell", () => {
     // Both TopNav (desktop) and PhoneTopBar (G1) render the wordmark; CSS
     // breakpoints (untestable in jsdom) decide which is visible.
     expect(screen.getAllByText("Cuộn").length).toBeGreaterThan(0);
+  });
+
+  it("gives every page the upload queue, so a batch survives navigation (Phase 2 D16)", () => {
+    function Probe() {
+      const { batches } = useUploads();
+      return <p>{`uploads: ${batches.length}`}</p>;
+    }
+    render(
+      <AppShell userInitial="T">
+        <Probe />
+      </AppShell>,
+    );
+    expect(screen.getByText("uploads: 0")).toBeInTheDocument();
   });
 });
