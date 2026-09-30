@@ -12,9 +12,16 @@ vi.mock("next-intl/server", async () => {
   };
 });
 
-vi.mock("@/features/uploads/components/RollUploadSection", () => ({
-  RollUploadSection: (props: { rollId: string; rollLabel: string; frameCount: number; initialOpen?: boolean }) => (
-    <div data-testid="upload-section">{`${props.rollId}|${props.rollLabel}|${props.frameCount}|${String(props.initialOpen)}`}</div>
+vi.mock("@/features/scan-sets/components/RollScans", () => ({
+  RollScans: (props: {
+    rollId: string;
+    rollLabel: string;
+    frameCount: number;
+    rollPushPullThirds: number | null;
+    scanSet: { id: string } | null;
+    initialOpenUpload?: boolean;
+  }) => (
+    <div data-testid="upload-section">{`${props.rollId}|${props.rollLabel}|${props.frameCount}|${String(props.initialOpenUpload)}|${props.rollPushPullThirds}|${props.scanSet?.id ?? "none"}`}</div>
   ),
 }));
 
@@ -55,8 +62,14 @@ describe("RollPage", () => {
   });
 
   it("mounts the upload section for this roll, numbered after its frames (Phase 2 F1)", async () => {
-    render(await RollPage({ roll: makeRoll({ name: null, number: 16, frameCount: 12 }), openUpload: true }));
-    expect(screen.getByTestId("upload-section")).toHaveTextContent(`${makeRoll({}).id}|Cuộn #16|12|true`);
+    render(
+      await RollPage({
+        roll: makeRoll({ name: null, number: 16, frameCount: 12, boxIso: 200, shotIso: 400 }),
+        openUpload: true,
+        scanSet: { id: "set-1" } as never,
+      }),
+    );
+    expect(screen.getByTestId("upload-section")).toHaveTextContent(`${makeRoll({}).id}|Cuộn #16|12|true|3|set-1`);
     expect(screen.queryByText("Sắp có")).not.toBeInTheDocument();
     expect(screen.queryAllByText("Chờ scan")).toHaveLength(0);
   });

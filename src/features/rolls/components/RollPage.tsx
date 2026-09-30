@@ -5,7 +5,9 @@ import { Canister } from "@/components/canister/Canister";
 import { cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
 import type { IRollEntry } from "@/features/rolls/core";
 import { formatRollDate } from "@/features/rolls/format-date";
-import { RollUploadSection } from "@/features/uploads/components/RollUploadSection";
+import { RollScans } from "@/features/scan-sets/components/RollScans";
+import type { IScanSetSummary } from "@/features/scan-sets/core";
+import { pushPullStops } from "@/features/rolls/push-pull";
 import styles from "./RollPage.module.css";
 
 export interface RollPageProps {
@@ -14,6 +16,8 @@ export interface RollPageProps {
   justSaved?: boolean;
   /** The upload tray links here with `?upload=1` to reopen the upload list (Phase 2 D16). */
   openUpload?: boolean;
+  /** The roll's scan set (LAB-3), or null before the first upload. */
+  scanSet?: IScanSetSummary | null;
 }
 
 function DetailRow({ label, value }: { label: string; value: string | null }) {
@@ -38,7 +42,7 @@ function joinMeta(parts: Array<string | false | null | undefined>): string | nul
  * (SCAN-1). `getRollPageContent` (the page itself) already 404s a missing
  * or another user's roll; this only renders one that was found.
  */
-export async function RollPage({ roll, justSaved = false, openUpload = false }: RollPageProps) {
+export async function RollPage({ roll, justSaved = false, openUpload = false, scanSet = null }: RollPageProps) {
   const t = await getTranslations("rolls.page");
   const tTypes = await getTranslations("catalogue.types");
 
@@ -55,6 +59,10 @@ export async function RollPage({ roll, justSaved = false, openUpload = false }: 
   // R2/N1: an unnamed roll shows "Cuộn #N" — never stored, only displayed.
   const numberedTitle = roll.number != null ? t("titleFallback", { number: roll.number }) : null;
   const title = roll.name ?? numberedTitle ?? (roll.stock ? `${roll.stock.brand} ${roll.stock.name}` : null) ?? t("detailFilm");
+
+  // D8: the scan-set form prefills push/pull in thirds of a stop.
+  const stops = pushPullStops(roll.boxIso, roll.shotIso);
+  const pushPullThirds = stops === null ? null : Math.round(stops * 3);
 
   const shotIsoLine =
     roll.shotIso !== null ? `${roll.shotIso}${roll.pushPull && roll.pushPull !== "0" ? ` · ${roll.pushPull}` : ""}` : null;
@@ -176,11 +184,13 @@ export async function RollPage({ roll, justSaved = false, openUpload = false }: 
             <h2 id="roll-scan-heading" className={styles.sectionHeading}>
               {t("scanHeading")}
             </h2>
-            <RollUploadSection
+            <RollScans
               rollId={roll.id}
               rollLabel={numberedTitle ?? title}
               frameCount={roll.frameCount ?? 0}
-              initialOpen={openUpload}
+              rollPushPullThirds={pushPullThirds}
+              scanSet={scanSet}
+              initialOpenUpload={openUpload}
             />
           </section>
         </div>

@@ -134,7 +134,9 @@ describe("LabPicker", () => {
     await user.click(await screen.findByRole("radio"));
     await user.click(screen.getByRole("button", { name: "Chọn LLAB" }));
 
-    expect(onPick).toHaveBeenCalledWith({ labId: "lab-llab", branchId: "branch-1" });
+    expect(onPick).toHaveBeenCalledWith(expect.objectContaining({ labId: "lab-llab", branchId: "branch-1", name: "LLAB" }));
+    expect(onPick.mock.calls[0][0].place).toEqual(expect.any(String));
+    expect(onPick.mock.calls[0][0].place.length).toBeGreaterThan(0);
   });
 
   it("calls onAddNew from the not-found panel", async () => {
