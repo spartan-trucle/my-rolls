@@ -17,8 +17,9 @@ import { index, integer, pgTable, text, timestamp, uniqueIndex, uuid } from "dri
  * entry apart, and D3's lenses have no catalogue counterpart to alias
  * anyway.
  *
- * `name`, `canister_color`, `notes` and `memory` are the pre-Phase-1 ADR
- * columns, unchanged; `version` drives share-image cache busting.
+ * `name`, `canister_color` and `memory` are the pre-Phase-1 ADR columns;
+ * `version` drives share-image cache busting. `notes` was dropped in
+ * migration 0004: notes live in the `note` table (Phase 2 plan D6).
  *
  * House rules (D9): `uuid_generate_v4()` id, no foreign keys — `stock_id`,
  * `camera_bag_item_id` and `lens_id` are bare ids the caller must
@@ -57,7 +58,6 @@ export const roll = pgTable(
     shotFrom: timestamp("shot_from", { withTimezone: true }),
     shotTo: timestamp("shot_to", { withTimezone: true }),
     datePrecision: text("date_precision", { enum: ["day", "month"] }),
-    notes: text("notes"),
     memory: text("memory"),
     version: integer("version").notNull().default(1),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),

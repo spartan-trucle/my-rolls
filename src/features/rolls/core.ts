@@ -455,7 +455,6 @@ export interface IRollEntry {
    * `number` above.
    */
   datePrecision?: "day" | "month" | null;
-  notes: string | null;
   memory: string | null;
   version: number;
   createdAt: Date;
@@ -535,7 +534,6 @@ async function hydrateRolls<TQueryResult extends PgQueryResultHKT>(
       shotFrom: row.shotFrom,
       shotTo: row.shotTo,
       datePrecision: row.datePrecision,
-      notes: row.notes,
       memory: row.memory,
       version: row.version,
       createdAt: row.createdAt,

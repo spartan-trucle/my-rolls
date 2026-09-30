@@ -600,5 +600,22 @@
       "start": "Bắt đầu",
       "later": "Để sau, xem kệ trước"
     }
+  },
+  "mistakes": {
+    "types": {
+      "light_leak": "Lọt sáng",
+      "blank_frame": "Tấm trắng",
+      "double_exposure": "Chồng hình",
+      "missed_focus": "Trượt nét",
+      "underexposed": "Thiếu sáng",
+      "overexposed": "Dư sáng",
+      "wrong_iso": "Sai ISO",
+      "camera_shake": "Rung tay",
+      "opened_back": "Mở nắp lưng",
+      "rewound_early": "Tua phim sớm",
+      "lab_dust_scratches": "Lab: bụi & xước",
+      "lab_colour_cast": "Lab: ám màu",
+      "other": "Khác"
+    }
   }
 }

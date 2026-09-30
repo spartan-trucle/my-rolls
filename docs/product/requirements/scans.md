@@ -39,7 +39,7 @@ Storage layout: originals go in a private R2 bucket; derivatives go in a public 
 | Source | Shape |
 |---|---|
 | PRD | `Frame`: id, scan_set_id, number, original_key, bytes, width, height, sha256, icc_profile, derived_keys{}, is_keeper, is_blank, alt_text |
-| [ADR-001](../../architecture/adr-001-tech-stack.md#data-model-mvp) | `frame`: id, scan_set_id, user_id, position, original_key, grid_key, view_key, width, height, exif, mark, note, status |
+| [ADR-001](../../architecture/adr-001-tech-stack.md#data-model-mvp) | `frame`: id, user_id, roll_id, scan_set_id, position, file_name, content_type, bytes, sha256, width, height, exif (no GPS), original_key, grid_key, view_key, is_keeper, is_blank, alt_text, status (migration `0004`) |
 
 ## Design
 

@@ -37,7 +37,7 @@ Back to: [Requirements index](README.md) · [PRD overview](../prd.md) · Ships i
 | Source | Shape |
 |---|---|
 | PRD | `Mistake / Note`: id, roll_id \| frame_id, type (mistake only), body, created_at, edited_at. `Roll.memory` |
-| [ADR-001](../../architecture/adr-001-tech-stack.md#data-model-mvp) | `roll.notes`, `roll.memory`, `frame.note`, `frame.mark` (keeper / oops / blank / none) |
+| [ADR-001](../../architecture/adr-001-tech-stack.md#data-model-mvp) | `note` (roll_id, frame_id?, body, timestamps), `mistake` (roll_id, frame_id?, type, note?), `roll.memory`, `frame.is_keeper`, `frame.is_blank` (migration `0004`) |
 
 ## Design
 

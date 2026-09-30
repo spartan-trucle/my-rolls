@@ -28,7 +28,6 @@ function makeRoll(overrides: Partial<IRollEntry>): IRollEntry {
     shotFrom: new Date("2025-10-12T12:00:00Z"),
     shotTo: null,
     datePrecision: "day",
-    notes: null,
     memory: null,
     version: 1,
     createdAt: new Date("2025-10-12T12:00:00Z"),
