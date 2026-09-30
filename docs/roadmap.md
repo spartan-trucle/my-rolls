@@ -1,7 +1,7 @@
 # Cuộn roadmap
 
 > **Mirror — the artifact is the source of truth:** [Cuộn roadmap](https://claude.ai/artifact/Lsq7MWHNCVanpBWQ2D4XTo)
-> Last synced: 27.09.2026 · doc revision 33 · by Claude for Trúc (revisions 16–23 by Trúc: waitlist page in Phase 1, landing page in Phase 5, 139 h build + 21 h buffer; revision 24 ticks "Repo, Next.js + Tailwind mapped to design tokens", landed in PR #1; revisions 25–26 remove the Phase 1 waitlist page at Trúc's request: sign-up stays open through the landing page; revision 27 ticks `next-intl`, Neon + Drizzle, Vercel `sin1` and PostHog, landed in PRs #3 and #5; revision 28 ticks R2 buckets (`pnpm r2:smoke` passes) and Google sign-in (phone check), both confirmed by Trúc; revision 29 ticks both spikes, passed on production, see docs/spikes/; revision 30 ticks the Phase 0 exit: phone sign-in on a preview URL and the story PNG both confirmed by Trúc; revisions 31–33 move BAG-2 (film pocket counts, with the bag canister strip) and BAG-3 (camera card) into Phase 1 and raise the P0 count to 28, at Trúc's request; the PRD artifact raised both to P0 in version 6).
+> Last synced: 30.09.2026 · doc revision 34 · by Claude for Trúc (revisions 16–23 by Trúc: waitlist page in Phase 1, landing page in Phase 5, 139 h build + 21 h buffer; revision 24 ticks "Repo, Next.js + Tailwind mapped to design tokens", landed in PR #1; revisions 25–26 remove the Phase 1 waitlist page at Trúc's request: sign-up stays open through the landing page; revision 27 ticks `next-intl`, Neon + Drizzle, Vercel `sin1` and PostHog, landed in PRs #3 and #5; revision 28 ticks R2 buckets (`pnpm r2:smoke` passes) and Google sign-in (phone check), both confirmed by Trúc; revision 29 ticks both spikes, passed on production, see docs/spikes/; revision 30 ticks the Phase 0 exit: phone sign-in on a preview URL and the story PNG both confirmed by Trúc; revisions 31–33 move BAG-2 (film pocket counts, with the bag canister strip) and BAG-3 (camera card) into Phase 1 and raise the P0 count to 28, at Trúc's request; the PRD artifact raised both to P0 in version 6; revision 34 ticks CAT-1, CAT-2, BAG-1, BAG-2, BAG-3, ROLL-1 and ROLL-2, landed in PR #20 and deployed to production, confirmed by Trúc; LAB-1 waits for the labs seed, LAB-2 and the exit stay open).
 > Before editing, re-read the artifact. Make changes in the artifact and copy them here in the same session (see [CLAUDE.md](../CLAUDE.md#sync-rules)).
 
 Related: [PRD overview](product/prd.md) · [Requirements index](product/requirements/README.md) · [ADR-001](architecture/adr-001-tech-stack.md) · [Design system](design/design-system.md)
@@ -34,13 +34,13 @@ Tick items as they land; a phase is done when its last item (the exit check) is 
 
 ### Phase 1 · Log a roll (12 Oct – 1 Nov)
 
-- [ ] Seeded catalogue + accent-free search ([CAT-1](product/requirements/catalogue.md))
-- [ ] Custom stock or camera ([CAT-2](product/requirements/catalogue.md))
-- [ ] Bag ([BAG-1](product/requirements/bag.md))
-- [ ] Film pocket counts + bag canister strip ([BAG-2](product/requirements/bag.md))
-- [ ] Camera card: rolls per camera ([BAG-3](product/requirements/bag.md))
-- [ ] New roll ([ROLL-1](product/requirements/rolls.md))
-- [ ] Past roll ([ROLL-2](product/requirements/rolls.md))
+- [x] Seeded catalogue + accent-free search ([CAT-1](product/requirements/catalogue.md))
+- [x] Custom stock or camera ([CAT-2](product/requirements/catalogue.md))
+- [x] Bag ([BAG-1](product/requirements/bag.md))
+- [x] Film pocket counts + bag canister strip ([BAG-2](product/requirements/bag.md))
+- [x] Camera card: rolls per camera ([BAG-3](product/requirements/bag.md))
+- [x] New roll ([ROLL-1](product/requirements/rolls.md))
+- [x] Past roll ([ROLL-2](product/requirements/rolls.md))
 - [ ] Lab directory ([LAB-1](product/requirements/labs.md))
 - [ ] Custom lab ([LAB-2](product/requirements/labs.md))
 - [ ] Exit: a roll is logged from the bag in under 60 s on a phone
