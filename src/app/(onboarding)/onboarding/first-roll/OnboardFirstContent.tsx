@@ -33,7 +33,6 @@ export function OnboardFirstContent() {
   return (
     <OnboardingFrame
       step={2}
-      skipHref="/"
       footer={
         <>
           <Link

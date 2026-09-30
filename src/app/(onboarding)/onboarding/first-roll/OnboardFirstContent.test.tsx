@@ -35,15 +35,12 @@ describe("OnboardFirstContent", () => {
     expect(push).toHaveBeenCalledWith("/rolls/new");
   });
 
-  it("'Để sau, xem kệ trước' and 'Bỏ qua' both link home", () => {
+  it("has one 'Bỏ qua', at the bottom, linking home — none in the step row (owner 30.09.2026)", () => {
     renderWithIntl(<OnboardFirstContent />);
 
-    expect(screen.getByRole("link", { name: "Để sau, xem kệ trước" })).toHaveAttribute("href", "/");
-    // The step row (with "Bỏ qua") renders twice — once for the phone
-    // layout, once for the desktop column — one hidden per breakpoint via
-    // CSS, both present in jsdom (no real viewport).
-    for (const link of screen.getAllByRole("link", { name: "Bỏ qua" })) {
-      expect(link).toHaveAttribute("href", "/");
-    }
+    const skips = screen.getAllByRole("link", { name: "Bỏ qua" });
+    expect(skips).toHaveLength(1);
+    expect(skips[0]).toHaveAttribute("href", "/");
+    expect(screen.queryByText("Để sau, xem kệ trước")).toBeNull();
   });
 });

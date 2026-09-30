@@ -5,7 +5,8 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export interface OnboardingFrameProps {
   step: 1 | 2;
-  skipHref: string;
+  /** Where the step row's "Bỏ qua" goes. Omit it when the page's own footer already offers the skip (B2, owner 30.09.2026). */
+  skipHref?: string;
   /** Main content — the search + chip columns (`/onboarding/bag`) or the empty shelf + radio options (`/onboarding/first-roll`). */
   children: ReactNode;
   /** The bottom hint + primary action, laid out per breakpoint by this frame (`OnboardBag`/`OnboardFirst`'s pinned-bottom / footer-bar). */
@@ -36,9 +37,11 @@ export function OnboardingFrame({ step, skipHref, children, footer }: Onboarding
     <div className="flex flex-col gap-2.5">
       <div className="flex items-center justify-between">
         <span className="font-sans text-label uppercase text-ink-muted">{stepLabel}</span>
-        <Link href={skipHref} className="flex min-h-11 items-center font-sans text-body-sm font-medium text-cobalt">
-          {skipLabel}
-        </Link>
+        {skipHref ? (
+          <Link href={skipHref} className="flex min-h-11 items-center font-sans text-body-sm font-medium text-cobalt">
+            {skipLabel}
+          </Link>
+        ) : null}
       </div>
       <div
         role="progressbar"
