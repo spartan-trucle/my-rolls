@@ -1,0 +1,86 @@
+/* Board `.toast`: ink bar over the page, paper text, lifted shadow. Sits at
+   the bottom on phone (the roll page has no tab bar) and bottom-right,
+   420px wide, on desktop. */
+.toast {
+  position: fixed;
+  left: var(--space-4);
+  right: var(--space-4);
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto 44px;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 52px;
+  padding: 0 0 0 var(--space-4);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 14px;
+  line-height: 20px;
+  box-shadow: var(--shadow-lift);
+}
+
+.tick {
+  color: var(--paper);
+}
+
+.text {
+  min-width: 0;
+}
+
+.text b {
+  font-weight: 600;
+}
+
+.action {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--space-2);
+  color: var(--paper);
+  font: 600 14px/1 var(--font-sans);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.close {
+  appearance: none;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--paper);
+  cursor: pointer;
+}
+
+.action:focus-visible,
+.close:focus-visible {
+  outline: 2px solid var(--paper);
+  outline-offset: -2px;
+}
+
+@media (min-width: 1024px) {
+  .toast {
+    left: auto;
+    right: 120px;
+    bottom: 40px;
+    width: 420px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .toast {
+    animation: toast-in 0.2s ease-out;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}

@@ -18,7 +18,7 @@ export default async function RollDetailPage({ params, searchParams }: PageProps
   const roll = await getRoll(id);
   if (!roll) notFound();
 
-  // R1: the "Đã lên kệ." banner shows only right after saving — the form
+  // R1: the "Đã lên kệ." toast shows only right after saving — the form
   // appends `?saved=1` to its own `router.push`, never present on a later
   // visit (a bookmark, Home's card link, back/forward).
   const query = await searchParams;

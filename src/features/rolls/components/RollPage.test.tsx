@@ -7,7 +7,7 @@ import type { IRollEntry } from "@/features/rolls/core";
 vi.mock("next-intl/server", async () => {
   const { createTranslator } = await import("next-intl");
   return {
-    getTranslations: async (namespace: "rolls.page" | "catalogue.types") =>
+    getTranslations: async (namespace: "rolls.page" | "catalogue.types" | "common") =>
       createTranslator({ locale: "vi", messages, namespace }),
   };
 });
@@ -78,12 +78,12 @@ describe("RollPage", () => {
     expect(screen.queryByRole("link", { name: "Về kệ" })).toBeNull();
   });
 
-  it("R1: shows the just-saved banner only when justSaved is true", async () => {
+  it("R1: shows the just-saved toast only when justSaved is true", async () => {
     const { rerender } = render(await RollPage({ roll: makeRoll({}) }));
-    expect(screen.queryByText("Đã lên kệ.")).not.toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
     rerender(await RollPage({ roll: makeRoll({}), justSaved: true }));
-    expect(screen.getByText("Đã lên kệ.")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Đã lên kệ.");
   });
 
   it("R4: links to the edit route from the details heading", async () => {
