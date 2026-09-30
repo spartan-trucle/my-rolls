@@ -81,4 +81,17 @@ describe("NotesMemory (NOTE-1, NotesMemory board)", () => {
     await userEvent.tab();
     expect(actions.saveNoteAction).toHaveBeenCalledWith({ noteId: "n1", rollId: "r1", body: "mới" });
   });
+
+  it("never autosaves an emptied note, so retyping keeps saving (review #14)", async () => {
+    actions.saveNoteAction.mockResolvedValue({ ok: true, id: "n1", updatedAt: new Date(), deleted: false });
+    renderIt([note("n1", "cũ")]);
+    await userEvent.click(screen.getByRole("button", { name: "Sửa ghi chú: cũ" }));
+    const field = screen.getByLabelText("Sửa ghi chú");
+    await userEvent.clear(field);
+    await userEvent.type(field, "mới");
+    await userEvent.tab();
+    const bodies = actions.saveNoteAction.mock.calls.map((c) => c[0].body);
+    expect(bodies).not.toContain("");
+    expect(bodies.at(-1)).toBe("mới");
+  });
 });

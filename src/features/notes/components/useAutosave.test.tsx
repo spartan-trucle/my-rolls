@@ -59,4 +59,22 @@ describe("useAutosave (D20)", () => {
     });
     expect(save).not.toHaveBeenCalled();
   });
+
+  it("saves what's pending when the component goes away, e.g. a back gesture (review #14)", () => {
+    const save = vi.fn().mockResolvedValue({ ok: true, updatedAt: new Date() });
+    const { result, unmount } = renderHook(() => useAutosave(save, { delay: 800 }));
+    act(() => result.current.change("last words"));
+    unmount();
+    expect(save).toHaveBeenCalledWith("last words");
+  });
+
+  it("skips values the caller says not to save", async () => {
+    const save = vi.fn().mockResolvedValue({ ok: true, updatedAt: new Date() });
+    const { result } = renderHook(() => useAutosave(save, { delay: 800, skip: (v) => v.trim() === "" }));
+    act(() => result.current.change("   "));
+    await act(async () => {
+      vi.advanceTimersByTime(800);
+    });
+    expect(save).not.toHaveBeenCalled();
+  });
 });

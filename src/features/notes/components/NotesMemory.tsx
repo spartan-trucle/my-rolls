@@ -33,7 +33,10 @@ function NoteRow({ rollId, note, onDeleted }: { rollId: string; note: IRollNote;
   const t = useTranslations("notes");
   const [editing, setEditing] = useState(false);
   const [body, setBody] = useState(note.body);
-  const autosave = useAutosave((value) => saveNoteAction({ noteId: note.id, rollId, body: value }));
+  // Review #14: an emptied note isn't saved (the server would delete it); the ✕ button deletes.
+  const autosave = useAutosave((value) => saveNoteAction({ noteId: note.id, rollId, body: value }), {
+    skip: (value) => value.trim() === "",
+  });
 
   return (
     <div className={styles.note}>
