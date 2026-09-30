@@ -274,3 +274,10 @@ messages/vi.json                             modify  every new string
 | Phase 1's first non-auth migration runs in the production build | Additive only (new tables); nothing drops or rewrites |
 | The 60 s exit fails because the form is too long on a phone | Optional fields folded (D0), bag first, one screen. Measure with D16 during the build, not only at exit |
 | Design (D0) arrives late | Tracks B and F (20 h) don't wait for it. D1–D3 are 6 h and fit the last week. If D0 isn't approved by 25 Oct, the exit moves into the buffer |
+
+## Progress
+
+- **30.09.2026:** roadmap rev 34 ticks CAT-1, CAT-2, BAG-1, BAG-2, BAG-3, ROLL-1 and ROLL-2. Evidence: PR #20 merged 30.09.2026 (`a0d6d00`), Vercel production deploy succeeded, `pnpm check` 824 tests. Confirmed by Trúc.
+- **Open:** LAB-1 waits for the labs seed (B3b, lab rows to be checked by Trúc; content deadline 01.11.2026).
+- **Open:** LAB-2 is built on `/dev/labs` only (D13). Not ticked, pending Trúc's call on whether that counts.
+- **Open:** Phase 1 exit: time three rolls logged from the bag on a phone in production, each under 60 s.
