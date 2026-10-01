@@ -31,6 +31,7 @@
 - **Design canvas:** re-read 30.09.2026: `1790765247-6906`. **All nine Phase 2 screens are drawn** (36 boards, see [Designs](#designs-d0-drawn)), with the blocker defaults below. Approved by Trúc on 30.09.2026.
 - **Docs for the boards:** moved onto `docs/phase-2-plan` (from `main`) with this plan (task P0), with the decision edits below.
 - **Plan status:** **approved 30.09.2026 (Trúc)**, with the default for all four [blockers](#blockers-answered-30092026).
+- **Progress, 01.10.2026:** tasks 1–13 built inline and the final review's fixes applied (suite 1087/1087, `pnpm check` green). [PR #22](https://github.com/spartan-trucle/my-rolls/pull/22) is open and marked ready for review by Trúc; Vercel preview checks pass. **Not merged**, so no roadmap box is ticked: SCAN-1–4, LAB-3, NOTE-1 and NOTE-2 get ticked once #22 is merged and deployed to production. **Open:** S1 (real phones, R2 CORS on both buckets), H (M1 dogfood: 5 real rolls, 0 failed files), `CRON_SECRET` in Vercel. Known gaps Trúc accepted for this PR: grid and view copies are public by unguessable URL, and one rejected file fails its slot group of 12 (deferred minor #10); UI polish follows in a separate PR.
 
 ## Blockers (answered 30.09.2026)
 
