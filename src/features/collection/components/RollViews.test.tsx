@@ -7,7 +7,7 @@ import type { IRollEntry } from "@/features/rolls/core";
 import { renderWithIntl as render } from "@/i18n/test-utils";
 import { RollViews } from "./RollViews";
 
-vi.mock("../actions", () => ({ rememberViewAction: vi.fn() }));
+vi.mock("../actions", () => ({ trackViewSwitchAction: vi.fn() }));
 const refresh = vi.hoisted(() => vi.fn());
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh }) }));
 

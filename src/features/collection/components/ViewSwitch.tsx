@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { MouseEvent, ReactNode } from "react";
 import { cx, Icon } from "@/design-system";
-import { rememberViewAction } from "../actions";
+import { trackViewSwitchAction } from "../actions";
+import { viewCookie } from "../view-pref";
 import styles from "./ViewSwitch.module.css";
 
 type TSurface = "roll" | "library";
@@ -41,19 +42,21 @@ export interface ViewSwitchProps {
   hrefs: Partial<Record<TView, string>>;
   /** Views not built yet: shown, but not a link and not focusable (Ruling R7). */
   disabled?: readonly string[];
-  /** Injected in tests; the server action otherwise. */
-  remember?: (input: { surface: TSurface; view: string }) => Promise<void>;
+  /** Reports `view_switched` (D17); injected in tests, the server action otherwise. */
+  track?: (input: { surface: TSurface; view: string }) => Promise<void>;
   className?: string;
 }
 
 /**
  * COL-1 / COL-3: the Kệ/Lưới (library) or Dải phim/Lưới (roll) switch,
- * the boards' `.vseg`. A plain click saves the view first (plan D7), then
- * navigates: the save's cookie refreshes the route, so it must land
- * before the push, not race it (Ruling R11). A failed save still
- * switches. Modifier and middle clicks keep native link behaviour.
+ * the boards' `.vseg`. A plain click remembers the view in a cookie
+ * written here on the client (plan D7), then navigates at once: a cookie
+ * set by a Server Action would re-render the page being left first
+ * (Ruling R31, superseding R11). `view_switched` goes out alongside,
+ * never awaited, and its failure is ignored. Modifier and middle clicks
+ * keep native link behaviour.
  */
-export function ViewSwitch({ surface, current, hrefs, disabled = [], remember = rememberViewAction, className }: ViewSwitchProps) {
+export function ViewSwitch({ surface, current, hrefs, disabled = [], track = trackViewSwitchAction, className }: ViewSwitchProps) {
   const t = useTranslations("views");
   const router = useRouter();
   const views = Object.entries(hrefs) as [TView, string][];
@@ -80,11 +83,16 @@ export function ViewSwitch({ surface, current, hrefs, disabled = [], remember = 
             href={href}
             className={styles.option}
             aria-current={view === current ? "page" : undefined}
-            onClick={async (event: MouseEvent<HTMLAnchorElement>) => {
+            onClick={(event: MouseEvent<HTMLAnchorElement>) => {
               if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
               event.preventDefault();
               if (view === current) return;
-              await remember({ surface, view }).catch(() => {});
+              document.cookie = viewCookie(surface, view);
+              try {
+                void track({ surface, view }).catch(() => {});
+              } catch {
+                // Analytics never blocks the switch.
+              }
               router.push(href);
             }}
           >

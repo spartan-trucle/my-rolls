@@ -16,3 +16,15 @@ export function resolveRollView(query: unknown, cookie: unknown): TRollView {
 export function resolveLibraryView(query: unknown, cookie: unknown): TLibraryView {
   return pick(["shelf", "grid"], "shelf", query, cookie);
 }
+
+const YEAR_IN_SECONDS = 60 * 60 * 24 * 365;
+
+/**
+ * Ruling R31: the `document.cookie` string ViewSwitch writes on a switch. Written on the client,
+ * not by a Server Action, so Next doesn't re-render the page being left before the push. A view
+ * that isn't one of the surface's stores its default.
+ */
+export function viewCookie(surface: "roll" | "library", view: string): string {
+  const [name, value] = surface === "roll" ? [ROLL_VIEW_COOKIE, resolveRollView(view, undefined)] : [LIBRARY_VIEW_COOKIE, resolveLibraryView(view, undefined)];
+  return `${name}=${value}; max-age=${YEAR_IN_SECONDS}; path=/; samesite=lax`;
+}
