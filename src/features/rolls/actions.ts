@@ -10,6 +10,7 @@ import {
   listRollsCore,
   peekNextRollNumberCore,
   setCanisterCore,
+  setCanisterInputSchema,
   updateRollCore,
   updateRollInputSchema,
   type IRollEntry,
@@ -137,13 +138,16 @@ export async function updateRoll(input: unknown): Promise<TUpdateRollResult> {
 }
 
 /** CAN-2: saves how a roll's canister looks; `drawn` carries a preset or `#rrggbb`. */
-export async function setCanisterAction(input: {
+export async function setCanisterAction(raw: {
   rollId: string;
   style: TCanisterStyle;
   color?: string;
 }): Promise<TSetCanisterResult> {
   const userId = await sessionUserIdForAction();
   if (!userId) return { ok: false, error: "not_found" };
+  const parsed = setCanisterInputSchema.safeParse(raw);
+  if (!parsed.success) return { ok: false, error: "invalid_input" };
+  const input = parsed.data;
   const result = await setCanisterCore(getDb(), userId, input);
   if (result.ok) {
     await captureServerEvent({

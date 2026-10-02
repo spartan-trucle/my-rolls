@@ -2,11 +2,21 @@ import "server-only";
 
 import { and, asc, count, eq, inArray, isNull } from "drizzle-orm";
 import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
+import { z } from "zod";
 import { frame, mistake, note, roll } from "@/db/schema";
 import type { TDb } from "@/features/shared/db";
-import { bumpRollVersion, ownedFrame, ownedReadyFrames, ownsRoll } from "@/features/shared/roll-access";
+import { bumpRollVersion, MAX_BULK_FRAMES, ownedFrame, ownedReadyFrames, ownsRoll } from "@/features/shared/roll-access";
 
-export type TFrameResult = { ok: true } | { ok: false; error: "not_found" };
+export type TFrameResult = { ok: true } | { ok: false; error: "not_found" | "invalid_input" };
+
+/** COL-4: what `setFramesMarksAction` accepts; types are erased at runtime, so the action parses its raw input. */
+export const setFramesMarksInputSchema = z.object({
+  rollId: z.string().uuid(),
+  frameIds: z.array(z.string().uuid()).min(1).max(MAX_BULK_FRAMES),
+  mark: z.enum(["keeper", "blank"]),
+  on: z.boolean(),
+  via: z.enum(["button", "key"]),
+});
 
 /**
  * SCAN-4, Phase 2 plan D3: a blank frame can't be tấm ưng, so setting one clears the other.

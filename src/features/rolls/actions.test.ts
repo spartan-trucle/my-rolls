@@ -223,6 +223,8 @@ describe("getRoll", () => {
 });
 
 describe("setCanisterAction", () => {
+  const ROLL = "11111111-1111-4111-8111-111111111111";
+
   afterEach(() => {
     setCanisterCore.mockReset();
     captureServerEvent.mockClear();
@@ -232,7 +234,7 @@ describe("setCanisterAction", () => {
   it("returns not_found and calls nothing when there's no session", async () => {
     getSession.mockResolvedValueOnce(null);
 
-    const result = await setCanisterAction({ rollId: "roll-1", style: "stock" });
+    const result = await setCanisterAction({ rollId: ROLL, style: "stock" });
 
     expect(result).toEqual({ ok: false, error: "not_found" });
     expect(setCanisterCore).not.toHaveBeenCalled();
@@ -244,16 +246,16 @@ describe("setCanisterAction", () => {
     getSession.mockResolvedValueOnce({ user: { id: USER_ID } });
     setCanisterCore.mockResolvedValueOnce({ ok: true });
 
-    const result = await setCanisterAction({ rollId: "roll-1", style: "drawn", color: "#a1b2c3" });
+    const result = await setCanisterAction({ rollId: ROLL, style: "drawn", color: "#a1b2c3" });
 
     expect(result).toEqual({ ok: true });
-    expect(setCanisterCore).toHaveBeenCalledWith(fakeDb, USER_ID, { rollId: "roll-1", style: "drawn", color: "#a1b2c3" });
+    expect(setCanisterCore).toHaveBeenCalledWith(fakeDb, USER_ID, { rollId: ROLL, style: "drawn", color: "#a1b2c3" });
     expect(captureServerEvent).toHaveBeenCalledWith({
       distinctId: USER_ID,
       event: "canister_customised",
       properties: { style: "drawn", color: "custom" },
     });
-    expect(revalidatePath).toHaveBeenCalledWith("/rolls/roll-1");
+    expect(revalidatePath).toHaveBeenCalledWith(`/rolls/${ROLL}`);
     expect(revalidatePath).toHaveBeenCalledWith("/");
   });
 
@@ -261,10 +263,22 @@ describe("setCanisterAction", () => {
     getSession.mockResolvedValueOnce({ user: { id: USER_ID } });
     setCanisterCore.mockResolvedValueOnce({ ok: false, error: "invalid_input" });
 
-    const result = await setCanisterAction({ rollId: "roll-1", style: "drawn" });
+    const result = await setCanisterAction({ rollId: ROLL, style: "drawn" });
 
     expect(result).toEqual({ ok: false, error: "invalid_input" });
     expect(captureServerEvent).not.toHaveBeenCalled();
     expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["a non-uuid roll id", { rollId: "roll-1" }],
+    ["an unknown style", { style: "tartan" }],
+    ["a colour that isn't a string", { color: ["#aabbcc"] }],
+  ])("refuses %s without reaching the core", async (_, forged) => {
+    getSession.mockResolvedValueOnce({ user: { id: USER_ID } });
+    const input = { rollId: ROLL, style: "drawn", color: "#aabbcc", ...forged };
+    expect(await setCanisterAction(input as never)).toEqual({ ok: false, error: "invalid_input" });
+    expect(setCanisterCore).not.toHaveBeenCalled();
+    expect(captureServerEvent).not.toHaveBeenCalled();
   });
 });

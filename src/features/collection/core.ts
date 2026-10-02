@@ -2,10 +2,17 @@ import "server-only";
 
 import { and, asc, count, desc, eq, exists, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
+import { z } from "zod";
 import { frame, mistake, roll } from "@/db/schema";
 import { toRollFrames, type IRollFrame } from "@/features/frames/core";
 import { hydrateRolls, type IRollEntry } from "@/features/rolls/core";
 import type { TDb } from "@/features/shared/db";
+
+/** COL-3: what `listLibraryAction` accepts; an unknown filter still reads as "all" (`parseFilter`). */
+export const listLibraryInputSchema = z.object({ filter: z.string(), cursor: z.string().nullish() });
+
+/** D7 / D17: what the view-switch action accepts; an unknown surface or view still falls back as before. */
+export const viewSwitchInputSchema = z.object({ surface: z.string(), view: z.string() });
 
 export type TLibraryFilter = "all" | "keeper" | "oops";
 export interface ILibraryGroup {

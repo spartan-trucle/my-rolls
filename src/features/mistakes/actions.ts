@@ -5,7 +5,10 @@ import type { TMistakeType } from "@/db/schema";
 import { getDb } from "@/db/client";
 import { sessionUserIdForAction } from "@/features/shared/session-user";
 import { captureServerEvent } from "@/lib/posthog-server";
-import { addMistakesToFramesCore, listRollMistakesCore, setMistakesCore, type IRollMistake, type TSetMistakesResult } from "./core";
+import {
+  addMistakesToFramesCore,
+  addMistakesToFramesInputSchema,
+  listRollMistakesCore, setMistakesCore, type IRollMistake, type TSetMistakesResult } from "./core";
 
 /** File-level "use server": client components import these, so every export is async; logic is in core.ts. */
 
@@ -27,7 +30,7 @@ export async function setMistakesAction(input: {
   return result;
 }
 
-export async function addMistakesToFramesAction(input: {
+export async function addMistakesToFramesAction(raw: {
   rollId: string;
   frameIds: string[];
   items: Array<{ type: TMistakeType; note?: string }>;
@@ -35,6 +38,9 @@ export async function addMistakesToFramesAction(input: {
 }): Promise<TSetMistakesResult> {
   const userId = await sessionUserIdForAction();
   if (!userId) return { ok: false, error: "not_found" };
+  const parsed = addMistakesToFramesInputSchema.safeParse(raw);
+  if (!parsed.success) return { ok: false, error: "invalid_input" };
+  const input = parsed.data;
   const { via, ...core } = input;
   const result = await addMistakesToFramesCore(getDb(), userId, core);
   if (result.ok) {

@@ -772,6 +772,13 @@ export async function updateRollCore<TQueryResult extends PgQueryResultHKT>(
   return { ok: true };
 }
 
+/** CAN-2: what `setCanisterAction` accepts; the colour's own rules stay in `setCanisterCore`. */
+export const setCanisterInputSchema = z.object({
+  rollId: z.string().uuid(),
+  style: z.enum(CANISTER_STYLES),
+  color: z.string().optional(),
+});
+
 export type TSetCanisterResult = { ok: true } | { ok: false; error: "not_found" | "invalid_input" };
 
 /** CAN-2, plan D1–D2. Only `drawn` writes a colour; `stock` and `photo` leave the stored copy alone. */
