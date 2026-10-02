@@ -53,6 +53,9 @@
   --wood-edge: #6e4a2b;
 
   top: max(44px, calc(100dvh - 648px));
+  /* Only the body scrolls (below); the dialog box itself never does, so
+     the head and the Huỷ / Lưu footer always stay in view. */
+  overflow: hidden;
 }
 
 [data-theme="dark"] .dialog {
@@ -69,11 +72,33 @@
   }
 }
 
+/* Desktop: as tall as its content, capped at ResponsiveDialog's 772px or
+   the window less a margin. The open box becomes a flex column so that cap
+   reaches the panel (a percentage height can't resolve against `auto`),
+   and ResponsiveDialog's content wrapper (its only child) may shrink.
+   `[open]` only: a closed <dialog> must keep its UA `display: none`. */
 @media (min-width: 1024px) {
   .dialog.dialog {
     top: 50%;
     width: 680px;
     height: auto;
+    max-height: min(772px, calc(100dvh - var(--space-6) * 2));
+  }
+
+  .dialog.dialog[open] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dialog.dialog[open] > * {
+    flex: 0 1 auto;
+    min-height: 0;
+    height: auto;
+  }
+
+  .panel.panel {
+    height: auto;
+    flex: 0 1 auto;
   }
 }
 
@@ -94,6 +119,7 @@
 }
 
 .head {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
