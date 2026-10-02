@@ -42,6 +42,21 @@ describe("collection actions", () => {
     ]);
   });
 
+  it.each([
+    ["a non-string cursor", { filter: "all", cursor: { id: 1 } }],
+    ["a non-string filter", { filter: ["keeper"] }],
+    ["no input at all", undefined],
+  ])("returns the empty page for %s without reaching the core", async (_, forged) => {
+    getSession.mockResolvedValue({ user: { id: "u1" } });
+    expect(await actions.listLibraryAction(forged as never)).toEqual({
+      totals: { rolls: 0, frames: 0, keepers: 0 },
+      counts: { all: 0, keeper: 0, oops: 0 },
+      groups: [],
+      nextCursor: null,
+    });
+    expect(core.listLibraryCore).not.toHaveBeenCalled();
+  });
+
   describe("libraryTotalsAction (Ruling R8)", () => {
     it("returns zeros for a signed-out caller", async () => {
       getSession.mockResolvedValue(null);
@@ -94,6 +109,17 @@ describe("collection actions", () => {
       await actions.rememberViewAction({ surface: "roll", view: "<script>" });
       expect(cookieJar.set.mock.calls[0].slice(0, 2)).toEqual(["cuon_roll_view", "strip"]);
       expect(captureServerEvent.mock.calls[0][0].properties).toEqual({ surface: "roll", view: "strip" });
+    });
+
+    it.each([
+      ["a non-string view", { surface: "roll", view: ["grid"] }],
+      ["a non-string surface", { surface: 1, view: "grid" }],
+      ["no input at all", undefined],
+    ])("ignores %s", async (_, forged) => {
+      getSession.mockResolvedValue({ user: { id: "u1" } });
+      await actions.rememberViewAction(forged as never);
+      expect(cookieJar.set).not.toHaveBeenCalled();
+      expect(captureServerEvent).not.toHaveBeenCalled();
     });
 
     it("treats an unknown surface as the library", async () => {

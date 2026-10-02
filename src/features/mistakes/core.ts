@@ -5,12 +5,20 @@ import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { MISTAKE_TYPES, mistake, type TMistakeType } from "@/db/schema";
 import type { TDb } from "@/features/shared/db";
-import { bumpRollVersion, ownedFrame, ownedReadyFrames, ownsRoll } from "@/features/shared/roll-access";
+import { bumpRollVersion, MAX_BULK_FRAMES, ownedFrame, ownedReadyFrames, ownsRoll } from "@/features/shared/roll-access";
 
 const itemsSchema = z
   .array(z.object({ type: z.enum(MISTAKE_TYPES), note: z.string().max(500).optional() }))
   .max(MISTAKE_TYPES.length)
   .refine((items) => new Set(items.map((i) => i.type)).size === items.length);
+
+/** COL-4 bulk oops: what `addMistakesToFramesAction` accepts, parsed from its raw input. */
+export const addMistakesToFramesInputSchema = z.object({
+  rollId: z.string().uuid(),
+  frameIds: z.array(z.string().uuid()).min(1).max(MAX_BULK_FRAMES),
+  items: itemsSchema,
+  via: z.enum(["button", "key"]),
+});
 
 export type TSetMistakesResult = { ok: true } | { ok: false; error: "not_found" | "invalid_input" };
 

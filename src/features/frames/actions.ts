@@ -12,6 +12,7 @@ import {
   restoreFrameCore,
   setFrameMarksCore,
   setFramesMarksCore,
+  setFramesMarksInputSchema,
   type IRollFrame,
   type TFrameResult,
 } from "./core";
@@ -35,7 +36,7 @@ export async function setFrameMarksAction(input: { frameId: string; isKeeper?: b
   return result;
 }
 
-export async function setFramesMarksAction(input: {
+export async function setFramesMarksAction(raw: {
   rollId: string;
   frameIds: string[];
   mark: "keeper" | "blank";
@@ -44,6 +45,9 @@ export async function setFramesMarksAction(input: {
 }): Promise<TFrameResult> {
   const userId = await sessionUserIdForAction();
   if (!userId) return NOT_FOUND;
+  const parsed = setFramesMarksInputSchema.safeParse(raw);
+  if (!parsed.success) return { ok: false, error: "invalid_input" };
+  const input = parsed.data;
   const { via, ...core } = input;
   const result = await setFramesMarksCore(getDb(), userId, core);
   if (result.ok) {
