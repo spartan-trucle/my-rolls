@@ -51,11 +51,6 @@
   outline-offset: 3px;
 }
 
-.linkDisabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 .trailing {
   display: flex;
   align-items: center;

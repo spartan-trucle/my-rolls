@@ -47,6 +47,12 @@ describe("FrameGrid (RollFrames board)", () => {
     expect(imgs[0]).toHaveAttribute("src", "https://img/grid/1.webp");
   });
 
+  it("takes how many cells load eagerly (the library: only its first group's first row)", () => {
+    const frames = Array.from({ length: 3 }, (_, i) => frame(i + 1));
+    const { container } = render(<FrameGrid rollId="r1" frames={frames} eager={0} />);
+    for (const img of container.querySelectorAll("img")) expect(img).toHaveAttribute("loading", "lazy");
+  });
+
   describe("with onOpen (COL-2, Ruling R19)", () => {
     it("makes every cell a button named like the link was, and opens the frame clicked", async () => {
       const onOpen = vi.fn();

@@ -9,7 +9,7 @@ const redirect = vi.hoisted(() => vi.fn(() => { throw new Error("NEXT_REDIRECT")
 
 vi.mock("@/lib/auth", () => ({ getAuth: vi.fn().mockReturnValue({ api: { getSession } }) }));
 vi.mock("next/headers", () => ({ headers: vi.fn(async () => new Headers()) }));
-vi.mock("next/navigation", () => ({ redirect, usePathname: () => "/" }));
+vi.mock("next/navigation", () => ({ redirect, usePathname: () => "/", useSearchParams: () => new URLSearchParams() }));
 
 import AppLayout from "./layout";
 

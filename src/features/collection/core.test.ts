@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { frame, mistake, roll } from "@/db/schema";
 import { createTestDb } from "@/db/test-db";
 import { seedRollWithFrames } from "@/test/phase2-fixtures";
-import { listLibraryCore } from "./core";
+import { libraryTotalsCore, listLibraryCore } from "./core";
 
 let cleanup: (() => Promise<void>) | undefined;
 afterEach(async () => {
@@ -101,5 +101,23 @@ describe("listLibraryCore (COL-3, D9)", () => {
     await db.update(roll).set({ deletedAt: new Date() }).where(eq(roll.id, r.roll.id));
     const page = await listLibraryCore(db, USER, { filter: "all", publicUrl: PUBLIC });
     expect(page).toMatchObject({ groups: [], totals: { rolls: 0, frames: 0, keepers: 0 } });
+  });
+});
+
+describe("libraryTotalsCore (Ruling R8: the shelf's count line)", () => {
+  it("counts live rolls, ready frames and tấm ưng without loading a page", async () => {
+    const db = await setup();
+    const [a, b] = await seedRolls(db, [2, 3]);
+    await seedRolls(db, [4], "user-2");
+    await db.update(frame).set({ isKeeper: true }).where(eq(frame.id, a.frames[0].id));
+    await db.update(frame).set({ status: "pending" }).where(eq(frame.id, b.frames[0].id));
+    expect(await libraryTotalsCore(db, USER)).toEqual({ rolls: 2, frames: 4, keepers: 1 });
+  });
+
+  it("matches listLibraryCore's totals", async () => {
+    const db = await setup();
+    await seedRolls(db, [0, 2]);
+    const page = await listLibraryCore(db, USER, { filter: "all", publicUrl: PUBLIC });
+    expect(await libraryTotalsCore(db, USER)).toEqual(page.totals);
   });
 });

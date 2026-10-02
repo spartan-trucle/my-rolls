@@ -5,7 +5,7 @@ import { renderWithIntl as render } from "@/i18n/test-utils";
 import { UploadProvider, useUploads } from "@/features/uploads/client/UploadProvider";
 import { AppShell } from "./AppShell";
 
-vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
+vi.mock("next/navigation", () => ({ usePathname: () => "/", useSearchParams: () => new URLSearchParams() }));
 
 describe("AppShell", () => {
   it("renders both the top nav and the bottom tabs, plus its children", () => {

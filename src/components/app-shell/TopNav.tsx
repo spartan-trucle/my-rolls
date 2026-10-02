@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { cx } from "@/design-system/cx";
+import { LibraryNavLink } from "./LibraryNavLink";
 import styles from "./TopNav.module.css";
 
 export interface TopNavProps {
@@ -13,6 +14,9 @@ export interface TopNavProps {
   className?: string;
 }
 
+/** G5: Kệ is current on `/` and under `/rolls/*`. */
+const shelfCurrent = (pathname: string) => pathname === "/" || pathname.startsWith("/rolls/");
+
 /**
  * Desktop chrome (1024px and up, see `AppShell`), from the `HomeWeb` /
  * `ProfileWeb` boards: the "Cuộn" wordmark, nav links (active one
@@ -20,7 +24,8 @@ export interface TopNavProps {
  * and the avatar. The boards don't draw a theme switch on this header, but
  * every other screen's chrome carries one, so it's kept here too.
  *
- * Tấm ưng has no screen until Phase 3: a disabled `<span>`, never a link.
+ * Tấm ưng opens the library grid filtered to tấm ưng (D15), and is the
+ * current item there instead of Kệ (Ruling R28).
  *
  * G5: "Kệ" also reads as current under `/rolls/*` — the roll form and roll
  * page are reached from the shelf and have no nav item of their own — and
@@ -32,7 +37,6 @@ export function TopNav({ userInitial, className }: TopNavProps) {
   const t = useTranslations("appShell");
 
   const current = (href: string) => (pathname === href ? ("page" as const) : undefined);
-  const shelfCurrent = pathname === "/" || pathname.startsWith("/rolls/") ? ("page" as const) : undefined;
   const showNewRollButton = pathname !== "/rolls/new";
 
   return (
@@ -42,15 +46,15 @@ export function TopNav({ userInitial, className }: TopNavProps) {
           {t("wordmark")}
         </Link>
         <nav className={styles.nav} aria-label={t("navLabel")}>
-          <Link href="/" aria-current={shelfCurrent} className={styles.link}>
+          <LibraryNavLink tab="shelf" shelfCurrent={shelfCurrent} className={styles.link}>
             {t("nav.shelf")}
-          </Link>
+          </LibraryNavLink>
           <Link href="/bag" aria-current={current("/bag")} className={styles.link}>
             {t("nav.bag")}
           </Link>
-          <span className={cx(styles.link, styles.linkDisabled)} aria-disabled="true">
+          <LibraryNavLink tab="keepers" className={styles.link}>
             {t("nav.keepers")}
-          </span>
+          </LibraryNavLink>
         </nav>
       </div>
       <div className={styles.trailing}>

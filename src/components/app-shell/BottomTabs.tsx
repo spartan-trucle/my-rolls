@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Icon } from "@/design-system";
 import { cx } from "@/design-system/cx";
 import { shouldHideShellChrome } from "./hidden-routes";
+import { LibraryNavLink } from "./LibraryNavLink";
 import styles from "./BottomTabs.module.css";
 
 export interface BottomTabsProps {
@@ -18,9 +19,8 @@ export interface BottomTabsProps {
  * Phone nav (below 1024px, see `AppShell`), from the `Home` board's
  * `.tabbar`: Kệ, Túi, the raised cobalt "Cuộn mới", Tấm ưng and Tôi.
  *
- * Tấm ưng has no screen until Phase 3 (D15's F3 scope): it renders as a
- * disabled `<span>`, never a link, so it can't be tapped or focused into
- * a route that doesn't exist yet.
+ * Tấm ưng opens the library grid filtered to tấm ưng (D15); it, not Kệ,
+ * is current there (Ruling R28, `LibraryNavLink`).
  *
  * G4/N2: renders nothing on the routes `shouldHideShellChrome` lists —
  * their page builds its own close header instead (W2).
@@ -35,10 +35,10 @@ export function BottomTabs({ userInitial, className }: BottomTabsProps) {
 
   return (
     <nav className={cx(styles.tabbar, className)} aria-label={t("navLabel")}>
-      <Link href="/" aria-current={current("/")} className={styles.tab}>
+      <LibraryNavLink tab="shelf" className={styles.tab}>
         <Icon name="roll" size={20} />
         <span>{t("nav.shelf")}</span>
-      </Link>
+      </LibraryNavLink>
       <Link href="/bag" aria-current={current("/bag")} className={styles.tab}>
         <Icon name="camera" size={20} />
         <span>{t("nav.bag")}</span>
@@ -49,10 +49,10 @@ export function BottomTabs({ userInitial, className }: BottomTabsProps) {
         </span>
         <span>{t("nav.newRoll")}</span>
       </Link>
-      <span className={cx(styles.tab, styles.tabDisabled)} aria-disabled="true">
+      <LibraryNavLink tab="keepers" className={styles.tab}>
         <Icon name="keeper" size={20} />
         <span>{t("nav.keepers")}</span>
-      </span>
+      </LibraryNavLink>
       <Link href="/profile" aria-current={current("/profile")} className={styles.tab}>
         <span className={styles.avatar} aria-hidden="true">
           {userInitial}

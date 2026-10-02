@@ -1,0 +1,192 @@
+/* `LibraryGrid` / `LibraryGridWeb` boards (COL-3). */
+.library {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-width: 0;
+}
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* The grid bleeds out of the page's 16px gutter on phones; the header stays in it. */
+.group > ol {
+  margin-inline: calc(-1 * var(--space-4));
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* The board's small canister: 40px wide; `sm` is 44×72, scaled down to sit beside two lines of text. */
+.canister {
+  flex-shrink: 0;
+  transform: scale(0.75);
+  margin: -9px -5px;
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.name {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font: 600 19px/24px var(--font-display);
+}
+
+.meta {
+  margin: 0;
+  font: 400 12px/16px var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+}
+
+.open {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  min-height: 44px;
+  font: 600 13px/18px var(--font-sans);
+  color: var(--cobalt);
+  text-decoration: none;
+}
+
+.open:hover {
+  color: var(--cobalt-deep);
+}
+
+.open:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* Two classes, so it beats the design-system button's own sizing whatever order the CSS loads in. */
+.library .more {
+  align-self: center;
+  min-height: 44px;
+}
+
+.error,
+.note {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ink-muted);
+}
+
+.error {
+  align-self: center;
+  color: var(--pin);
+}
+
+/* `LibraryGridKeepersEmpty(Web)`. */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 28px var(--space-6) 0;
+  text-align: center;
+}
+
+.emptyIcon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  color: var(--cobalt);
+  background: var(--cobalt-soft);
+}
+
+.emptyTitle {
+  margin: 4px 0 0;
+  font: 600 20px/26px var(--font-display);
+}
+
+.emptyBody {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-muted);
+}
+
+.empty .emptyCta {
+  margin-top: var(--space-2);
+}
+
+/* The hint by how the user points, like COL-4's (a touch tablet is wide). */
+.hintPointer {
+  display: none;
+}
+
+@media (pointer: fine) {
+  .hintTouch {
+    display: none;
+  }
+
+  .hintPointer {
+    display: inline;
+  }
+}
+
+@media (min-width: 1024px) {
+  .library {
+    gap: 36px;
+  }
+
+  .groups {
+    gap: var(--space-12);
+  }
+
+  .group > ol {
+    margin-inline: 0;
+  }
+
+  .name {
+    font-size: 24px;
+    line-height: 30px;
+  }
+
+  .note {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .empty {
+    gap: 14px;
+    max-width: 520px;
+    margin: 44px auto 0;
+  }
+
+  .emptyIcon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .emptyTitle {
+    font: 500 32px/38px var(--font-display);
+  }
+
+  .emptyBody {
+    font-size: 16px;
+    line-height: 24px;
+  }
+}
