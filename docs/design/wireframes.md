@@ -2,7 +2,7 @@
 
 > **Reference only.** The [design canvas](https://claude.ai/artifact/AXpgMvXFo6HL1vrw9RS6gt) ("Roll Call Landing Page") holds wireframes and ideas. Code may change layouts and details. When a wireframe disagrees with the [PRD](../product/prd.md) or the [design system](design-system.md), those two win.
 >
-> Indexed 25.09.2026 from canvas version `1790318000-c9a4` (re-indexed after the "Đăng nhập" and "Kệ & hồ sơ" pages were added). Re-checked 25.09.2026 against version `1790325947-074d`: same pages, boards and sizes. Updated 27.09.2026 to version `1790516511-f125` (118 boards): the Phase 1 screens were added to "Kệ & hồ sơ" and the Phase 2 screens to a new page "Scan & ghi chú". Re-checked 30.09.2026 against version `1790765247-6906`: same pages and boards, and the `Home`, `Profile` and `OnboardBag` boards now link to them. The canvas installs the [design system](design-system.md) as `rollcall`.
+> Indexed 25.09.2026 from canvas version `1790318000-c9a4` (re-indexed after the "Đăng nhập" and "Kệ & hồ sơ" pages were added). Re-checked 25.09.2026 against version `1790325947-074d`: same pages, boards and sizes. Updated 27.09.2026 to version `1790516511-f125` (118 boards): the Phase 1 screens were added to "Kệ & hồ sơ" and the Phase 2 screens to a new page "Scan & ghi chú". Re-checked 30.09.2026 against version `1790765247-6906`: same pages and boards, and the `Home`, `Profile` and `OnboardBag` boards now link to them. Re-checked 02.10.2026 against version `1790936301-40d9` (147 boards): a new page "Chia sẻ · MVP" with 21 Phase 4 boards ([below](#page-chia-sẻ--mvp-sharing-phase-4)); the other pages are unchanged. The canvas installs the [design system](design-system.md) as `rollcall`.
 
 Every product screen has a phone (390 px) and a desktop (1440 px) version, as the PRD requires. Story cards are fixed 1080 × 1920 images, drawn at half size (540 × 960).
 
@@ -56,6 +56,22 @@ The rolling strip pauses on hover and keyboard focus, and everything stops for p
 | `LabPickerWeb.dc.html` | 1440 × 900 | Pick a lab, desktop | [LAB-1, LAB-3](../product/requirements/labs.md) |
 | `LabAdd.dc.html` | 390 × 844 | Add a new lab, phone | [LAB-2](../product/requirements/labs.md) |
 | `LabAddWeb.dc.html` | 1440 × 900 | Add a new lab, desktop | [LAB-2](../product/requirements/labs.md) |
+
+## Page "Chia sẻ · MVP" (sharing, Phase 4)
+
+Added by 02.10.2026. Screens have up to four boards (phone and desktop, Paper and Darkroom: `…Dark`, `…Web`, `…WebDark`); the link previews are fixed-size images. The boards use `[domain]` until roadmap decision 1 picks the name.
+
+| Artboards | Size | What it shows | PRD |
+|---|---|---|---|
+| `ShareRoll` · `ShareRollDark` · `ShareRollWeb` · `ShareRollWebDark` | 390 × 844 · 1440 × 900 | "Chia sẻ cuộn này": the 1080 × 1920 story preview with room for the link sticker, story templates Dải phim and Phiếu cuộn, the roll link with "Đổi link" and "Tắt link", "Ai có link đều xem được, không cần tài khoản" and "Không ai tải được ảnh gốc". Desktop: "Tải ảnh và chép link", and a hint to post the story from a phone | [SHARE-1, SHARE-4](../product/requirements/sharing.md) |
+| `ShareLink` · `ShareLinkDark` · `ShareLinkWeb` · `ShareLinkWebDark` | 390 × 844 · 1440 × 900 | Change or turn off the link: the active link and its date, "Đổi link mới" (the old link stops at once) or "Tắt chia sẻ" (no one can open the roll until a new link is made; posted stories open "Link này không mở được nữa"), then the confirmations and the "Chưa có link" state with "Tạo link mới" | [SHARE-1](../product/requirements/sharing.md) |
+| `ShareInApp` · `ShareInAppDark` | 390 × 844 | The share screen opened inside Zalo's in-app browser: "Ở đây chưa đăng story được", three steps (save the story image, copy the link, post from Instagram with a link sticker), or open in Safari or Chrome | [SHARE-4](../product/requirements/sharing.md), roadmap risk "Web Share inside in-app browsers" |
+| `LinkPreview` | 1200 × 630 | The link preview image for a roll with scans: owner and roll number, title, film and camera in mono, keeper and oops counts, "bấm để xem cả cuộn", with the 1:1 crop marked | [SHARE-3](../product/requirements/sharing.md) |
+| `LinkPreviewNoScans` | 1200 × 630 | The same for a roll still at the lab: a drawn canister, "cuộn đang ở lab, sắp có scan", "Chờ scan" | [SHARE-3](../product/requirements/sharing.md) |
+| `LinkPreviewChat` | 390 × 844 | A sample chat (not Cuộn's UI) showing the preview as a wide card and as a square crop | [SHARE-3](../product/requirements/sharing.md) |
+| `SharedRevoked` · `SharedRevokedDark` · `SharedRevokedWeb` · `SharedRevokedWebDark` | 390 × 844 · 1440 × 900 | What a friend sees on a revoked link: "Link này không mở được nữa", ask the owner for a new one, then a sign-up pitch "Tạo kệ của bạn — miễn phí" | [SHARE-1](../product/requirements/sharing.md) |
+| `SharedRollDark` · `SharedRollWebDark` | 390 × 1680 · 1440 × 2260 | Darkroom versions of the friend view, film strip (Paper boards on page "Chia sẻ & lab") | [SHARE-2](../product/requirements/sharing.md) |
+| `SharedGridDark` · `SharedGridWebDark` | 390 × 1660 · 1440 × 1600 | Darkroom versions of the friend view, grid | [COL-5](../product/requirements/collection.md) |
 
 ## Page "Bộ sưu tập" (collection)
 
