@@ -4,7 +4,7 @@ import { and, asc, count, eq, inArray, isNull } from "drizzle-orm";
 import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { frame, mistake, note, roll } from "@/db/schema";
 import type { TDb } from "@/features/shared/db";
-import { bumpRollVersion, ownedFrame, ownsRoll } from "@/features/shared/roll-access";
+import { bumpRollVersion, ownedFrame, ownedReadyFrames, ownsRoll } from "@/features/shared/roll-access";
 
 export type TFrameResult = { ok: true } | { ok: false; error: "not_found" };
 
@@ -27,6 +27,30 @@ export async function setFrameMarksCore<TQueryResult extends PgQueryResultHKT>(
 
   await db.update(frame).set({ isKeeper, isBlank, updatedAt: new Date() }).where(eq(frame.id, row.id));
   await bumpRollVersion(db, row.rollId);
+  return { ok: true };
+}
+
+/** COL-4, plan D12: one mark on many frames in one transaction, one version bump. Blank and tấm ưng clear each other (D3). */
+export async function setFramesMarksCore<TQueryResult extends PgQueryResultHKT>(
+  db: TDb<TQueryResult>,
+  userId: string,
+  input: { rollId: string; frameIds: string[]; mark: "keeper" | "blank"; on: boolean },
+): Promise<TFrameResult> {
+  const ids = await ownedReadyFrames(db, userId, input.rollId, input.frameIds);
+  if (!ids) return { ok: false, error: "not_found" };
+
+  const set =
+    input.mark === "keeper"
+      ? input.on
+        ? { isKeeper: true, isBlank: false }
+        : { isKeeper: false }
+      : input.on
+        ? { isBlank: true, isKeeper: false }
+        : { isBlank: false };
+  await db.transaction(async (tx) => {
+    await tx.update(frame).set({ ...set, updatedAt: new Date() }).where(inArray(frame.id, ids));
+  });
+  await bumpRollVersion(db, input.rollId);
   return { ok: true };
 }
 

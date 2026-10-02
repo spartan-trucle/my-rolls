@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { frame, mistake, note, roll } from "@/db/schema";
 import { createTestDb } from "@/db/test-db";
 import { seedRollWithFrames } from "@/test/phase2-fixtures";
-import { deleteFrameCore, listRollFramesCore, moveFrameCore, restoreFrameCore, setFrameMarksCore } from "./core";
+import { deleteFrameCore, listRollFramesCore, moveFrameCore, restoreFrameCore, setFrameMarksCore, setFramesMarksCore } from "./core";
 
 let cleanup: (() => Promise<void>) | undefined;
 afterEach(async () => {
@@ -143,5 +143,65 @@ describe("listRollFramesCore", () => {
       },
     ]);
     expect(await listRollFramesCore(db, OTHER, r.id, { publicUrl: PUBLIC })).toEqual([]);
+  });
+});
+
+describe("setFramesMarksCore (COL-4, D12)", () => {
+  it("sets tấm ưng on every selected frame and clears blank on them, with one version bump", async () => {
+    const { db, frames, roll: r } = await setup(4);
+    await db.update(frame).set({ isBlank: true }).where(eq(frame.id, frames[0].id));
+    const ids = [frames[0].id, frames[1].id, frames[2].id];
+    expect(await setFramesMarksCore(db, USER, { rollId: r.id, frameIds: ids, mark: "keeper", on: true })).toEqual({ ok: true });
+    const rows = await db.select().from(frame).where(eq(frame.rollId, r.id)).orderBy(frame.position);
+    expect(rows.map((f) => [f.isKeeper, f.isBlank])).toEqual([
+      [true, false],
+      [true, false],
+      [true, false],
+      [false, false],
+    ]);
+    expect(await version(db, r.id)).toBe(2);
+  });
+
+  it("blank on clears tấm ưng; off removes only that mark", async () => {
+    const { db, frames, roll: r } = await setup(2);
+    const ids = frames.map((f) => f.id);
+    await setFramesMarksCore(db, USER, { rollId: r.id, frameIds: ids, mark: "keeper", on: true });
+    await setFramesMarksCore(db, USER, { rollId: r.id, frameIds: ids, mark: "blank", on: true });
+    let rows = await db.select().from(frame).where(eq(frame.rollId, r.id));
+    expect(rows.every((f) => f.isBlank && !f.isKeeper)).toBe(true);
+    await setFramesMarksCore(db, USER, { rollId: r.id, frameIds: ids, mark: "blank", on: false });
+    rows = await db.select().from(frame).where(eq(frame.rollId, r.id));
+    expect(rows.every((f) => !f.isBlank && !f.isKeeper)).toBe(true);
+  });
+
+  it("changes nothing when any id isn't a live frame of this user's roll", async () => {
+    const { db, frames, roll: r } = await setup(2);
+    const other = await seedRollWithFrames(db, USER, 1);
+    const result = await setFramesMarksCore(db, USER, { rollId: r.id, frameIds: [frames[0].id, other.frames[0].id], mark: "keeper", on: true });
+    expect(result).toEqual({ ok: false, error: "not_found" });
+    const [row] = await db.select().from(frame).where(eq(frame.id, frames[0].id));
+    expect(row.isKeeper).toBe(false);
+    expect(await setFramesMarksCore(db, OTHER, { rollId: r.id, frameIds: [frames[0].id], mark: "keeper", on: true })).toEqual({
+      ok: false,
+      error: "not_found",
+    });
+    expect(await version(db, r.id)).toBe(1);
+  });
+
+  it("an empty list or more than 500 ids is refused without writing", async () => {
+    const { db, roll: r } = await setup(1);
+    expect(await setFramesMarksCore(db, USER, { rollId: r.id, frameIds: [], mark: "keeper", on: true })).toEqual({ ok: false, error: "not_found" });
+    const many = Array.from({ length: 501 }, () => crypto.randomUUID());
+    expect(await setFramesMarksCore(db, USER, { rollId: r.id, frameIds: many, mark: "keeper", on: true })).toEqual({ ok: false, error: "not_found" });
+    expect(await version(db, r.id)).toBe(1);
+  });
+
+  it("duplicate ids are harmless", async () => {
+    const { db, frames, roll: r } = await setup(2);
+    const id = frames[0].id;
+    expect(await setFramesMarksCore(db, USER, { rollId: r.id, frameIds: [id, id], mark: "keeper", on: true })).toEqual({ ok: true });
+    const [row] = await db.select().from(frame).where(eq(frame.id, id));
+    expect(row.isKeeper).toBe(true);
+    expect(await version(db, r.id)).toBe(2);
   });
 });

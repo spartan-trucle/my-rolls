@@ -5,7 +5,7 @@ import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { MISTAKE_TYPES, mistake, type TMistakeType } from "@/db/schema";
 import type { TDb } from "@/features/shared/db";
-import { bumpRollVersion, ownedFrame, ownsRoll } from "@/features/shared/roll-access";
+import { bumpRollVersion, ownedFrame, ownedReadyFrames, ownsRoll } from "@/features/shared/roll-access";
 
 const itemsSchema = z
   .array(z.object({ type: z.enum(MISTAKE_TYPES), note: z.string().max(500).optional() }))
@@ -67,6 +67,34 @@ export async function setMistakesCore<TQueryResult extends PgQueryResultHKT>(
     }
   });
 
+  await bumpRollVersion(db, input.rollId);
+  return { ok: true };
+}
+
+/** COL-4 bulk oops, plan D13: add the picked types to every frame; existing mistakes stay; one version bump. */
+export async function addMistakesToFramesCore<TQueryResult extends PgQueryResultHKT>(
+  db: TDb<TQueryResult>,
+  userId: string,
+  input: { rollId: string; frameIds: string[]; items: Array<{ type: TMistakeType; note?: string }> },
+): Promise<TSetMistakesResult> {
+  const parsed = itemsSchema.safeParse(input.items);
+  if (!parsed.success || parsed.data.length === 0) return { ok: false, error: "invalid_input" };
+  const ids = await ownedReadyFrames(db, userId, input.rollId, input.frameIds);
+  if (!ids) return { ok: false, error: "not_found" };
+
+  await db.transaction(async (tx) => {
+    const existing = await tx
+      .select({ frameId: mistake.frameId, type: mistake.type })
+      .from(mistake)
+      .where(and(inArray(mistake.frameId, ids), isNull(mistake.deletedAt)));
+    const have = new Set(existing.map((m) => `${m.frameId}|${m.type}`));
+    const rows = ids.flatMap((frameId) =>
+      parsed.data
+        .filter((i) => !have.has(`${frameId}|${i.type}`))
+        .map((i) => ({ userId, rollId: input.rollId, frameId, type: i.type, note: i.note?.trim() || null })),
+    );
+    if (rows.length > 0) await tx.insert(mistake).values(rows);
+  });
   await bumpRollVersion(db, input.rollId);
   return { ok: true };
 }

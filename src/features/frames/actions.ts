@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { getDb } from "@/db/client";
 import { sessionUserIdForAction } from "@/features/shared/session-user";
 import { captureServerEvent } from "@/lib/posthog-server";
@@ -10,6 +11,7 @@ import {
   moveFrameCore,
   restoreFrameCore,
   setFrameMarksCore,
+  setFramesMarksCore,
   type IRollFrame,
   type TFrameResult,
 } from "./core";
@@ -29,6 +31,28 @@ export async function setFrameMarksAction(input: { frameId: string; isKeeper?: b
       event: "frame_marked",
       properties: { mark, on: mark === "blank" ? input.isBlank : input.isKeeper },
     });
+  }
+  return result;
+}
+
+export async function setFramesMarksAction(input: {
+  rollId: string;
+  frameIds: string[];
+  mark: "keeper" | "blank";
+  on: boolean;
+  via: "button" | "key";
+}): Promise<TFrameResult> {
+  const userId = await sessionUserIdForAction();
+  if (!userId) return NOT_FOUND;
+  const { via, ...core } = input;
+  const result = await setFramesMarksCore(getDb(), userId, core);
+  if (result.ok) {
+    await captureServerEvent({
+      distinctId: userId,
+      event: "frames_bulk_marked",
+      properties: { mark: input.mark, on: input.on, count: input.frameIds.length, via },
+    });
+    revalidatePath(`/rolls/${input.rollId}`);
   }
   return result;
 }
