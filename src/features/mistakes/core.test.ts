@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { mistake, roll } from "@/db/schema";
 import { createTestDb } from "@/db/test-db";
 import { seedRollWithFrames } from "@/test/phase2-fixtures";
-import { listRollMistakesCore, setMistakesCore } from "./core";
+import { addMistakesToFramesCore, listRollMistakesCore, setMistakesCore } from "./core";
 
 let cleanup: (() => Promise<void>) | undefined;
 afterEach(async () => {
@@ -14,10 +14,10 @@ afterEach(async () => {
 const USER = "user-1";
 const OTHER = "user-2";
 
-async function setup() {
+async function setup(n = 2) {
   const { db, client } = await createTestDb();
   cleanup = () => client.close();
-  return { db, ...(await seedRollWithFrames(db, USER, 2)) };
+  return { db, ...(await seedRollWithFrames(db, USER, n)) };
 }
 
 const live = (db: Awaited<ReturnType<typeof setup>>["db"]) => db.select().from(mistake).where(isNull(mistake.deletedAt));
@@ -95,5 +95,53 @@ describe("listRollMistakesCore", () => {
     expect(await listRollMistakesCore(db, OTHER, r.id)).toEqual([]);
     const rows = await db.select().from(mistake).where(and(eq(mistake.rollId, r.id)));
     expect(rows).toHaveLength(1);
+  });
+});
+
+describe("addMistakesToFramesCore (COL-4 bulk oops, D13)", () => {
+  it("adds the picked types to every frame and keeps their existing mistakes", async () => {
+    const { db, frames, roll: r } = await setup(3);
+    await setMistakesCore(db, USER, { rollId: r.id, frameId: frames[0].id, items: [{ type: "light_leak" }] });
+    const ids = frames.map((f) => f.id);
+    expect(
+      await addMistakesToFramesCore(db, USER, { rollId: r.id, frameIds: ids, items: [{ type: "camera_shake", note: "run" }, { type: "light_leak" }] }),
+    ).toEqual({ ok: true });
+
+    const rows = await db.select().from(mistake).where(and(eq(mistake.rollId, r.id), isNull(mistake.deletedAt)));
+    const byFrame = (id: string) => rows.filter((m) => m.frameId === id).map((m) => m.type).sort();
+    expect(byFrame(frames[0].id)).toEqual(["camera_shake", "light_leak"]);
+    expect(byFrame(frames[2].id)).toEqual(["camera_shake", "light_leak"]);
+    expect(rows.find((m) => m.frameId === frames[1].id && m.type === "camera_shake")?.note).toBe("run");
+  });
+
+  it("is idempotent: running it twice adds no duplicate rows", async () => {
+    const { db, frames, roll: r } = await setup(2);
+    const input = { rollId: r.id, frameIds: frames.map((f) => f.id), items: [{ type: "light_leak" as const }] };
+    await addMistakesToFramesCore(db, USER, input);
+    await addMistakesToFramesCore(db, USER, input);
+    const rows = await db.select().from(mistake).where(and(eq(mistake.rollId, r.id), isNull(mistake.deletedAt)));
+    expect(rows).toHaveLength(2);
+  });
+
+  it("refuses no types, an unknown type, or a frame from another roll, without writing", async () => {
+    const { db, frames, roll: r } = await setup(1);
+    const other = await seedRollWithFrames(db, USER, 1);
+    expect(await addMistakesToFramesCore(db, USER, { rollId: r.id, frameIds: [frames[0].id], items: [] })).toEqual({ ok: false, error: "invalid_input" });
+    expect(
+      await addMistakesToFramesCore(db, USER, { rollId: r.id, frameIds: [frames[0].id], items: [{ type: "blinked" as never }] }),
+    ).toEqual({ ok: false, error: "invalid_input" });
+    expect(
+      await addMistakesToFramesCore(db, USER, { rollId: r.id, frameIds: [other.frames[0].id], items: [{ type: "light_leak" }] }),
+    ).toEqual({ ok: false, error: "not_found" });
+    expect(await db.select().from(mistake)).toHaveLength(0);
+    expect((await db.select({ v: roll.version }).from(roll).where(eq(roll.id, r.id)))[0].v).toBe(1);
+  });
+
+  it("duplicate frame ids are harmless and the version bumps once", async () => {
+    const { db, frames, roll: r } = await setup(1);
+    const id = frames[0].id;
+    await addMistakesToFramesCore(db, USER, { rollId: r.id, frameIds: [id, id], items: [{ type: "light_leak" }] });
+    expect(await live(db)).toHaveLength(1);
+    expect((await db.select({ v: roll.version }).from(roll).where(eq(roll.id, r.id)))[0].v).toBe(2);
   });
 });

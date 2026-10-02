@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { frame, roll } from "@/db/schema";
 import type { TDb } from "./db";
@@ -47,4 +47,32 @@ export async function bumpRollVersion<TQueryResult extends PgQueryResultHKT>(db:
     .update(roll)
     .set({ version: sql`${roll.version} + 1`, updatedAt: new Date() })
     .where(eq(roll.id, rollId));
+}
+
+/** Most frames one bulk action may touch. */
+export const MAX_BULK_FRAMES = 500;
+
+/** The caller's live, ready frames among `frameIds` on `rollId` (deduped); null unless every id matched. */
+export async function ownedReadyFrames<TQueryResult extends PgQueryResultHKT>(
+  db: TDb<TQueryResult>,
+  userId: string,
+  rollId: string,
+  frameIds: string[],
+): Promise<string[] | null> {
+  const unique = [...new Set(frameIds)];
+  if (unique.length === 0 || unique.length > MAX_BULK_FRAMES) return null;
+  if (!(await ownsRoll(db, userId, rollId))) return null;
+  const rows = await db
+    .select({ id: frame.id })
+    .from(frame)
+    .where(
+      and(
+        inArray(frame.id, unique),
+        eq(frame.rollId, rollId),
+        eq(frame.userId, userId),
+        eq(frame.status, "ready"),
+        isNull(frame.deletedAt),
+      ),
+    );
+  return rows.length === unique.length ? unique : null;
 }
