@@ -119,6 +119,15 @@ export async function listRollFramesCore<TQueryResult extends PgQueryResultHKT>(
     .from(frame)
     .where(and(eq(frame.rollId, rollId), eq(frame.userId, userId), eq(frame.status, "ready"), isNull(frame.deletedAt)))
     .orderBy(asc(frame.position));
+  return toRollFrames(db, rows, opts.publicUrl);
+}
+
+/** Ready frame rows → IRollFrame, with D5's oops and a note count. Shared by the roll page and the library grid. */
+export async function toRollFrames<TQueryResult extends PgQueryResultHKT>(
+  db: TDb<TQueryResult>,
+  rows: (typeof frame.$inferSelect)[],
+  publicUrl: string,
+): Promise<IRollFrame[]> {
   if (rows.length === 0) return [];
 
   const ids = rows.map((r) => r.id);
@@ -134,7 +143,7 @@ export async function listRollFramesCore<TQueryResult extends PgQueryResultHKT>(
 
   const oopsIds = new Set(oops.map((o) => o.frameId));
   const noteCounts = new Map(notes.map((n) => [n.frameId, Number(n.value)]));
-  const base = opts.publicUrl.replace(/\/+$/, "");
+  const base = publicUrl.replace(/\/+$/, "");
 
   return rows.map((r) => ({
     id: r.id,
