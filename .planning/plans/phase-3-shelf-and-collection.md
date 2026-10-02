@@ -41,7 +41,7 @@ The inputs and conditions most likely to bite a real user that the requirements 
 - **Design canvas:** `1790936301-40d9` (147 boards), re-indexed in `wireframes.md` in P0: a new page "Chia sẻ · MVP" with 21 Phase 4 boards. **No Phase 3 boards yet.** `RollGrid`, `RollGridWeb`, `LibraryGrid` and `LibraryGridWeb` exist in Paper only.
 - **Missing boards** ([missing-screens.md](../../docs/design/missing-screens.md#phase-3--shelf--collection)): canister shelf, canister editor, owner's roll in film-strip view, filters and lightbox. Plus Darkroom for the four grid boards, and the empty "Tấm ưng" state. Task D0 draws them.
 - **Content:** canister photos matched to catalogue entries are due 23.11.2026. No stock has `canister_photo_key` set today, so photo mode is built with a drawn fallback and lights up when the photos land.
-- **Plan status:** **blockers answered 02.10.2026 (Trúc)**: defaults for 2, 3, 5 and 6, and the `canister_style` column for 4 (after weighing the no-migration option). Execution: subagent-driven.
+- **Plan status:** **boards approved 02.10.2026 (Trúc), D19 added. Blockers answered 02.10.2026 (Trúc)**: defaults for 2, 3, 5 and 6, and the `canister_style` column for 4 (after weighing the no-migration option). Execution: subagent-driven.
 
 ## Blockers (answered 02.10.2026)
 
@@ -93,6 +93,7 @@ A change to one of these goes back to Trúc first.
 | D16 | Film strip flags | A frame that is both tấm ưng and oops shows the keeper flag in Dải phim (one flag per frame there); the grid shows both | `FilmStrip` takes one `flag`. Mistakes are content, but the strip "says nothing" if every frame is flagged |
 | D17 | Analytics (PostHog) | `view_switched` (surface: `roll` \| `library`, view), `frames_bulk_marked` (mark: `keeper` \| `blank` \| `oops`, on, count, via: `button` \| `key`), `canister_customised` (style, preset or `custom`), `lightbox_opened` (surface) | The exit check, and whether people use the beautiful view |
 | D18 | Canister photos | Served from the public bucket: `${R2_PUBLIC_URL}/${stock.canister_photo_key}` | Same bucket as the scan copies; photos are reference images, not user data |
+| D19 | Film strip frames | **Uncropped** (`object-fit: contain` on the `film` ground), in the app's `FilmStrip` and in the design system's `bundle.css` / `FilmStrip` README. Decided by Trúc 02.10.2026 when approving the boards | The design system's own rule says scans are never cropped; its component cropped to 3:2. The boards draw it uncropped |
 
 ## Order
 
@@ -170,7 +171,7 @@ Only with Trúc's yes on blocker 6 (CLAUDE.md: never create or sync docs silentl
 - [x] **Step 1:** Re-read the canvas (`canvas.json`, the `RollGrid…` and `LibraryGrid…` boards, `Home…`, `RollFrames…`, `FrameView…`, `MistakePicker…`).
 - [x] **Step 2:** Draw every board in [Designs](#designs-d0-to-draw) on page "Kệ & bộ sưu tập" with the blocker defaults, using the design system's `bundle.css` components. Use the Task 1 tokens for the three new presets (inline values on the canvas until the design system carries them).
 - [x] **Step 3:** Add the boards to `wireframes.md`, tick the four Phase 3 rows and the "Tấm ưng tab" and Darkroom rows they cover in `missing-screens.md`.
-- [ ] **Step 4:** Ask Trúc to approve the boards. (Drawn 02.10.2026 on canvas `1790944574-5a0f`, 28 new boards; asked 02.10.2026.) **Tasks 6–10 wait for this.**
+- [x] **Step 4:** Ask Trúc to approve the boards. (Drawn 02.10.2026 on canvas `1790944574-5a0f`, 28 new boards; **approved as drawn by Trúc, 02.10.2026**.) **Tasks 6–10 wait for this.**
 - [ ] **Step 5: Commit** `docs(cuon): index the phase 3 boards`.
 
 ### Task 1: Canister tokens (~0.75 h)
