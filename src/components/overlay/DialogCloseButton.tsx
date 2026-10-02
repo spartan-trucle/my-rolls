@@ -1,12 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import type { Ref } from "react";
 import { cx } from "@/design-system/cx";
 import styles from "./DialogCloseButton.module.css";
 
 export interface DialogCloseButtonProps {
   onClose: () => void;
   className?: string;
+  /** React 19 passes `ref` as a prop: the lightbox focuses its close button on open. */
+  ref?: Ref<HTMLButtonElement>;
 }
 
 /**
@@ -16,11 +19,11 @@ export interface DialogCloseButtonProps {
  * edge rather than the row's own padding. No `IconName` in the design
  * system covers an X, so this draws the same inline path the boards use.
  */
-export function DialogCloseButton({ onClose, className }: DialogCloseButtonProps) {
+export function DialogCloseButton({ onClose, className, ref }: DialogCloseButtonProps) {
   const t = useTranslations("common");
 
   return (
-    <button type="button" className={cx(styles.close, className)} aria-label={t("close")} onClick={onClose}>
+    <button ref={ref} type="button" className={cx(styles.close, className)} aria-label={t("close")} onClick={onClose}>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden="true">
         <path d="M6 6l12 12M18 6L6 18" />
       </svg>

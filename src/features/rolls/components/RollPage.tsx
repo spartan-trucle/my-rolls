@@ -2,10 +2,12 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Icon, Stamp } from "@/design-system";
 import { CanisterEditor } from "@/features/canister/components/CanisterEditor";
+import { RollViews } from "@/features/collection/components/RollViews";
+import type { TFrameFilter } from "@/features/collection/filters";
+import type { TRollView } from "@/features/collection/view-pref";
 import { cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
 import type { IRollEntry } from "@/features/rolls/core";
 import { formatRollDate } from "@/features/rolls/format-date";
-import { FrameGrid } from "@/features/frames/components/FrameGrid";
 import type { IRollFrame } from "@/features/frames/core";
 import type { IRollMistake } from "@/features/mistakes/core";
 import type { IRollNote } from "@/features/notes/core";
@@ -29,6 +31,10 @@ export interface RollPageProps {
   notes?: IRollNote[];
   /** The roll's live mistakes (NOTE-2); roll-level ones are stamped on the header. */
   mistakes?: IRollMistake[];
+  /** COL-1: Dải phim (default) or Lưới, resolved from the URL and the remembered view. */
+  view?: TRollView;
+  /** COL-2: the grid's filter, from the URL. */
+  filter?: TFrameFilter;
 }
 
 function DetailRow({ label, value }: { label: string; value: string | null }) {
@@ -53,7 +59,7 @@ function joinMeta(parts: Array<string | false | null | undefined>): string | nul
  * (SCAN-1). `getRollPageContent` (the page itself) already 404s a missing
  * or another user's roll; this only renders one that was found.
  */
-export async function RollPage({ roll, justSaved = false, openUpload = false, scanSet = null, frames = [], notes = [], mistakes = [] }: RollPageProps) {
+export async function RollPage({ roll, justSaved = false, openUpload = false, scanSet = null, frames = [], notes = [], mistakes = [], view = "strip", filter = "all" }: RollPageProps) {
   const t = await getTranslations("rolls.page");
   const tTypes = await getTranslations("catalogue.types");
   const tFrames = await getTranslations("frames");
@@ -100,6 +106,9 @@ export async function RollPage({ roll, justSaved = false, openUpload = false, sc
       ])
     : null;
 
+  // RollStrip: the strip's lower rail, "GOLD 200 · CUỘN 14".
+  const edgeText = [roll.stock?.name.toUpperCase(), roll.number != null ? t("stripEdge", { number: roll.number }) : null].filter(Boolean).join(" · ");
+
   const formatDetail = joinMeta([roll.format, roll.exposures !== null ? t("detailFormatExposures", { count: roll.exposures }) : null]);
 
   return (
@@ -127,58 +136,65 @@ export async function RollPage({ roll, justSaved = false, openUpload = false, sc
         </div>
       ) : null}
 
+      {/* RollStrip: the title block on the left, the roll's canister on the right; it opens the canister editor (CAN-2). */}
+      <div className={styles.header}>
+        <div className={styles.headingBlock}>
+          {/* The number kicker only adds something over a name; an unnamed roll's title is already "Cuộn #N". */}
+          {roll.name !== null && roll.number != null ? <span className={styles.kicker}><Icon name="roll" size={16} /> {t("kickerNumber", { number: roll.number })}</span> : null}
+          <h1 className={styles.heading}>{title}</h1>
+          {roll.name === null ? (
+            <Link href={`/rolls/${roll.id}/edit`} className={styles.nameLink}>
+              {t("nameLink")}
+            </Link>
+          ) : null}
+          {(filmMetaLine || cameraMetaLine) ? (
+            <p className={styles.metaLine}>
+              {filmMetaLine}
+              {filmMetaLine && cameraMetaLine ? <br /> : null}
+              {cameraMetaLine}
+            </p>
+          ) : null}
+        </div>
+        <CanisterEditor roll={roll} />
+      </div>
+
+      <div className={styles.stamps}>
+        {frames.length === 0 && (roll.frameCount ?? 0) === 0 ? (
+          <Stamp tone="ink" icon="upload" label={t("waitingScan")}>
+            {t("waitingScan")}
+          </Stamp>
+        ) : null}
+        {frames.length > 0 ? <Stamp tone="ink">{tFrames("stampFrames", { count: frames.length })}</Stamp> : null}
+        {keeperCount > 0 ? (
+          <Stamp tone="keeper" icon="keeper" label={tFrames("stampKeepers", { count: keeperCount })}>
+            {keeperCount}
+          </Stamp>
+        ) : null}
+        {rollMistakes.map((m) => (
+          <Stamp key={m.id} tone="oops" icon="oops" label={tMistakes(`types.${m.type}`)}>
+            {tMistakes(`types.${m.type}`)}
+          </Stamp>
+        ))}
+        {oopsCount > 0 ? (
+          <Stamp tone="oops" icon="oops" label={tFrames("stampOops", { count: oopsCount })}>
+            {oopsCount}
+          </Stamp>
+        ) : null}
+        {roll.pushPull && roll.pushPull !== "0" ? (
+          <Stamp>{t(roll.pushPull.startsWith("−") ? "pushPullStampPull" : "pushPullStampPush", { pp: roll.pushPull })}</Stamp>
+        ) : null}
+        {roll.format ? <Stamp>{roll.exposures ? `${roll.format} · ${roll.exposures} exp` : roll.format}</Stamp> : null}
+      </div>
+
+      {/* COL-1 / COL-2 (RollStrip, RollGrid): the switch, then the strip edge to edge or the filtered grid. */}
+      {frames.length > 0 ? (
+        <section aria-label={tFrames("heading")} className={styles.frames}>
+          <RollViews rollId={roll.id} frames={frames} view={view} filter={filter} edgeText={edgeText} />
+        </section>
+      ) : null}
+
       <div className={styles.layout}>
         <div className={styles.main}>
-          {/* RollStrip: the title block on the left, the roll's canister on the right; it opens the canister editor (CAN-2). */}
-          <div className={styles.header}>
-            <div className={styles.headingBlock}>
-              {/* The number kicker only adds something over a name; an unnamed roll's title is already "Cuộn #N". */}
-              {roll.name !== null && roll.number != null ? <span className={styles.kicker}><Icon name="roll" size={16} /> {t("kickerNumber", { number: roll.number })}</span> : null}
-              <h1 className={styles.heading}>{title}</h1>
-              {roll.name === null ? (
-                <Link href={`/rolls/${roll.id}/edit`} className={styles.nameLink}>
-                  {t("nameLink")}
-                </Link>
-              ) : null}
-              {(filmMetaLine || cameraMetaLine) ? (
-                <p className={styles.metaLine}>
-                  {filmMetaLine}
-                  {filmMetaLine && cameraMetaLine ? <br /> : null}
-                  {cameraMetaLine}
-                </p>
-              ) : null}
-            </div>
-            <CanisterEditor roll={roll} />
-          </div>
-
-          <div className={styles.stamps}>
-            {frames.length === 0 && (roll.frameCount ?? 0) === 0 ? (
-              <Stamp tone="ink" icon="upload" label={t("waitingScan")}>
-                {t("waitingScan")}
-              </Stamp>
-            ) : null}
-            {frames.length > 0 ? <Stamp tone="ink">{tFrames("stampFrames", { count: frames.length })}</Stamp> : null}
-            {keeperCount > 0 ? (
-              <Stamp tone="keeper" icon="keeper" label={tFrames("stampKeepers", { count: keeperCount })}>
-                {keeperCount}
-              </Stamp>
-            ) : null}
-            {rollMistakes.map((m) => (
-              <Stamp key={m.id} tone="oops" icon="oops" label={tMistakes(`types.${m.type}`)}>
-                {tMistakes(`types.${m.type}`)}
-              </Stamp>
-            ))}
-            {oopsCount > 0 ? (
-              <Stamp tone="oops" icon="oops" label={tFrames("stampOops", { count: oopsCount })}>
-                {oopsCount}
-              </Stamp>
-            ) : null}
-            {roll.pushPull && roll.pushPull !== "0" ? (
-              <Stamp>{t(roll.pushPull.startsWith("−") ? "pushPullStampPull" : "pushPullStampPush", { pp: roll.pushPull })}</Stamp>
-            ) : null}
-            {roll.format ? <Stamp>{roll.exposures ? `${roll.format} · ${roll.exposures} exp` : roll.format}</Stamp> : null}
-          </div>
-
           <section aria-labelledby="roll-details-heading" className={`${styles.section} ${styles.details}`}>
             <div className={styles.detailsHeadingRow}>
               <h2 id="roll-details-heading" className={styles.sectionHeading}>
@@ -200,21 +216,6 @@ export async function RollPage({ roll, justSaved = false, openUpload = false, sc
         </div>
 
         <div className={styles.side}>
-          {frames.length > 0 ? (
-            <section aria-labelledby="roll-frames-heading" className={`${styles.section} ${styles.frames}`}>
-              <div className={styles.sectionHead}>
-                <h2 id="roll-frames-heading" className={styles.sectionHeading}>
-                  {tFrames("heading")}
-                </h2>
-                <a href="#roll-scan-heading" className={styles.sectionLink}>
-                  {tFrames("addScans")}
-                </a>
-              </div>
-              <p className={styles.sectionHint}>{tFrames("sortHint")}</p>
-              <FrameGrid rollId={roll.id} frames={frames} />
-            </section>
-          ) : null}
-
           <section aria-labelledby="roll-memory-heading" className={`${styles.section} ${styles.notes}`}>
             <div className={styles.sectionHead}>
               <h2 id="roll-memory-heading" className={styles.sectionHeading}>

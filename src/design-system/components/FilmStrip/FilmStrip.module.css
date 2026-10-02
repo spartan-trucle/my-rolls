@@ -43,8 +43,9 @@
   width: 100%;
   aspect-ratio: 3 / 2;
   margin: var(--space-1) 0;
-  object-fit: cover;
-  background: var(--ink-muted);
+  /* D19: the whole scan, never cropped; the 3:2 cell letterboxes on film. */
+  object-fit: contain;
+  background: var(--film);
   border-radius: var(--radius-sm);
 }
 .blank { background: var(--film-hole); opacity: 0.92; }

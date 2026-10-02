@@ -574,7 +574,8 @@
       "editDetails": "Sửa chi tiết",
       "detailFormatExposures": "{count} kiểu",
       "pushPullStampPush": "Đẩy {pp}",
-      "pushPullStampPull": "Kéo {pp}"
+      "pushPullStampPull": "Kéo {pp}",
+      "stripEdge": "CUỘN {number}"
     }
   },
   "onboarding": {
@@ -746,8 +747,6 @@
     "keeperIcon": "Tấm ưng",
     "oopsIcon": "Oops",
     "heading": "Các tấm",
-    "sortHint": "Xếp theo tên tệp. Chạm một tấm để đánh dấu tấm ưng, tấm trắng hay oops.",
-    "addScans": "+ Thêm scan",
     "position": "Tấm {n}/{total}",
     "prev": "Tấm trước",
     "next": "Tấm sau",
@@ -766,7 +765,8 @@
     "back": "‹ {roll}",
     "stampFrames": "{count} tấm",
     "stampKeepers": "{count} tấm ưng",
-    "stampOops": "{count} oops"
+    "stampOops": "{count} oops",
+    "blankCell": "TRẮNG"
   },
   "notes": {
     "pageTitle": "Ghi chú & kỷ niệm",
@@ -822,5 +822,37 @@
       "mono": "Than chì",
       "cream": "Kem"
     }
+  },
+  "filters": {
+    "label": "Lọc tấm",
+    "all": "Tất cả",
+    "keeper": "Tấm ưng",
+    "oops": "Oops",
+    "blank": "Tấm trắng"
+  },
+  "lightbox": {
+    "frame": "Tấm {n}",
+    "blank": "Tấm {n}, trắng",
+    "blankTile": "TẤM TRẮNG",
+    "position": "Tấm {n}/{total}",
+    "positionFiltered": "Tấm {n}/{total} · {filter} {i}/{count}",
+    "prev": "Tấm trước",
+    "next": "Tấm sau",
+    "detail": "Chi tiết",
+    "close": "Đóng",
+    "keeper": "Tấm ưng",
+    "oops": "Oops",
+    "hintKeys": "← → để chuyển tấm · Esc để đóng",
+    "hintSwipe": "Vuốt sang hai bên để chuyển tấm"
+  },
+  "rollViews": {
+    "strip": "Dải phim",
+    "frame": "Tấm {n}",
+    "blankFrame": "Tấm {n}, trắng",
+    "keeper": "Tấm ưng",
+    "oops": "Oops",
+    "emptyFilter": "Không có tấm nào ở đây",
+    "stripHintTouch": "Vuốt dải phim để xem tiếp. Chạm một tấm để xem lớn.",
+    "stripHintPointer": "Kéo hoặc cuộn ngang để xem tiếp. Bấm một tấm để xem lớn."
   }
 }

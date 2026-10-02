@@ -19,6 +19,11 @@ describe("FilmStrip", () => {
     expect(within(list).getAllByRole("listitem")).toHaveLength(4);
   });
 
+  it("is a named region, so the roll page can point to it (R18)", () => {
+    render(<FilmStrip frames={frames} labels={labels} />);
+    expect(screen.getByRole("region", { name: labels.strip })).toContainElement(screen.getByRole("list"));
+  });
+
   it("shows scans with their alt and blank frames as a named image", () => {
     render(<FilmStrip frames={frames} labels={labels} />);
     expect(screen.getByRole("img", { name: "Chợ Đà Lạt buổi sáng" })).toHaveAttribute("src", "/1.webp");

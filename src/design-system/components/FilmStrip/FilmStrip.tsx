@@ -60,6 +60,7 @@ function FramePicture({ frame }: { frame: FilmFrame }) {
 
 /**
  * A roll as a strip of negatives that scrolls sideways with snap.
+ * A named region (R18) around a named list, one item per frame.
  * Give it a container with a definite width. Inside a grid track or a flex row, the parent needs
  * `min-w-0` (or a `minmax(0, 1fr)` track), otherwise the strip widens its parent instead of scrolling.
  */
@@ -68,29 +69,31 @@ export function FilmStrip({ frames, labels, frameWidth = 200, edgeText = "", cla
   const stripStyle = { ...style, "--rc-frame-w": `${frameWidth}px` } as CSSProperties;
 
   return (
-    <ul className={cx(styles.strip, className)} style={stripStyle} aria-label={labels.strip}>
-      {frames.map((frame, i) => {
-        const num = frame.number != null ? String(frame.number) : String(i + 1);
-        return (
-          <li key={`${num}-${i}`} className={styles.frame}>
-            <div className={styles.edge} aria-hidden="true">
-              <span>{num}</span>
-              <span>{`▸${num}A`}</span>
-            </div>
-            <Holes count={holeCount} />
-            <FramePicture frame={frame} />
-            {frame.flag ? (
-              <span className={styles.flag}>
-                <Stamp tone={frame.flag} solid icon={frame.flag} label={labels[frame.flag]} className={styles.flagStamp} />
-              </span>
-            ) : null}
-            <Holes count={holeCount} />
-            <div className={styles.edge} aria-hidden="true">
-              <span>{edgeText}</span>
-            </div>
-          </li>
-        );
-      })}
-    </ul>
+    <div role="region" aria-label={labels.strip}>
+      <ul className={cx(styles.strip, className)} style={stripStyle} aria-label={labels.strip}>
+        {frames.map((frame, i) => {
+          const num = frame.number != null ? String(frame.number) : String(i + 1);
+          return (
+            <li key={`${num}-${i}`} className={styles.frame}>
+              <div className={styles.edge} aria-hidden="true">
+                <span>{num}</span>
+                <span>{`▸${num}A`}</span>
+              </div>
+              <Holes count={holeCount} />
+              <FramePicture frame={frame} />
+              {frame.flag ? (
+                <span className={styles.flag}>
+                  <Stamp tone={frame.flag} solid icon={frame.flag} label={labels[frame.flag]} className={styles.flagStamp} />
+                </span>
+              ) : null}
+              <Holes count={holeCount} />
+              <div className={styles.edge} aria-hidden="true">
+                <span>{edgeText}</span>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
