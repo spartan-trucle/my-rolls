@@ -1,0 +1,483 @@
+/* `CanisterEditor` (phone sheet) / `CanisterEditorWeb` (desktop dialog)
+   boards, Phase 3 D0, and the roll header's `.canlink` from `RollStrip`.
+   The wood is the Shelf board's value (no token yet), as in Shelf.module.css. */
+
+/* The roll header's canister: the canister and an underlined "Đổi vỏ". */
+.trigger {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 64px;
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--cobalt);
+  cursor: pointer;
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* The board draws the header canister at 7px on the phone, 10px on desktop. */
+.trigger .triggerCanister {
+  font-size: 7px;
+}
+
+.triggerText {
+  font: 600 12px/16px var(--font-sans);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (min-width: 1024px) {
+  .trigger .triggerCanister {
+    font-size: 10px;
+  }
+
+  .triggerText {
+    font-size: 13px;
+  }
+}
+
+/* The phone sheet sits lower than the catalogue's full-height one (board
+   `top: 196px` on an 844px screen); content-sized on desktop at 680px.
+   Doubled class: wins over ResponsiveDialog's own `.dialog` whatever the
+   stylesheet order. */
+.dialog.dialog {
+  --wood: #b98b5d;
+  --wood-lo: #956a41;
+  --wood-edge: #6e4a2b;
+
+  top: max(44px, calc(100dvh - 648px));
+}
+
+[data-theme="dark"] .dialog {
+  --wood: #6d4c32;
+  --wood-lo: #583c27;
+  --wood-edge: #382616;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .dialog {
+    --wood: #6d4c32;
+    --wood-lo: #583c27;
+    --wood-edge: #382616;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dialog.dialog {
+    top: 50%;
+    width: 680px;
+    height: auto;
+  }
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+.grab {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 4px;
+  margin: 8px auto 0;
+  border-radius: var(--radius-pill);
+  background: var(--line-strong);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 0 16px;
+}
+
+.head > button {
+  margin: 0;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 600;
+}
+
+.body {
+  flex-grow: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 4px 16px 16px;
+}
+
+.top {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.previewColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.preview {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0 0 8px;
+}
+
+.preview .previewCanister {
+  font-size: 12px;
+}
+
+.ledge {
+  align-self: stretch;
+  height: 10px;
+  background: linear-gradient(var(--wood), var(--wood-lo));
+  border-bottom: 3px solid var(--wood-edge);
+}
+
+.film {
+  margin-top: 8px;
+  font: 400 13px/18px var(--font-sans);
+  text-align: center;
+}
+
+.sticker {
+  display: none;
+  font: 400 12px/16px var(--font-mono);
+  color: var(--ink-muted);
+}
+
+.fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.legend {
+  width: 100%;
+  margin: 0 0 10px;
+  padding: 0;
+  font: 600 12px/16px var(--font-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.looks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.look {
+  position: relative;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: 52px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  border: 1.5px solid var(--line);
+  background: var(--paper-raised);
+  cursor: pointer;
+}
+
+.look:has(input:checked) {
+  border-color: var(--cobalt);
+  background: var(--cobalt-soft);
+}
+
+.dot {
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--line-strong);
+}
+
+.look:has(input:checked) .dot {
+  border: 6px solid var(--cobalt);
+}
+
+.look:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.lookText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.lookTitle {
+  font: 600 14px/20px var(--font-sans);
+}
+
+.lookHint {
+  font: 400 12px/16px var(--font-mono);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px 8px;
+}
+
+.swatch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 6px 0 4px;
+  cursor: pointer;
+  font: 500 12px/16px var(--font-sans);
+  color: var(--ink);
+  text-align: center;
+}
+
+.swatch:has(input:checked) {
+  font-weight: 700;
+}
+
+.chip {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-strong);
+}
+
+.swatch:has(input:checked) .chip {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.swatch:has(input:focus-visible) .chip {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.tick {
+  display: none;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  background: var(--print);
+  color: var(--on-print);
+  box-shadow: 0 0 0 1px rgba(31, 26, 22, 0.25);
+}
+
+.swatch:has(input:checked) .tick {
+  display: flex;
+}
+
+.customRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.customSwatch {
+  flex-direction: row;
+  gap: 10px;
+}
+
+.picker {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1.5px solid var(--line-strong);
+  background: var(--paper-raised);
+  cursor: pointer;
+}
+
+.picker::-webkit-color-swatch-wrapper {
+  padding: 4px;
+}
+
+.picker::-webkit-color-swatch {
+  border: 0;
+}
+
+.picker:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.hex {
+  font: 400 13px/18px var(--font-mono);
+  color: var(--ink-muted);
+}
+
+.hint {
+  margin: 0;
+  font: 400 13px/18px var(--font-sans);
+  color: var(--ink-muted);
+}
+
+.rename {
+  font-weight: 600;
+}
+
+.foot {
+  flex: 0 0 auto;
+  padding: 10px 16px 20px;
+  border-top: 1px solid var(--line);
+}
+
+.error {
+  margin: 0 0 10px;
+  font: 500 13px/18px var(--font-sans);
+  color: var(--pin);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Phone: only a full-width "Lưu" (close with the X or Esc). */
+.actions .cancel {
+  display: none;
+}
+
+.actions .save {
+  width: 100%;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (min-width: 1024px) {
+  .panel {
+    gap: 20px;
+    padding: 24px 28px 20px;
+  }
+
+  .grab {
+    display: none;
+  }
+
+  .head {
+    padding: 0;
+  }
+
+  .head > button {
+    margin-right: -12px;
+  }
+
+  .title {
+    font-size: 26px;
+    line-height: 32px;
+  }
+
+  .body {
+    padding: 0;
+    gap: 20px;
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    column-gap: 32px;
+    align-items: start;
+  }
+
+  /* Desktop: the preview column spans the left; looks, colours and the
+     label hint stack on the right. */
+  .top {
+    display: contents;
+  }
+
+  .previewColumn {
+    grid-row: 1 / span 3;
+    padding-top: 8px;
+  }
+
+  .preview {
+    padding: 0 0 0 12px;
+  }
+
+  .preview .previewCanister {
+    font-size: 16px;
+  }
+
+  .ledge {
+    height: 12px;
+  }
+
+  .film {
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .sticker {
+    display: block;
+  }
+
+  .hint {
+    grid-column: 2;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .foot {
+    padding: 16px 0 0;
+  }
+
+  .actions .cancel {
+    display: inline-flex;
+    border-color: var(--line-strong);
+  }
+
+  .actions .save {
+    width: auto;
+    padding: 0 28px;
+  }
+}
