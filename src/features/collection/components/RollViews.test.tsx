@@ -1,7 +1,9 @@
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { CanisterEditor } from "@/features/canister/components/CanisterEditor";
 import { makeFrame } from "@/features/frames/test-frames";
+import type { IRollEntry } from "@/features/rolls/core";
 import { renderWithIntl as render } from "@/i18n/test-utils";
 import { RollViews } from "./RollViews";
 
@@ -211,6 +213,31 @@ describe("bulk marking (COL-4, D11–D13)", () => {
     expect(screen.getByText("Tấm 3/6")).toBeInTheDocument();
     await userEvent.keyboard("k");
     expect(mark).not.toHaveBeenCalled();
+  });
+
+  it("shortcuts are off while another dialog on the page (the canister editor) is open (Review Focus 3)", async () => {
+    const mark = vi.fn().mockResolvedValue({ ok: true });
+    const roll = { id: "r", number: 14, name: "Đà Lạt", canisterColor: "gold", canisterStyle: "stock", stock: null } as unknown as IRollEntry;
+    render(
+      <>
+        <CanisterEditor roll={roll} save={vi.fn()} />
+        <RollViews rollId="r" frames={frames} view="grid" filter="all" edgeText="" markFrames={mark} />
+      </>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: /^Tấm 1/ }));
+    await userEvent.click(screen.getByRole("button", { name: /^Tấm 2/ }));
+    await userEvent.click(screen.getByRole("button", { name: /Đổi vỏ cuộn/ }));
+    const editor = document.querySelector("dialog[open]") as HTMLElement;
+    // Focus still outside the dialog (jsdom's showModal moves none), then inside it on a button.
+    for (const target of [document.activeElement as HTMLElement, within(editor).getAllByRole("button")[0]]) {
+      target.focus();
+      fireEvent.keyDown(target, { key: "k" });
+      fireEvent.keyDown(target, { key: "b" });
+      expect(fireEvent.keyDown(target, { key: "a", ctrlKey: true })).toBe(true); // native select-all isn't blocked
+      fireEvent.keyDown(target, { key: "Escape" });
+    }
+    expect(mark).not.toHaveBeenCalled();
+    expect(screen.getByText("2 tấm đã chọn")).toBeInTheDocument();
   });
 
   it("long-press on a phone starts selecting; then taps toggle", () => {
