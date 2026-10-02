@@ -6,6 +6,8 @@ const fakeDb = vi.hoisted(() => ({ __brand: "fake-db" }));
 const createRollCore = vi.hoisted(() => vi.fn());
 const listRollsCore = vi.hoisted(() => vi.fn());
 const getRollCore = vi.hoisted(() => vi.fn());
+const setCanisterCore = vi.hoisted(() => vi.fn());
+const revalidatePath = vi.hoisted(() => vi.fn());
 const captureServerEvent = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 
 vi.mock("@/lib/auth", () => ({
@@ -20,6 +22,12 @@ vi.mock("@/db/client", () => ({
   getDb: vi.fn().mockReturnValue(fakeDb),
 }));
 
+vi.mock("next/cache", () => ({ revalidatePath }));
+
+vi.mock("@/lib/r2", () => ({
+  getR2Env: () => ({ R2_PUBLIC_URL: "https://img.example" }),
+}));
+
 vi.mock("@/lib/posthog-server", () => ({
   captureServerEvent,
 }));
@@ -31,11 +39,12 @@ vi.mock("./core", async (importOriginal) => {
     createRollCore,
     listRollsCore,
     getRollCore,
+    setCanisterCore,
   };
 });
 
 import * as actions from "./actions";
-import { createRoll, getRoll, listRolls } from "./actions";
+import { createRoll, getRoll, listRolls, setCanisterAction } from "./actions";
 
 const USER_ID = "user-1";
 
@@ -183,7 +192,7 @@ describe("listRolls", () => {
     const result = await listRolls();
 
     expect(result).toEqual([{ id: "roll-1" }]);
-    expect(listRollsCore).toHaveBeenCalledWith(fakeDb, USER_ID);
+    expect(listRollsCore).toHaveBeenCalledWith(fakeDb, USER_ID, { publicUrl: "https://img.example" });
   });
 });
 
@@ -209,6 +218,53 @@ describe("getRoll", () => {
     const result = await getRoll("roll-1");
 
     expect(result).toEqual({ id: "roll-1" });
-    expect(getRollCore).toHaveBeenCalledWith(fakeDb, USER_ID, "roll-1");
+    expect(getRollCore).toHaveBeenCalledWith(fakeDb, USER_ID, "roll-1", { publicUrl: "https://img.example" });
+  });
+});
+
+describe("setCanisterAction", () => {
+  afterEach(() => {
+    setCanisterCore.mockReset();
+    captureServerEvent.mockClear();
+    revalidatePath.mockClear();
+  });
+
+  it("returns not_found and calls nothing when there's no session", async () => {
+    getSession.mockResolvedValueOnce(null);
+
+    const result = await setCanisterAction({ rollId: "roll-1", style: "stock" });
+
+    expect(result).toEqual({ ok: false, error: "not_found" });
+    expect(setCanisterCore).not.toHaveBeenCalled();
+    expect(captureServerEvent).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("captures canister_customised with a generic colour for a hex, and revalidates", async () => {
+    getSession.mockResolvedValueOnce({ user: { id: USER_ID } });
+    setCanisterCore.mockResolvedValueOnce({ ok: true });
+
+    const result = await setCanisterAction({ rollId: "roll-1", style: "drawn", color: "#a1b2c3" });
+
+    expect(result).toEqual({ ok: true });
+    expect(setCanisterCore).toHaveBeenCalledWith(fakeDb, USER_ID, { rollId: "roll-1", style: "drawn", color: "#a1b2c3" });
+    expect(captureServerEvent).toHaveBeenCalledWith({
+      distinctId: USER_ID,
+      event: "canister_customised",
+      properties: { style: "drawn", color: "custom" },
+    });
+    expect(revalidatePath).toHaveBeenCalledWith("/rolls/roll-1");
+    expect(revalidatePath).toHaveBeenCalledWith("/");
+  });
+
+  it("does not capture or revalidate when the core refuses", async () => {
+    getSession.mockResolvedValueOnce({ user: { id: USER_ID } });
+    setCanisterCore.mockResolvedValueOnce({ ok: false, error: "invalid_input" });
+
+    const result = await setCanisterAction({ rollId: "roll-1", style: "drawn" });
+
+    expect(result).toEqual({ ok: false, error: "invalid_input" });
+    expect(captureServerEvent).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
   });
 });
