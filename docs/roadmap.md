@@ -1,7 +1,7 @@
 # Cuộn roadmap
 
 > **Mirror — the artifact is the source of truth:** [Cuộn roadmap](https://claude.ai/artifact/Lsq7MWHNCVanpBWQ2D4XTo)
-> Last synced: 30.09.2026 · doc revision 37 · by Claude for Trúc (revisions 16–23 by Trúc: waitlist page in Phase 1, landing page in Phase 5, 139 h build + 21 h buffer; revision 24 ticks "Repo, Next.js + Tailwind mapped to design tokens", landed in PR #1; revisions 25–26 remove the Phase 1 waitlist page at Trúc's request: sign-up stays open through the landing page; revision 27 ticks `next-intl`, Neon + Drizzle, Vercel `sin1` and PostHog, landed in PRs #3 and #5; revision 28 ticks R2 buckets (`pnpm r2:smoke` passes) and Google sign-in (phone check), both confirmed by Trúc; revision 29 ticks both spikes, passed on production, see docs/spikes/; revision 30 ticks the Phase 0 exit: phone sign-in on a preview URL and the story PNG both confirmed by Trúc; revisions 31–33 move BAG-2 (film pocket counts, with the bag canister strip) and BAG-3 (camera card) into Phase 1 and raise the P0 count to 28, at Trúc's request; the PRD artifact raised both to P0 in version 6; revision 34 ticks CAT-1, CAT-2, BAG-1, BAG-2, BAG-3, ROLL-1 and ROLL-2, landed in PR #20 and deployed to production, confirmed by Trúc; LAB-1 waits for the labs seed, LAB-2 and the exit stay open; revisions 35–37 settle decision 2 at Trúc's call: the MVP takes JPEG, PNG and WebP up to 10 MB with browser-made copies, TIFF and server-made copies move to v1.1a, SCAN-1 and SCAN-3 edited in PRD artifact version 8).
+> Last synced: 02.10.2026 · doc revision 38 · by Claude for Trúc (revisions 16–23 by Trúc: waitlist page in Phase 1, landing page in Phase 5, 139 h build + 21 h buffer; revision 24 ticks "Repo, Next.js + Tailwind mapped to design tokens", landed in PR #1; revisions 25–26 remove the Phase 1 waitlist page at Trúc's request: sign-up stays open through the landing page; revision 27 ticks `next-intl`, Neon + Drizzle, Vercel `sin1` and PostHog, landed in PRs #3 and #5; revision 28 ticks R2 buckets (`pnpm r2:smoke` passes) and Google sign-in (phone check), both confirmed by Trúc; revision 29 ticks both spikes, passed on production, see docs/spikes/; revision 30 ticks the Phase 0 exit: phone sign-in on a preview URL and the story PNG both confirmed by Trúc; revisions 31–33 move BAG-2 (film pocket counts, with the bag canister strip) and BAG-3 (camera card) into Phase 1 and raise the P0 count to 28, at Trúc's request; the PRD artifact raised both to P0 in version 6; revision 34 ticks CAT-1, CAT-2, BAG-1, BAG-2, BAG-3, ROLL-1 and ROLL-2, landed in PR #20 and deployed to production, confirmed by Trúc; LAB-1 waits for the labs seed, LAB-2 and the exit stay open; revisions 35–37 settle decision 2 at Trúc's call: the MVP takes JPEG, PNG and WebP up to 10 MB with browser-made copies, TIFF and server-made copies move to v1.1a, SCAN-1 and SCAN-3 edited in PRD artifact version 8; revision 38 ticks SCAN-1, SCAN-2, SCAN-4, LAB-3, NOTE-1 and NOTE-2, landed in PR #22 (`4eb126c`) and deployed to production, with uploads confirmed on production by Trúc, plus Phase 1's LAB-2, mounted in the scan-set form by the same PR; SCAN-3 waits for `CRON_SECRET` in Vercel, M1 for the dogfood).
 > Before editing, re-read the artifact. Make changes in the artifact and copy them here in the same session (see [CLAUDE.md](../CLAUDE.md#sync-rules)).
 
 Related: [PRD overview](product/prd.md) · [Requirements index](product/requirements/README.md) · [ADR-001](architecture/adr-001-tech-stack.md) · [Design system](design/design-system.md)
@@ -42,18 +42,18 @@ Tick items as they land; a phase is done when its last item (the exit check) is 
 - [x] New roll ([ROLL-1](product/requirements/rolls.md))
 - [x] Past roll ([ROLL-2](product/requirements/rolls.md))
 - [ ] Lab directory ([LAB-1](product/requirements/labs.md))
-- [ ] Custom lab ([LAB-2](product/requirements/labs.md))
+- [x] Custom lab ([LAB-2](product/requirements/labs.md))
 - [ ] Exit: a roll is logged from the bag in under 60 s on a phone
 
 ### Phase 2 · Scans & notes (2 – 22 Nov)
 
-- [ ] Presigned upload, 10 MB cap ([SCAN-1](product/requirements/scans.md))
-- [ ] Bulk upload with per-file retry ([SCAN-2](product/requirements/scans.md))
+- [x] Presigned upload, 10 MB cap ([SCAN-1](product/requirements/scans.md))
+- [x] Bulk upload with per-file retry ([SCAN-2](product/requirements/scans.md))
 - [ ] Browser-made WebP copies + nightly cleanup ([SCAN-3](product/requirements/scans.md))
-- [ ] Tấm ưng / blank marks ([SCAN-4](product/requirements/scans.md))
-- [ ] Scan set with lab + branch ([LAB-3](product/requirements/labs.md))
-- [ ] Notes and memory ([NOTE-1](product/requirements/notes.md))
-- [ ] Mistakes ([NOTE-2](product/requirements/notes.md))
+- [x] Tấm ưng / blank marks ([SCAN-4](product/requirements/scans.md))
+- [x] Scan set with lab + branch ([LAB-3](product/requirements/labs.md))
+- [x] Notes and memory ([NOTE-1](product/requirements/notes.md))
+- [x] Mistakes ([NOTE-2](product/requirements/notes.md))
 - [ ] M1 dogfood: 5 of your real rolls uploaded, 0 failed files
 
 ### Phase 3 · Shelf & collection (23 Nov – 13 Dec)

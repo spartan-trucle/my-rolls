@@ -32,6 +32,7 @@
 - **Docs for the boards:** moved onto `docs/phase-2-plan` (from `main`) with this plan (task P0), with the decision edits below.
 - **Plan status:** **approved 30.09.2026 (Trúc)**, with the default for all four [blockers](#blockers-answered-30092026).
 - **Progress, 01.10.2026:** tasks 1–13 built inline and the final review's fixes applied (suite 1087/1087, `pnpm check` green). [PR #22](https://github.com/spartan-trucle/my-rolls/pull/22) is open and marked ready for review by Trúc; Vercel preview checks pass. **Not merged**, so no roadmap box is ticked: SCAN-1–4, LAB-3, NOTE-1 and NOTE-2 get ticked once #22 is merged and deployed to production. **Open:** S1 (real phones, R2 CORS on both buckets), H (M1 dogfood: 5 real rolls, 0 failed files), `CRON_SECRET` in Vercel. Known gaps Trúc accepted for this PR: grid and view copies are public by unguessable URL, and one rejected file fails its slot group of 12 (deferred minor #10); UI polish follows in a separate PR.
+- **Progress, 02.10.2026:** PR #22 merged (`4eb126c`) and deployed to production (Vercel: deployment completed). Trúc confirmed uploads work on production. Ticked in the roadmap (artifact rev 38, mirror synced): SCAN-1, SCAN-2, SCAN-4, LAB-3, NOTE-1, NOTE-2, and Phase 1's LAB-2 (F2 mounted `LabAddForm` in the scan-set form; `/dev/labs` removed). **Still open:** SCAN-3 (waits for `CRON_SECRET` in Vercel production, so the nightly cleanup runs), S1's device notes in `docs/spikes/browser-copies.md`, and H (M1 dogfood: 5 real rolls, 0 failed files).
 
 ## Blockers (answered 30.09.2026)
 
