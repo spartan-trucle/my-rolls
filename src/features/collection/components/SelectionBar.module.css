@@ -1,0 +1,74 @@
+/* RollGrid (phones): docked at the bottom, count and Bỏ chọn on top, the three marks below.
+   The roll page hides the bottom tabs (hidden-routes.ts), so the bar sits on the screen's edge. */
+.bar {
+  position: fixed;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas:
+    "count count clear"
+    "keeper oops blank"
+    "error error error";
+  align-items: center;
+  gap: 10px var(--space-2);
+  padding: var(--space-3) var(--space-4) max(20px, env(safe-area-inset-bottom));
+  color: var(--ink);
+  background: var(--paper-raised);
+  border-top: 1.5px solid var(--ink);
+}
+
+.count {
+  grid-area: count;
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+
+/* At least 44 px to hit, over the design system's 36 px small button. */
+.bar .action { min-height: 44px; padding-inline: var(--space-2); }
+.keeper { grid-area: keeper; }
+.oops { grid-area: oops; }
+.blank { grid-area: blank; }
+.bar .clear { grid-area: clear; justify-self: end; }
+
+.error {
+  grid-area: error;
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--pin);
+}
+
+/* Nothing picked: only the empty live region stays, out of sight, so the first count is announced. */
+.bar.idle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+/* RollGridWeb: beside the filter chips, on cobalt-soft. */
+@media (min-width: 1024px) {
+  .bar {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+    background: var(--cobalt-soft);
+    border: 0;
+  }
+  .count { font-size: 15px; line-height: 22px; color: var(--cobalt-deep); }
+  .bar .action { padding-inline: var(--space-4); }
+  .error { flex-basis: 100%; }
+}

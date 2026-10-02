@@ -855,5 +855,23 @@
     "emptyFilter": "Không có tấm nào ở đây",
     "stripHintTouch": "Vuốt dải phim để xem tiếp. Chạm một tấm để xem lớn.",
     "stripHintPointer": "Kéo hoặc cuộn ngang để xem tiếp. Bấm một tấm để xem lớn."
+  },
+  "selection": {
+    "bar": "Đánh dấu các tấm đã chọn",
+    "count": "{count} tấm đã chọn",
+    "keeper": "Tấm ưng",
+    "oops": "Oops",
+    "blank": "Tấm trắng",
+    "clear": "Bỏ chọn",
+    "start": "Chọn",
+    "hintTouch": "Nhấn giữ một tấm để chọn nhiều tấm rồi đánh dấu một lần.",
+    "hintDesktop": "Bấm để chọn, giữ Shift để chọn một dãy. Phím K: tấm ưng · O: oops · B: tấm trắng.",
+    "oopsFor": "Oops cho {count} tấm",
+    "markFailed": "Chưa đánh dấu được, thử lại nhé",
+    "bulkPositions": "TẤM {list}",
+    "bulkNotePlaceholder": "ghi chú ngắn, gắn cho cả {count} tấm",
+    "bulkInfo": "Lỗi bạn chọn được thêm vào cả {count} tấm. Lỗi đã gắn trước đó vẫn giữ nguyên; muốn bỏ một lỗi, mở từng tấm.",
+    "bulkSave": "Lưu · thêm cho {count} tấm",
+    "cancel": "Huỷ"
   }
 }
