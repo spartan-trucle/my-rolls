@@ -1,0 +1,20 @@
+.picker { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-6) var(--space-4); }
+@media (min-width: 1024px) { .picker { padding: var(--space-8); } }
+.title { margin: 0; font-family: var(--font-display); font-size: var(--text-title); line-height: var(--text-title--line-height); font-weight: var(--text-title--font-weight); }
+.scope { display: inline-flex; border: 1.5px solid var(--ink); align-self: flex-start; }
+.scope button { min-height: 44px; padding: 0 var(--space-4); font: 600 var(--text-body-sm) / 1 var(--font-sans); color: var(--ink); background: transparent; border: 0; cursor: pointer; }
+.scope button[aria-pressed="true"] { color: var(--paper); background: var(--ink); }
+.scope button:focus-visible, .primary:focus-visible, .clear:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+.fieldset { margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.legend { font-size: var(--text-label); font-weight: var(--text-label--font-weight); letter-spacing: var(--text-label--letter-spacing); text-transform: uppercase; color: var(--ink-muted); }
+.chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.chip { position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--space-3); font-size: var(--text-body-sm); border: 1.5px solid var(--line-strong); border-radius: var(--radius-md); cursor: pointer; }
+.chip:has(input:checked) { color: var(--on-pin); background: var(--pin); border-color: var(--pin); font-weight: 600; }
+.chip:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.input { min-height: 44px; padding: 0 var(--space-3); font: 400 var(--text-body) / 1 var(--font-sans); color: var(--ink); background: var(--paper-raised); border: 1.5px solid var(--line-strong); border-radius: var(--radius-md); }
+.error { margin: 0; color: var(--pin); font-size: var(--text-body-sm); }
+.actions { display: flex; flex-direction: column; gap: var(--space-2); }
+.primary { min-height: 48px; font: 600 15px/1 var(--font-sans); color: var(--on-cobalt); background: var(--cobalt); border: 0; cursor: pointer; }
+.clear { min-height: 44px; font: 600 var(--text-body-sm) / 1 var(--font-sans); color: var(--pin); background: none; border: 0; cursor: pointer; text-decoration: underline; }

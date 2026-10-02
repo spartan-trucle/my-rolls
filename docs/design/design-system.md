@@ -1,7 +1,7 @@
 # Design system
 
 > **Mirror — the artifact is the source of truth:** [Design system](https://claude.ai/artifact/HtsG9sZeNGx19PSvPjW65a) (namespace `RollCall`)
-> Last synced: 28.09.2026 · artifact version `1790581701-ee2b` · by Claude for Trúc · checked while redrawing the bag canister from `components/bundle.css` (`.rc-can`): `tokens.json` is byte-identical to `design-tokens/tokens.json`, and the README, `bundle.css` and the RollCard and Scribble guidelines are unchanged in size and content from `e825`, so nothing mirrored changed. Last content change 25.09.2026 by Trúc: "README: added an In code section on how the Cuộn app uses the tokens and components."
+> Last synced: 30.09.2026 · artifact version `1790767263-4ce8` · by Claude for Trúc · two changes since `ee2b`: (1) `bd24`, 30.09.2026 by Trúc: smaller type on phones, with new styles `display-mobile` (28/32), `title-mobile` (20/26), `body-mobile` (14/20) and `body-sm-mobile` (13/18) in `tokens.json`, the README's Type and Mobile sections and `bundle.css` (mirrored in [Type](#type) and [Mobile](#mobile); **the app's `design-tokens/tokens.json` is not updated yet**, see the [Phase 2 plan](../../.planning/plans/phase-2-scans-and-notes.md#status)); (2) `4ce8`, 30.09.2026 by Claude for Trúc: the `UploadDrop` guideline says `cobalt` on drag-over (Known conflict #7) and its preview hint drops TIFF (roadmap decision 2).
 > Before editing, re-read the artifact. Make changes in the artifact and copy them here in the same session (see [CLAUDE.md](../../CLAUDE.md#sync-rules)).
 >
 > **Naming:** the design system still calls the product **Roll Call**. The product name is **Cuộn** (see [Known conflicts](../README.md#known-conflicts-between-sources)). Token and component names stay as they are.
@@ -95,19 +95,23 @@ All four families come from Google Fonts and include Vietnamese diacritics (Đà
 
 | Style | Family | Size / line | Weight | Tracking | Usage |
 |---|---|---|---|---|---|
-| `display-hero` | display | 88 / 84 | 500 | -0.025em | Landing hero only; becomes `display-xl` under 600px |
-| `display-xl` | display | 56 / 56 | 500 | -0.02em | One per page: roll title on desktop; becomes `display-l` under 600px |
-| `display-l` | display | 40 / 44 | 500 | -0.015em | Page titles on mobile; section titles on desktop |
-| `title` | display | 22 / 28 | 600 | — | Roll-card names, dialog titles |
-| `body` | sans | 16 / 24 | 400 | — | Running text and inputs (16px stops iOS zoom) |
-| `body-sm` | sans | 14 / 20 | 400 | — | Secondary UI copy, list rows |
+| `display-hero` | display | 88 / 84 | 500 | -0.025em | Landing hero only; becomes `display-l` (40px) under 600px |
+| `display-xl` | display | 56 / 56 | 500 | -0.02em | One per page: roll title on desktop; becomes `display-mobile` under 600px |
+| `display-l` | display | 40 / 44 | 500 | -0.015em | Section titles on desktop; under 600px page titles use `display-mobile` |
+| `title` | display | 22 / 28 | 600 | — | Roll-card names, dialog titles on desktop; becomes `title-mobile` under 600px |
+| `display-mobile` | display | 28 / 32 | 500 | -0.01em | Page titles on phones (under 600px), replacing `display-xl` and `display-l`. One per screen |
+| `title-mobile` | display | 20 / 26 | 600 | — | Section, sheet and dialog titles on phones, replacing `title` |
+| `body` | sans | 16 / 24 | 400 | — | Running text and inputs on desktop; `body-mobile` under 600px |
+| `body-sm` | sans | 14 / 20 | 400 | — | Secondary UI copy, list rows on desktop; `body-sm-mobile` under 600px |
+| `body-mobile` | sans | 14 / 20 | 400 | — | Replaces `body` under 600px: running text, list-row names, inputs and buttons on phones |
+| `body-sm-mobile` | sans | 13 / 18 | 400 | — | Replaces `body-sm` under 600px: secondary copy, hints, small buttons on phones |
 | `label` | sans | 12 / 16 | 600 | 0.08em | Field labels, nav, tabs; always uppercase |
 | `meta` | mono | 13 / 18 | 400 | — | Stock, ISO, exposures, dates, camera, lens |
 | `edge` | mono | 11 / 14 | 700 | 0.12em | Edge print on film rails and stamps, uppercase |
 | `note` | hand | 24 / 28 | 400 | — | Captions, oops notes, one scribble per section |
 | `note-sm` | hand | 19 / 22 | 400 | — | Captions on small prints and film frames |
 
-Use one `display-*` per screen.
+Use one `display-*` per screen. `label`, `meta` and `edge` keep their size on phones. Inputs follow the body size, so they are 14px on phones; iOS Safari zooms into inputs under 16px, so the app's viewport sets `maximum-scale=1` (pinch-zoom still works).
 
 ## Space, shape, depth
 
@@ -157,6 +161,7 @@ Use one `display-*` per screen.
 ## Mobile
 
 - Mobile first at 390px, single column, `space-4` gutters. The film strip goes edge to edge and scrolls sideways with snap. Prints go in a 2-column grid.
+- Under 600px, type steps down: page titles `display-mobile`, section and dialog titles `title-mobile`, running text `body-mobile`, secondary copy `body-sm-mobile` (see [Type](#type)).
 - Touch targets are at least 44px. Primary actions sit at the bottom of the page, full width.
 - Reference layout: the **Roll page (mobile)** preview (`project/components/RollPage/preview.html`).
 
@@ -169,7 +174,7 @@ Small and physical, 150–200ms ease. On hover a print straightens to `tilt-none
 - Focus: 2px solid `focus` ring, 3px offset, on every interactive element.
 - Disabled: 45% opacity, no hover.
 - Errors: written in `pin`, in a human voice, under the field ("That's a lot. Pushed +3?"). No error icons.
-- Drag-over on the upload zone: `cobalt-soft` fill with a `cobalt` dashed border. **Conflict:** the UploadDrop guideline says `pin-soft` + `pin`; see [Known conflicts](../README.md#known-conflicts-between-sources).
+- Drag-over on the upload zone: `cobalt-soft` fill with a `cobalt` dashed border. The `UploadDrop` guideline says the same since 30.09.2026 ([Known conflicts](../README.md#known-conflicts-between-sources) #7, resolved).
 
 ## Components
 

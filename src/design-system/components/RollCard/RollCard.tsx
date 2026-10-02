@@ -27,12 +27,14 @@ export interface RollCardProps {
   keepers?: RollCount;
   /** Makes the whole card a link. */
   href?: string;
+  /** Extra stamp before oops and keepers, e.g. upload progress (Phase 2 HomeUploading board). */
+  status?: ReactNode;
   className?: string;
 }
 
 const joinMeta = (parts: Array<string | false | null | undefined>) => parts.filter(Boolean).join(" · ");
 
-export function RollCard({ name, stock = "gold", iso, film, exposures, camera, date, oops, keepers, href, className }: RollCardProps) {
+export function RollCard({ name, stock = "gold", iso, film, exposures, camera, date, oops, keepers, href, status, className }: RollCardProps) {
   const filmLine = joinMeta([film, iso != null && `ISO ${iso}`, exposures != null && `${exposures} EXP`]);
   const cameraLine = joinMeta([camera, date]);
   const canStyle = { "--rc-stock": `var(--stock-${stock})` } as CSSProperties;
@@ -52,6 +54,7 @@ export function RollCard({ name, stock = "gold", iso, film, exposures, camera, d
         {cameraLine ? <p className={styles.meta}>{cameraLine}</p> : null}
       </div>
       <div className={styles.side}>
+        {status}
         {oops ? <Stamp tone="oops" icon="oops" label={oops.label}>{oops.count}</Stamp> : null}
         {keepers ? <Stamp tone="keeper" icon="keeper" label={keepers.label}>{keepers.count}</Stamp> : null}
       </div>

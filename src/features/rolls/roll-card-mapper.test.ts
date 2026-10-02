@@ -13,7 +13,6 @@ const baseEntry: IRollEntry = {
   locations: null,
   shotFrom: new Date("2025-10-12T12:00:00Z"),
   shotTo: null,
-  notes: null,
   memory: null,
   version: 1,
   createdAt: new Date("2025-10-12T12:00:00Z"),

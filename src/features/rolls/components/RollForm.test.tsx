@@ -463,7 +463,6 @@ describe("RollForm", () => {
       shotFrom: null,
       shotTo: null,
       datePrecision: null,
-      notes: null,
       memory: null,
       version: 2,
       createdAt: new Date("2026-09-01"),

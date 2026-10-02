@@ -64,3 +64,11 @@ a.card:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
 @media (prefers-reduced-motion: reduce) {
   .card { transition: none; }
 }
+
+/* Phones (under 600px): the compact card from the design system's bundle.css phone block. */
+@media (max-width: 599px) {
+  .card { grid-template-columns: 40px minmax(0, 1fr) auto; gap: var(--space-3); padding: var(--space-3) var(--space-3) calc(var(--space-3) + 2px); }
+  .can { zoom: .75; }
+  .name { font-size: 17px; line-height: 22px; }
+  .meta { font-size: 12px; line-height: 16px; }
+}

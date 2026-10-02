@@ -1,7 +1,7 @@
 # Cuộn roadmap
 
 > **Mirror — the artifact is the source of truth:** [Cuộn roadmap](https://claude.ai/artifact/Lsq7MWHNCVanpBWQ2D4XTo)
-> Last synced: 30.09.2026 · doc revision 34 · by Claude for Trúc (revisions 16–23 by Trúc: waitlist page in Phase 1, landing page in Phase 5, 139 h build + 21 h buffer; revision 24 ticks "Repo, Next.js + Tailwind mapped to design tokens", landed in PR #1; revisions 25–26 remove the Phase 1 waitlist page at Trúc's request: sign-up stays open through the landing page; revision 27 ticks `next-intl`, Neon + Drizzle, Vercel `sin1` and PostHog, landed in PRs #3 and #5; revision 28 ticks R2 buckets (`pnpm r2:smoke` passes) and Google sign-in (phone check), both confirmed by Trúc; revision 29 ticks both spikes, passed on production, see docs/spikes/; revision 30 ticks the Phase 0 exit: phone sign-in on a preview URL and the story PNG both confirmed by Trúc; revisions 31–33 move BAG-2 (film pocket counts, with the bag canister strip) and BAG-3 (camera card) into Phase 1 and raise the P0 count to 28, at Trúc's request; the PRD artifact raised both to P0 in version 6; revision 34 ticks CAT-1, CAT-2, BAG-1, BAG-2, BAG-3, ROLL-1 and ROLL-2, landed in PR #20 and deployed to production, confirmed by Trúc; LAB-1 waits for the labs seed, LAB-2 and the exit stay open).
+> Last synced: 30.09.2026 · doc revision 37 · by Claude for Trúc (revisions 16–23 by Trúc: waitlist page in Phase 1, landing page in Phase 5, 139 h build + 21 h buffer; revision 24 ticks "Repo, Next.js + Tailwind mapped to design tokens", landed in PR #1; revisions 25–26 remove the Phase 1 waitlist page at Trúc's request: sign-up stays open through the landing page; revision 27 ticks `next-intl`, Neon + Drizzle, Vercel `sin1` and PostHog, landed in PRs #3 and #5; revision 28 ticks R2 buckets (`pnpm r2:smoke` passes) and Google sign-in (phone check), both confirmed by Trúc; revision 29 ticks both spikes, passed on production, see docs/spikes/; revision 30 ticks the Phase 0 exit: phone sign-in on a preview URL and the story PNG both confirmed by Trúc; revisions 31–33 move BAG-2 (film pocket counts, with the bag canister strip) and BAG-3 (camera card) into Phase 1 and raise the P0 count to 28, at Trúc's request; the PRD artifact raised both to P0 in version 6; revision 34 ticks CAT-1, CAT-2, BAG-1, BAG-2, BAG-3, ROLL-1 and ROLL-2, landed in PR #20 and deployed to production, confirmed by Trúc; LAB-1 waits for the labs seed, LAB-2 and the exit stay open; revisions 35–37 settle decision 2 at Trúc's call: the MVP takes JPEG, PNG and WebP up to 10 MB with browser-made copies, TIFF and server-made copies move to v1.1a, SCAN-1 and SCAN-3 edited in PRD artifact version 8).
 > Before editing, re-read the artifact. Make changes in the artifact and copy them here in the same session (see [CLAUDE.md](../CLAUDE.md#sync-rules)).
 
 Related: [PRD overview](product/prd.md) · [Requirements index](product/requirements/README.md) · [ADR-001](architecture/adr-001-tech-stack.md) · [Design system](design/design-system.md)
@@ -98,7 +98,7 @@ Tick items as they land; a phase is done when its last item (the exit check) is 
 ### Decisions
 
 - [ ] 1. Name and domain
-- [ ] 2. File types and size (edit SCAN-1, SCAN-3)
+- [x] 2. File types and size (edit SCAN-1, SCAN-3)
 - [ ] 3. GPS on downloads
 - [ ] 4. Lab listing accuracy
 - [ ] 5. Brand logos in canister photos
@@ -145,12 +145,12 @@ About 2 h/week of data and writing work. Film friends can take much of it.
 
 ## Decisions due
 
-Each open question has a date after which it blocks work. The PRD and ADR also disagree in two places (rows 2 and 3); both need a PRD edit before Phase 2.
+Each open question has a date after which it blocks work. The PRD and ADR also disagreed in two places (rows 2 and 3): row 2 was settled on 30.09.2026, and row 3 still needs a PRD edit before Phase 2.
 
 | # | Decision | Decide by | Suggested default |
 |---|---|---|---|
 | 1 | Name and domain (PRD Q6) | 11.10.2026 | Take whichever of cuon.app / cuon.vn is free |
-| 2 | File types and size (PRD Q2). PRD SCAN-1/3 accept TIFF with server-made copies; ADR makes copies in the browser, JPEG/PNG only | 01.11.2026 | MVP: JPEG, PNG, WebP up to 10 MB. TIFF and the server path in v1.1a. Update SCAN-1 and SCAN-3 |
+| 2 | File types and size (PRD Q2). PRD SCAN-1/3 accept TIFF with server-made copies; ADR makes copies in the browser, JPEG/PNG only | 01.11.2026 | Decided 30.09.2026: the MVP takes JPEG, PNG and WebP up to 10 MB, with copies made in the browser. TIFF and server-made copies in v1.1a. SCAN-1 and SCAN-3 updated in the PRD (version 8) |
 | 3 | GPS on downloads. SHARE-1 says no file served carries GPS, but a full-size download is the original, byte for byte | 01.11.2026 | No download toggle in the MVP. When share settings (SHARE-6) ship, serve a GPS-stripped copy |
 | 4 | Lab listing accuracy (PRD Q3) | 01.11.2026 | Launch with checked labs only; district and city, no services |
 | 5 | Brand logos in canister photos (PRD Q5) | 23.11.2026 | Keep as reference photos; drawn canisters stay unbranded |

@@ -88,6 +88,7 @@ function RemoveIcon() {
 export function BagList({ initialEntries }: BagListProps) {
   const t = useTranslations("bag");
   const tTypes = useTranslations("catalogue.types");
+  const tMistakes = useTranslations("mistakes");
   const typeLabel = (key: Parameters<typeof tTypes>[0] | null) => (key ? tTypes(key) : null);
   const dialogTitleId = useId();
   const confirmTitleId = useId();
@@ -312,7 +313,15 @@ export function BagList({ initialEntries }: BagListProps) {
                         {t("fixedStockNote", { name: `${entry.fixedStock.brand} ${entry.fixedStock.name}` })}
                       </span>
                     ) : null}
-                    <span className={styles.itemMeta}>{t("rollsShotCamera", { count: entry.rollsShot ?? 0 })}</span>
+                    <span className={styles.itemMeta}>
+                      {t("rollsShotCamera", { count: entry.rollsShot ?? 0 })}
+                      {entry.topMistake
+                        ? ` · ${t("cameraMistake", {
+                            count: entry.topMistake.count,
+                            type: tMistakes(`types.${entry.topMistake.type}`).toLocaleLowerCase("vi"),
+                          })}`
+                        : null}
+                    </span>
                   </span>
                   <button
                     type="button"

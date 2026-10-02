@@ -11,10 +11,12 @@ export interface UploadDropProps {
   hint: string;
   /** Defaults to image/*. */
   accept?: string;
+  /** Reads a drop itself, e.g. to walk a dropped folder (SCAN-2). Defaults to `dataTransfer.files`. */
+  readDrop?: (dataTransfer: DataTransfer) => Promise<File[]>;
   className?: string;
 }
 
-export function UploadDrop({ onFiles, title, hint, accept = "image/*", className }: UploadDropProps) {
+export function UploadDrop({ onFiles, title, hint, accept = "image/*", readDrop, className }: UploadDropProps) {
   const [over, setOver] = useState(false);
 
   const take = (list: FileList | File[] | null | undefined) => {
@@ -29,7 +31,8 @@ export function UploadDrop({ onFiles, title, hint, accept = "image/*", className
   const onDrop = (e: DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     setOver(false);
-    take(e.dataTransfer?.files);
+    if (readDrop && e.dataTransfer) void readDrop(e.dataTransfer).then(take);
+    else take(e.dataTransfer?.files);
   };
 
   return (

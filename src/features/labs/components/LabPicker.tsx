@@ -13,6 +13,9 @@ const SEARCH_DEBOUNCE_MS = 200;
 export interface ILabPick {
   labId: string;
   branchId: string | null;
+  /** The lab's name and the branch's place line, for the scan-set form's lab row (Phase 2 F2). */
+  name: string;
+  place: string;
 }
 
 export interface LabPickerProps {
@@ -203,7 +206,7 @@ export function LabPicker({ heading, onPick, onAddNew, className }: LabPickerPro
           variant="primary"
           className="w-full"
           disabled={!chosen}
-          onClick={() => chosen && onPick({ labId: chosen.labId, branchId: chosen.branchId })}
+          onClick={() => chosen && onPick({ labId: chosen.labId, branchId: chosen.branchId, name: chosen.name, place: chosen.place })}
         >
           {chooseLabel}
         </Button>

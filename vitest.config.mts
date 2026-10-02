@@ -10,6 +10,9 @@ const PGLITE_TEST_GLOBS = [
   "src/**/core.test.ts",
   "src/**/queries.test.ts",
   "src/lib/search-text.integration.test.ts",
+  "src/db/schema/scans.test.ts",
+  "src/db/schema/notes.test.ts",
+  "src/features/uploads/cleanup.test.ts",
   "scripts/seed-catalogue.test.ts",
 ];
 

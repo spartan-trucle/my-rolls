@@ -1,6 +1,6 @@
 # Cuộn PRD (MVP) — overview
 
-> **Source:** [Cuộn PRD v0.4](https://claude.ai/artifact/9rfAShmDJUP9uFaDLikmu8) · Draft for review · Owner Trúc Lê · updated 27.09.2026 (artifact version 6: BAG-2 and BAG-3 raised to P0)
+> **Source:** [Cuộn PRD v0.4](https://claude.ai/artifact/9rfAShmDJUP9uFaDLikmu8) · Draft for review · Owner Trúc Lê · updated 30.09.2026 (artifact version 8: SCAN-1 and SCAN-3 drop TIFF from the MVP, roadmap decision 2; version 6 raised BAG-2 and BAG-3 to P0)
 > This page summarises the PRD. The requirement-level detail lives in the [deep-dives](requirements/README.md). When the wording here and the artifact differ, the artifact wins.
 
 Related: [Roadmap](../roadmap.md) · [ADR-001](../architecture/adr-001-tech-stack.md) · [Design system](../design/design-system.md) · [Wireframes](../design/wireframes.md)
@@ -186,7 +186,7 @@ Dates and suggested defaults for each are in the [roadmap's Decisions due](../ro
 | # | Question | Detail |
 |---|---|---|
 | Q1 | Storage while free | Importing 20 old rolls brings about 6 GB. What cap per account keeps the soft launch affordable, worded so it never feels like a paywall? |
-| Q2 | Is 10 MB enough? | Lab JPEGs fit, but a 35mm TIFF is often 20–60 MB. Keep the cap, raise it for TIFF only, or decide later? |
+| Q2 | Is 10 MB enough? | Lab JPEGs fit, but a 35mm TIFF is often 20–60 MB. **Decided 30.09.2026:** the MVP takes JPEG, PNG and WebP up to 10 MB; TIFF, and its cap, come with server-made copies in v1.1a. |
 | Q3 | Lab listings | Branches move and addresses differ between sources; most labs' services are unverified. District and city only, and later let labs claim their listing? "47+" still needs identifying. |
 | Q4 | Who reviews submissions | When submissions open in v1.1, who reviews and how fast? Consider auto-approving users with 3+ approved entries. |
 | Q5 | Brand logos in photos | Catalogue canister photos show real logos. Fine as reference photos; the drawn canister stays unbranded. |

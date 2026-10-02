@@ -59,3 +59,10 @@ describe("RollCard", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 });
+
+describe("RollCard status slot (Phase 2, HomeUploading)", () => {
+  it("renders a status node beside the stamps", () => {
+    render(<RollCard name="Cuộn #16" status={<span>12/36</span>} />);
+    expect(screen.getByText("12/36")).toBeInTheDocument();
+  });
+});

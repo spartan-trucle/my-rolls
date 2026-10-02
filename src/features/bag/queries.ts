@@ -1,6 +1,6 @@
 import { and, count, desc, eq, inArray, isNull, or } from "drizzle-orm";
 import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
-import { bagItem, camera, lens, roll, stock, user } from "@/db/schema";
+import { MISTAKE_TYPES, bagItem, camera, lens, mistake, roll, stock, user, type TMistakeType } from "@/db/schema";
 import type { TDb } from "@/features/shared/db";
 
 export type TStockRow = typeof stock.$inferSelect;
@@ -34,6 +34,8 @@ export type TBagEntry =
       // `null` for every other camera.
       fixedStock: TStockRow | null;
       rollsShot?: number;
+      /** BAG-3, Phase 2 plan D25: the most frequent live mistake on rolls from this body, or null. */
+      topMistake?: { type: TMistakeType; count: number } | null;
     }
   | { bagItemId: string; kind: "lens"; createdAt: Date; lens: TLensRow; rollsShot?: number };
 
@@ -108,7 +110,7 @@ export async function listBag<TQueryResult extends PgQueryResultHKT>(
       : await db.select().from(lens).where(and(inArray(lens.id, lensIds), eq(lens.ownerId, userId)));
 
   const rollRows = await db
-    .select({ stockId: roll.stockId, cameraBagItemId: roll.cameraBagItemId, lensId: roll.lensId })
+    .select({ id: roll.id, stockId: roll.stockId, cameraBagItemId: roll.cameraBagItemId, lensId: roll.lensId })
     .from(roll)
     .where(and(eq(roll.userId, userId), isNull(roll.deletedAt)));
 
@@ -120,6 +122,35 @@ export async function listBag<TQueryResult extends PgQueryResultHKT>(
     rollsShotByCameraBagItemId.set(row.cameraBagItemId, (rollsShotByCameraBagItemId.get(row.cameraBagItemId) ?? 0) + 1);
     if (row.lensId) rollsShotByLensId.set(row.lensId, (rollsShotByLensId.get(row.lensId) ?? 0) + 1);
   }
+
+  // BAG-3 (Phase 2 D25): mistakes on this user's live rolls, counted per camera body and type.
+  const cameraBagItemIdByRollId = new Map(rollRows.map((row) => [row.id, row.cameraBagItemId]));
+  const mistakeRows =
+    rollRows.length === 0
+      ? []
+      : await db
+          .select({ rollId: mistake.rollId, type: mistake.type })
+          .from(mistake)
+          .where(and(eq(mistake.userId, userId), isNull(mistake.deletedAt), inArray(mistake.rollId, rollRows.map((r) => r.id))));
+  const mistakeCounts = new Map<string, Map<TMistakeType, number>>();
+  for (const row of mistakeRows) {
+    const bodyId = cameraBagItemIdByRollId.get(row.rollId);
+    if (!bodyId) continue;
+    const byType = mistakeCounts.get(bodyId) ?? new Map<TMistakeType, number>();
+    byType.set(row.type, (byType.get(row.type) ?? 0) + 1);
+    mistakeCounts.set(bodyId, byType);
+  }
+  const topMistakeFor = (bodyId: string): { type: TMistakeType; count: number } | null => {
+    const byType = mistakeCounts.get(bodyId);
+    if (!byType) return null;
+    // Highest count wins; a tie goes to the type listed first in NOTE-2.
+    let best: { type: TMistakeType; count: number } | null = null;
+    for (const type of MISTAKE_TYPES) {
+      const n = byType.get(type) ?? 0;
+      if (n > 0 && (!best || n > best.count)) best = { type, count: n };
+    }
+    return best;
+  };
 
   const stockById = new Map(stockRows.map((row) => [row.id, row]));
   const cameraById = new Map(cameraRows.map((row) => [row.id, row]));
@@ -152,6 +183,7 @@ export async function listBag<TQueryResult extends PgQueryResultHKT>(
           camera: cameraRow,
           fixedStock,
           rollsShot: rollsShotByCameraBagItemId.get(item.id) ?? 0,
+          topMistake: topMistakeFor(item.id),
         });
       }
     } else {

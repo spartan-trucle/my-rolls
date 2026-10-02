@@ -466,7 +466,6 @@ export function RollForm({ mode, roll }: RollFormProps) {
     shotFrom: previewShotFrom,
     shotTo: previewShotTo,
     datePrecision: previewDatePrecision,
-    notes: null,
     memory: null,
     version: 1,
     createdAt: new Date(),

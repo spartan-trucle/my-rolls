@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+import { UploadProvider } from "@/features/uploads/client/UploadProvider";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import messages from "../../messages/vi.json";
 import type { IRollEntry } from "@/features/rolls/core";
@@ -21,6 +22,9 @@ vi.mock("next/headers", () => ({
 vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
 
 vi.mock("@/features/rolls/actions", () => ({ listRolls }));
+vi.mock("@/features/uploads/components/RollUploadBadge", () => ({
+  RollUploadBadge: ({ rollId, frameCount }: { rollId: string; frameCount: number }) => <span>{`badge:${rollId}:${frameCount}`}</span>,
+}));
 
 // `getTranslations` needs Next's request scope; the real messages through next-intl's own translator stand in.
 vi.mock("next-intl/server", async () => {
@@ -33,7 +37,12 @@ vi.mock("next-intl/server", async () => {
 import Home, { generateMetadata } from "./page";
 
 function renderHome(ui: Awaited<ReturnType<typeof Home>>) {
-  return render(<NextIntlClientProvider locale="vi" messages={messages}>{ui}</NextIntlClientProvider>);
+  // The root layout provides the upload queue in the app (Phase 2 D16).
+  return render(
+    <NextIntlClientProvider locale="vi" messages={messages}>
+      <UploadProvider>{ui}</UploadProvider>
+    </NextIntlClientProvider>,
+  );
 }
 
 const signedInSession = {
@@ -53,7 +62,6 @@ function makeRoll(overrides: Partial<IRollEntry>): IRollEntry {
     locations: null,
     shotFrom: new Date("2025-10-12T12:00:00Z"),
     shotTo: null,
-    notes: null,
     memory: null,
     version: 1,
     createdAt: new Date("2025-10-12T12:00:00Z"),
@@ -119,6 +127,16 @@ describe("Home (/)", () => {
     // mapper folds it into the date it already renders.
     expect(screen.getByText(/12\.10\.25 · \+1/)).toBeInTheDocument();
     expect(screen.getByText(/12\.10\.25 · −⅓/)).toBeInTheDocument();
+  });
+
+  it("gives each roll card its upload badge with the frame count (Phase 2 HomeUploading)", async () => {
+    getSessionCookie.mockReturnValue("a-session-token");
+    getSession.mockResolvedValue(signedInSession);
+    listRolls.mockResolvedValue([makeRoll({ id: "roll-1", frameCount: 36 })]);
+
+    renderHome(await Home());
+
+    expect(screen.getByText("badge:roll-1:36")).toBeInTheDocument();
   });
 
   it("shows the empty state with a link to the first-roll onboarding when there are no rolls", async () => {

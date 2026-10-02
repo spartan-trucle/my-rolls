@@ -9,6 +9,7 @@ import { ButtonLink, RollCard } from "@/design-system";
 import { listRolls } from "@/features/rolls/actions";
 import type { IRollEntry } from "@/features/rolls/core";
 import { toRollCardProps } from "@/features/rolls/roll-card-mapper";
+import { RollUploadBadge } from "@/features/uploads/components/RollUploadBadge";
 import { getAuth } from "@/lib/auth";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -48,7 +49,11 @@ function RollList({ rolls, t }: { rolls: IRollEntry[]; t: ReturnType<typeof useT
   return (
     <div className="grid grid-cols-1 gap-2.5 lg:grid-cols-2 lg:gap-x-6 lg:gap-y-4">
       {rolls.map((roll) => (
-        <RollCard key={roll.id} {...toRollCardProps(roll, { unnamedRollLabel: unnamedRollLabel(t, roll.number) })} />
+        <RollCard
+          key={roll.id}
+          {...toRollCardProps(roll, { unnamedRollLabel: unnamedRollLabel(t, roll.number) })}
+          status={<RollUploadBadge rollId={roll.id} frameCount={roll.frameCount ?? 0} />}
+        />
       ))}
     </div>
   );

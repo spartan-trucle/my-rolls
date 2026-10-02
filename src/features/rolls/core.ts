@@ -1,9 +1,9 @@
 import "server-only";
 
 import { z } from "zod";
-import { and, desc, eq, inArray, isNull, or } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNull, or } from "drizzle-orm";
 import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
-import { bagItem, camera, lens, roll, stock } from "@/db/schema";
+import { bagItem, camera, frame, lens, roll, stock } from "@/db/schema";
 import type { TDb } from "@/features/shared/db";
 import { isFutureVnDay, isFutureVnMonth, vnMonthEnd, vnMonthStart } from "@/features/rolls/date-utils";
 import { formatPushPull, pushPullStops } from "@/features/rolls/push-pull";
@@ -455,10 +455,11 @@ export interface IRollEntry {
    * `number` above.
    */
   datePrecision?: "day" | "month" | null;
-  notes: string | null;
   memory: string | null;
   version: number;
   createdAt: Date;
+  /** Phase 2 B5: ready, live frames, for the roll card's stamp (`HomeUploading`). Optional for old fixtures. */
+  frameCount?: number;
   /** ROLL-1, D17: `formatPushPull(pushPullStops(boxIso, shotIso))`, or `null` when either ISO is missing. */
   pushPull: string | null;
   stock: IRollStockSummary | null;
@@ -508,6 +509,17 @@ async function hydrateRolls<TQueryResult extends PgQueryResultHKT>(
 
   const lensRows = lensIds.length === 0 ? [] : await db.select().from(lens).where(inArray(lens.id, lensIds));
 
+  const rollIds = rollRows.map((row) => row.id);
+  const frameCountRows =
+    rollIds.length === 0
+      ? []
+      : await db
+          .select({ rollId: frame.rollId, value: count() })
+          .from(frame)
+          .where(and(inArray(frame.rollId, rollIds), eq(frame.status, "ready"), isNull(frame.deletedAt)))
+          .groupBy(frame.rollId);
+  const frameCountByRollId = new Map(frameCountRows.map((row) => [row.rollId, Number(row.value)]));
+
   const stockById = new Map(stockRows.map((row) => [row.id, row]));
   const cameraBagItemById = new Map(cameraBagItemRows.map((row) => [row.id, row]));
   const cameraById = new Map(cameraRows.map((row) => [row.id, row]));
@@ -535,10 +547,10 @@ async function hydrateRolls<TQueryResult extends PgQueryResultHKT>(
       shotFrom: row.shotFrom,
       shotTo: row.shotTo,
       datePrecision: row.datePrecision,
-      notes: row.notes,
       memory: row.memory,
       version: row.version,
       createdAt: row.createdAt,
+      frameCount: frameCountByRollId.get(row.id) ?? 0,
       pushPull: formatPushPull(pushPullStops(row.boxIso, row.shotIso)),
       stock: stockRow
         ? {

@@ -7,7 +7,13 @@ const RollPage = vi.hoisted(() => vi.fn(({ roll }: { roll: { id: string } }) => 
 
 vi.mock("@/features/rolls/actions", () => ({ getRoll }));
 vi.mock("next/navigation", () => ({ notFound }));
+const getScanSetForRollAction = vi.hoisted(() => vi.fn());
 vi.mock("@/features/rolls/components/RollPage", () => ({ RollPage }));
+vi.mock("@/features/scan-sets/actions", () => ({ getScanSetForRollAction }));
+const listRollFramesAction = vi.hoisted(() => vi.fn().mockResolvedValue([]));
+vi.mock("@/features/frames/actions", () => ({ listRollFramesAction }));
+vi.mock("@/features/notes/actions", () => ({ listRollNotesAction: vi.fn().mockResolvedValue([]) }));
+vi.mock("@/features/mistakes/actions", () => ({ listRollMistakesAction: vi.fn().mockResolvedValue([]) }));
 
 import RollDetailPage from "./page";
 
@@ -21,6 +27,29 @@ describe("RollDetailPage", () => {
 
     expect(getRoll).toHaveBeenCalledWith("roll-1");
     expect(screen.getByTestId("roll-page")).toHaveTextContent("roll-1");
+  });
+
+  it("passes the roll's scan set, and opens the upload list for ?upload=1 (Phase 2)", async () => {
+    getRoll.mockResolvedValue({ id: "roll-1" });
+    getScanSetForRollAction.mockResolvedValue({ id: "set-1" });
+
+    render(
+      await RollDetailPage({ params: Promise.resolve({ id: "roll-1" }), searchParams: Promise.resolve({ upload: "1" }) }),
+    );
+
+    expect(getScanSetForRollAction).toHaveBeenCalledWith("roll-1");
+    expect(RollPage.mock.lastCall?.[0]).toMatchObject({ openUpload: true, scanSet: { id: "set-1" } });
+  });
+
+  it("passes the roll's ready frames (Phase 2 F3)", async () => {
+    getRoll.mockResolvedValue({ id: "roll-1" });
+    getScanSetForRollAction.mockResolvedValue(null);
+    listRollFramesAction.mockResolvedValue([{ id: "f1" }]);
+
+    render(await RollDetailPage({ params: Promise.resolve({ id: "roll-1" }), searchParams: Promise.resolve({}) }));
+
+    expect(listRollFramesAction).toHaveBeenCalledWith("roll-1");
+    expect(RollPage.mock.lastCall?.[0]).toMatchObject({ frames: [{ id: "f1" }] });
   });
 
   it("404s for a missing or another user's roll", async () => {
