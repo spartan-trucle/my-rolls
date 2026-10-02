@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import messages from "../../../../messages/vi.json";
 import type { IRollEntry } from "@/features/rolls/core";
+import { renderWithIntl as render } from "@/i18n/test-utils";
 
 // `getTranslations` needs Next's request scope; the real messages through next-intl's own translator stand in.
 vi.mock("next-intl/server", async () => {
@@ -24,6 +25,9 @@ vi.mock("@/features/scan-sets/components/RollScans", () => ({
     <div data-testid="upload-section">{`${props.rollId}|${props.rollLabel}|${props.frameCount}|${String(props.initialOpenUpload)}|${props.rollPushPullThirds}|${props.scanSet?.id ?? "none"}`}</div>
   ),
 }));
+
+// The header's canister editor (CAN-2) is a client component that refreshes the route after saving.
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }) }));
 
 vi.mock("@/features/frames/components/FrameGrid", () => ({
   FrameGrid: ({ frames }: { frames: Array<{ id: string }> }) => <div data-testid="frame-grid">{frames.map((f) => f.id).join(",")}</div>,
@@ -208,5 +212,13 @@ describe("RollPage", () => {
 
     expect(screen.getByText("12.10.25")).toBeInTheDocument();
     expect(screen.getByText("20.10.25")).toBeInTheDocument();
+  });
+
+  it("CAN-2: the header's canister is the canister editor's trigger", async () => {
+    render(await RollPage({ roll: makeRoll({ name: "Đà Lạt" }) }));
+
+    const trigger = screen.getByRole("button", { name: "Đổi vỏ cuộn" });
+    expect(within(trigger).getByText("Đổi vỏ")).toBeInTheDocument();
+    expect(trigger.closest("[aria-hidden='true']")).toBeNull();
   });
 });

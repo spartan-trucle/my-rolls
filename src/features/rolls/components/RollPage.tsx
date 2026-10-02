@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Icon, Scribble, Stamp } from "@/design-system";
-import { Canister } from "@/components/canister/Canister";
+import { Icon, Stamp } from "@/design-system";
+import { CanisterEditor } from "@/features/canister/components/CanisterEditor";
 import { cameraTypeLabelKey, stockTypeLabelKey } from "@/features/catalogue/labels";
 import type { IRollEntry } from "@/features/rolls/core";
 import { formatRollDate } from "@/features/rolls/format-date";
@@ -129,22 +129,26 @@ export async function RollPage({ roll, justSaved = false, openUpload = false, sc
 
       <div className={styles.layout}>
         <div className={styles.main}>
-          <div className={styles.headingBlock}>
-            {/* The number kicker only adds something over a name; an unnamed roll's title is already "Cuộn #N". */}
-            {roll.name !== null && roll.number != null ? <span className={styles.kicker}><Icon name="roll" size={16} /> {t("kickerNumber", { number: roll.number })}</span> : null}
-            <h1 className={styles.heading}>{title}</h1>
-            {roll.name === null ? (
-              <Link href={`/rolls/${roll.id}/edit`} className={styles.nameLink}>
-                {t("nameLink")}
-              </Link>
-            ) : null}
-            {(filmMetaLine || cameraMetaLine) ? (
-              <p className={styles.metaLine}>
-                {filmMetaLine}
-                {filmMetaLine && cameraMetaLine ? <br /> : null}
-                {cameraMetaLine}
-              </p>
-            ) : null}
+          {/* RollStrip: the title block on the left, the roll's canister on the right; it opens the canister editor (CAN-2). */}
+          <div className={styles.header}>
+            <div className={styles.headingBlock}>
+              {/* The number kicker only adds something over a name; an unnamed roll's title is already "Cuộn #N". */}
+              {roll.name !== null && roll.number != null ? <span className={styles.kicker}><Icon name="roll" size={16} /> {t("kickerNumber", { number: roll.number })}</span> : null}
+              <h1 className={styles.heading}>{title}</h1>
+              {roll.name === null ? (
+                <Link href={`/rolls/${roll.id}/edit`} className={styles.nameLink}>
+                  {t("nameLink")}
+                </Link>
+              ) : null}
+              {(filmMetaLine || cameraMetaLine) ? (
+                <p className={styles.metaLine}>
+                  {filmMetaLine}
+                  {filmMetaLine && cameraMetaLine ? <br /> : null}
+                  {cameraMetaLine}
+                </p>
+              ) : null}
+            </div>
+            <CanisterEditor roll={roll} />
           </div>
 
           <div className={styles.stamps}>
@@ -196,23 +200,6 @@ export async function RollPage({ roll, justSaved = false, openUpload = false, sc
         </div>
 
         <div className={styles.side}>
-          {/* RollSavedWeb: the roll's canister standing on the shelf ledge
-              beside two empty slots, the note at the end of the row. */}
-          <div className={styles.shelf} aria-hidden="true">
-            <div className={styles.shelfRow}>
-              <span className={styles.shelfSlot} />
-              <span className={styles.shelfSlot} />
-              <Canister color={roll.canisterColor} iso={roll.boxIso} />
-              <span className={styles.shelfNote}>
-                <Scribble arrow="left" size="sm">
-                  {t("canisterScribble")}
-                </Scribble>
-              </span>
-            </div>
-            <div className={styles.ledge} />
-            <div className={styles.ledgeBase} />
-          </div>
-
           {frames.length > 0 ? (
             <section aria-labelledby="roll-frames-heading" className={`${styles.section} ${styles.frames}`}>
               <div className={styles.sectionHead}>

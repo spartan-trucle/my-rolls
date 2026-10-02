@@ -58,11 +58,10 @@
   align-items: center;
 }
 
-/* RollSavedWeb: title, stamps and details on the left, the canister
-   shelf and the scan section in a 560px column on the right, using the
+/* RollSavedWeb: title (with the canister, RollStrip), stamps and details
+   on the left, the scan section in a 560px column on the right, using the
    page's whole width. On phone both columns dissolve (`display: contents`)
-   into one list ordered title → stamps → scan → details, and the shelf
-   stays hidden. */
+   into one list ordered title → stamps → scan → details. */
 .layout {
   display: flex;
   flex-direction: column;
@@ -86,10 +85,6 @@
   order: 3;
 }
 
-.shelf {
-  display: none;
-}
-
 @media (min-width: 1024px) {
   .layout {
     display: grid;
@@ -109,44 +104,22 @@
   .details {
     max-width: 560px;
   }
+}
 
-  .shelf {
-    display: flex;
-    flex-direction: column;
-    padding: var(--space-2) var(--space-4) 0;
+/* RollStrip: the title block, and the roll's canister (the canister
+   editor's trigger, CAN-2) on its right. */
+.header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .header {
+    gap: 40px;
+    align-items: end;
   }
-}
-
-.shelfRow {
-  display: flex;
-  align-items: flex-end;
-  gap: 14px;
-  padding: 0 var(--space-3);
-}
-
-.shelfSlot {
-  width: 44px;
-  height: 72px;
-  box-sizing: border-box;
-  border: 1.5px dashed var(--line);
-  border-radius: var(--radius-sm);
-  opacity: 0.8;
-}
-
-.shelfNote {
-  margin-left: 10px;
-  padding-bottom: 18px;
-}
-
-.ledge {
-  height: 10px;
-  margin-top: 4px;
-  background: var(--scrap-edge);
-}
-
-.ledgeBase {
-  height: 6px;
-  background: var(--line);
 }
 
 .headingBlock {

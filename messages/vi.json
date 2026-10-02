@@ -571,7 +571,6 @@
       "kickerNumber": "Cuộn {number}",
       "titleFallback": "Cuộn #{number}",
       "nameLink": "Đặt tên cho cuộn",
-      "canisterScribble": "lên kệ rồi ≧ω≦",
       "editDetails": "Sửa chi tiết",
       "detailFormatExposures": "{count} kiểu",
       "pushPullStampPush": "Đẩy {pp}",
@@ -791,5 +790,37 @@
     "previewEdit": "Sửa",
     "previewAdd": "+ Thêm ghi chú",
     "previewMemoryEmpty": "Chưa có kỷ niệm. ở đâu, với ai?"
+  },
+  "canisterEditor": {
+    "open": "Đổi vỏ cuộn",
+    "openShort": "Đổi vỏ",
+    "title": "Vỏ cuộn",
+    "preview": "Xem trước vỏ cuộn {name}",
+    "look": "Kiểu vỏ",
+    "stockHint": "{film} → {colour}",
+    "drawn": "Tự vẽ",
+    "drawnHint": "Chọn màu bên dưới",
+    "photo": "Ảnh vỏ thật",
+    "photoHint": "Ảnh từ danh mục",
+    "colours": "Màu vỏ",
+    "custom": "Màu khác",
+    "customPicker": "Chọn màu khác",
+    "reset": "Theo màu film",
+    "labelHint": "Tên trên nhãn là tên cuộn.",
+    "rename": "Đổi tên",
+    "cancel": "Huỷ",
+    "save": "Lưu",
+    "saveFailed": "Chưa lưu được, thử lại nhé",
+    "unnamedRoll": "Cuộn #{number}",
+    "presets": {
+      "gold": "Vàng",
+      "green": "Xanh lá",
+      "blue": "Xanh dương",
+      "rose": "Hồng",
+      "red": "Đỏ",
+      "orange": "Cam",
+      "mono": "Than chì",
+      "cream": "Kem"
+    }
   }
 }
