@@ -29,8 +29,10 @@ vi.mock("@/features/scan-sets/components/RollScans", () => ({
 // The header's canister editor (CAN-2) is a client component that refreshes the route after saving.
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }) }));
 
-vi.mock("@/features/frames/components/FrameGrid", () => ({
-  FrameGrid: ({ frames }: { frames: Array<{ id: string }> }) => <div data-testid="frame-grid">{frames.map((f) => f.id).join(",")}</div>,
+vi.mock("@/features/collection/components/RollViews", () => ({
+  RollViews: (props: { rollId: string; frames: Array<{ id: string }>; view: string; filter: string; edgeText: string }) => (
+    <div data-testid="frame-grid">{`${props.frames.map((f) => f.id).join(",")}|${props.view}|${props.filter}|${props.edgeText}`}</div>
+  ),
 }));
 
 import { RollPage } from "./RollPage";
@@ -89,10 +91,16 @@ describe("RollPage", () => {
       { id: "f3", isKeeper: false, isOops: false },
     ];
     render(await RollPage({ roll: makeRoll({ frameCount: 3 }), frames: frames as never }));
-    expect(screen.getByTestId("frame-grid")).toHaveTextContent("f1,f2,f3");
+    expect(screen.getByTestId("frame-grid")).toHaveTextContent("f1,f2,f3|strip|all|GOLD 200 · CUỘN 16");
     expect(screen.getByText("3 tấm")).toBeInTheDocument();
     expect(screen.getByLabelText("2 tấm ưng")).toBeInTheDocument();
     expect(screen.getByLabelText("1 oops")).toBeInTheDocument();
+  });
+
+  it("shows the roll's frames in the view and filter it was given (COL-1, COL-2)", async () => {
+    const frames = [{ id: "f1", isKeeper: false, isOops: false }];
+    render(await RollPage({ roll: makeRoll({ frameCount: 1, number: 14 }), frames: frames as never, view: "grid", filter: "oops" }));
+    expect(screen.getByTestId("frame-grid")).toHaveTextContent("f1|grid|oops|GOLD 200 · CUỘN 14");
   });
 
   it("previews the memory and the latest notes, linking to the notes page (NOTE-1)", async () => {

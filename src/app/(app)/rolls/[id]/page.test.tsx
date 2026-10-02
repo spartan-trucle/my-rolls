@@ -7,6 +7,10 @@ const RollPage = vi.hoisted(() => vi.fn(({ roll }: { roll: { id: string } }) => 
 
 vi.mock("@/features/rolls/actions", () => ({ getRoll }));
 vi.mock("next/navigation", () => ({ notFound }));
+const cookieValue = vi.hoisted(() => ({ current: undefined as string | undefined }));
+vi.mock("next/headers", () => ({
+  cookies: async () => ({ get: (name: string) => (name === "cuon_roll_view" && cookieValue.current ? { value: cookieValue.current } : undefined) }),
+}));
 const getScanSetForRollAction = vi.hoisted(() => vi.fn());
 vi.mock("@/features/rolls/components/RollPage", () => ({ RollPage }));
 vi.mock("@/features/scan-sets/actions", () => ({ getScanSetForRollAction }));
@@ -58,5 +62,30 @@ describe("RollDetailPage", () => {
     await expect(
       RollDetailPage({ params: Promise.resolve({ id: "missing" }), searchParams: Promise.resolve({}) }),
     ).rejects.toThrow("NEXT_NOT_FOUND");
+  });
+
+  it("defaults to the film strip, all frames (COL-1)", async () => {
+    getRoll.mockResolvedValue({ id: "roll-1" });
+    cookieValue.current = undefined;
+    render(await RollDetailPage({ params: Promise.resolve({ id: "roll-1" }), searchParams: Promise.resolve({}) }));
+    expect(RollPage.mock.lastCall?.[0]).toMatchObject({ view: "strip", filter: "all" });
+  });
+
+  it("takes the view from the URL first, then the remembered cookie (plan D7)", async () => {
+    getRoll.mockResolvedValue({ id: "roll-1" });
+    cookieValue.current = "grid";
+    render(await RollDetailPage({ params: Promise.resolve({ id: "roll-1" }), searchParams: Promise.resolve({}) }));
+    expect(RollPage.mock.lastCall?.[0]).toMatchObject({ view: "grid" });
+    render(await RollDetailPage({ params: Promise.resolve({ id: "roll-1" }), searchParams: Promise.resolve({ view: "strip" }) }));
+    expect(RollPage.mock.lastCall?.[0]).toMatchObject({ view: "strip" });
+    cookieValue.current = undefined;
+  });
+
+  it("reads the grid filter, blank included, and drops an unknown one (COL-2)", async () => {
+    getRoll.mockResolvedValue({ id: "roll-1" });
+    render(await RollDetailPage({ params: Promise.resolve({ id: "roll-1" }), searchParams: Promise.resolve({ view: "grid", filter: "blank" }) }));
+    expect(RollPage.mock.lastCall?.[0]).toMatchObject({ filter: "blank" });
+    render(await RollDetailPage({ params: Promise.resolve({ id: "roll-1" }), searchParams: Promise.resolve({ view: "grid", filter: "nope" }) }));
+    expect(RollPage.mock.lastCall?.[0]).toMatchObject({ filter: "all" });
   });
 });

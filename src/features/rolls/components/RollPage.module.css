@@ -58,10 +58,11 @@
   align-items: center;
 }
 
-/* RollSavedWeb: title (with the canister, RollStrip), stamps and details
-   on the left, the scan section in a 560px column on the right, using the
-   page's whole width. On phone both columns dissolve (`display: contents`)
-   into one list ordered title → stamps → scan → details. */
+/* Title (with the canister) and stamps, then the frames (RollStrip,
+   RollGrid: full width, COL-1), then details on the left and the scan-set
+   line, memory and notes in a 560px column on the right. On phone both
+   columns dissolve (`display: contents`) into one list ordered
+   scan → memory and notes → details. */
 .layout {
   display: flex;
   flex-direction: column;
@@ -73,11 +74,11 @@
   display: contents;
 }
 
-.stamps {
+.scan {
   order: 1;
 }
 
-.scan {
+.notes {
   order: 2;
 }
 
@@ -226,14 +227,12 @@
   }
 }
 
-/* Phase 2 F3: the frames section (RollFrames board). */
-.frames { grid-column: 1 / -1; }
+/* COL-1: the frames section; RollViews bleeds the strip out of the page's gutter, so nothing here may clip it. */
+.frames { min-width: 0; }
 .sectionHead { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4); }
 .sectionLink { color: var(--cobalt); font-weight: 600; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
-.sectionHint { margin: 0 0 var(--space-3); color: var(--ink-muted); font-size: var(--text-body-sm); line-height: var(--text-body-sm--line-height); }
 
 /* Phase 2 F4: memory and notes previews (RollFrames board). */
-.notes { grid-column: 1 / -1; }
 .memory { margin: 0; font-family: var(--font-hand); font-size: var(--text-note-sm); line-height: var(--text-note-sm--line-height); white-space: pre-line; }
 .notePreview { display: flex; justify-content: space-between; gap: var(--space-3); align-items: baseline; padding: var(--space-2) 0; border-bottom: 1px solid var(--line); }
 .notePreview p { margin: 0; }
