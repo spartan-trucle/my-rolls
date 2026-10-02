@@ -110,6 +110,13 @@
   text-align: center;
 }
 
+/* R10: a photo canister's roll name, set like the board's label (Patrick Hand), as a caption above the stock. */
+.name {
+  max-width: 100%;
+  font: 400 var(--text-note-sm) / var(--text-note-sm--line-height) var(--font-hand);
+  overflow-wrap: anywhere;
+}
+
 .stock {
   font: 500 13px/18px var(--font-sans);
 }
