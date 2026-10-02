@@ -128,6 +128,27 @@ describe("bulk marking (COL-4, D11–D13)", () => {
     expect(screen.getByText("2 tấm đã chọn")).toBeInTheDocument();
   });
 
+  it.each([
+    ["fails", (settle: { resolve: (v: { ok: boolean }) => void; reject: (e: Error) => void }) => settle.resolve({ ok: false })],
+    ["throws", (settle: { resolve: (v: { ok: boolean }) => void; reject: (e: Error) => void }) => settle.reject(new Error("network"))],
+  ])("a bulk oops save that %s after the picker was closed says so on the bar and keeps the selection", async (_, finish) => {
+    let settle: { resolve: (v: { ok: boolean }) => void; reject: (e: Error) => void } = { resolve: () => {}, reject: () => {} };
+    const addMistakes = vi.fn(() => new Promise<{ ok: boolean }>((resolve, reject) => (settle = { resolve, reject })));
+    render(<RollViews rollId="r" frames={frames} view="grid" filter="all" edgeText="" addMistakes={addMistakes} />);
+    await userEvent.click(screen.getByRole("button", { name: /^Tấm 1/ }));
+    await userEvent.click(screen.getByRole("button", { name: /^Tấm 2/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Oops" }));
+    const dialog = await screen.findByRole("dialog", { name: /2 tấm/ });
+    await userEvent.click(within(dialog).getByRole("checkbox", { name: "Lọt sáng" }));
+    await userEvent.click(within(dialog).getByRole("button", { name: "Lưu · thêm cho 2 tấm" }));
+    await userEvent.click(within(dialog).getByRole("button", { name: "Huỷ" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    await act(async () => finish(settle));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Chưa đánh dấu được, thử lại nhé");
+    expect(screen.getByText("2 tấm đã chọn")).toBeInTheDocument();
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
   it("K, O and B do nothing while the mistake picker is open", async () => {
     const mark = vi.fn().mockResolvedValue({ ok: true });
     render(<RollViews rollId="r" frames={frames} view="grid" filter="all" edgeText="" markFrames={mark} />);
