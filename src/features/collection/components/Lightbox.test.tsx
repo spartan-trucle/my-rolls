@@ -5,6 +5,9 @@ import { makeFrame } from "@/features/frames/test-frames";
 import { renderWithIntl as render } from "@/i18n/test-utils";
 import { Lightbox, type LightboxProps } from "./Lightbox";
 
+const router = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => router }));
+
 const frames = [1, 2, 3].map((n) => makeFrame({ id: `f${n}`, position: n }));
 
 function setup(index = 0, extra: Partial<LightboxProps> = {}) {
@@ -16,7 +19,11 @@ function setup(index = 0, extra: Partial<LightboxProps> = {}) {
   return { onIndexChange, onClose, ...utils };
 }
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+  router.push.mockReset();
+  router.replace.mockReset();
+});
 
 describe("Lightbox (COL-2, D10)", () => {
   it("shows the 2048 px copy and 'Tấm 2/3'", () => {
@@ -119,6 +126,76 @@ describe("Lightbox (COL-2, D10)", () => {
       }
       await userEvent.tab({ shift: true });
       expect(dialog).toContainElement(document.activeElement as HTMLElement);
+    });
+  });
+
+  describe("fix round 1", () => {
+    it("Chi tiết replaces the lightbox's own history entry and doesn't go back (no stale entry)", async () => {
+      const back = vi.spyOn(window.history, "back").mockImplementation(() => {});
+      const { onClose } = setup(1);
+      await userEvent.click(screen.getByRole("link", { name: "Chi tiết" }));
+      expect(router.replace).toHaveBeenCalledWith("/rolls/r/frames/f2");
+      expect(router.push).not.toHaveBeenCalled();
+      expect(back).not.toHaveBeenCalled();
+      // The pop of a later Back mustn't close or go back again either.
+      act(() => {
+        window.dispatchEvent(new PopStateEvent("popstate"));
+      });
+      expect(onClose).not.toHaveBeenCalled();
+      expect(back).not.toHaveBeenCalled();
+    });
+
+    it("Tab from body, after focus left the controls, lands inside the dialog, not the page behind", async () => {
+      const behind = document.createElement("button");
+      behind.textContent = "page behind";
+      document.body.prepend(behind);
+      setup(1);
+      const dialog = screen.getByRole("dialog");
+      (document.activeElement as HTMLElement).blur();
+      expect(document.body).toHaveFocus();
+      await userEvent.tab();
+      expect(dialog).toContainElement(document.activeElement as HTMLElement);
+      expect(document.activeElement).not.toBe(dialog);
+      (document.activeElement as HTMLElement).blur();
+      await userEvent.tab({ shift: true });
+      expect(dialog).toContainElement(document.activeElement as HTMLElement);
+      behind.remove();
+    });
+
+    it("a click on the photo keeps focus in the dialog, and Tab goes to a control", async () => {
+      setup(1);
+      const dialog = screen.getByRole("dialog");
+      await userEvent.click(screen.getByRole("img"));
+      expect(dialog).toContainElement(document.activeElement as HTMLElement);
+      await userEvent.tab();
+      expect(dialog).toContainElement(document.activeElement as HTMLElement);
+      expect(document.activeElement).not.toBe(dialog);
+    });
+
+    it("an index past the end follows the list to its last frame (R21)", () => {
+      const onIndexChange = vi.fn();
+      render(<Lightbox frames={frames.slice(0, 2)} index={2} onIndexChange={onIndexChange} onClose={vi.fn()} detailHref={() => "/x"} />);
+      expect(onIndexChange).toHaveBeenLastCalledWith(1);
+      expect(screen.getByText("Tấm 2/2")).toBeInTheDocument();
+    });
+
+    it("an emptied list closes it the normal way, dropping its history entry (R21)", () => {
+      const back = vi.spyOn(window.history, "back").mockImplementation(() => {});
+      const onClose = vi.fn();
+      const props = { index: 0, onIndexChange: vi.fn(), onClose, detailHref: () => "/x" };
+      const { rerender } = render(<Lightbox frames={frames} {...props} />);
+      rerender(<Lightbox frames={[]} {...props} />);
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(back).toHaveBeenCalledTimes(1);
+    });
+
+    it("returns focus to the opener it was given, not whatever was focused (Safari, R21)", () => {
+      const opener = document.createElement("button");
+      document.body.append(opener);
+      const { unmount } = setup(0, { returnFocusTo: opener });
+      unmount();
+      expect(opener).toHaveFocus();
+      opener.remove();
     });
   });
 });

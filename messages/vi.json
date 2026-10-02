@@ -847,6 +847,7 @@
   },
   "rollViews": {
     "strip": "Dải phim",
+    "stripFrames": "{count} tấm",
     "frame": "Tấm {n}",
     "blankFrame": "Tấm {n}, trắng",
     "keeper": "Tấm ưng",

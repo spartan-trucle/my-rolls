@@ -19,9 +19,19 @@ describe("FilmStrip", () => {
     expect(within(list).getAllByRole("listitem")).toHaveLength(4);
   });
 
-  it("is a named region, so the roll page can point to it (R18)", () => {
-    render(<FilmStrip frames={frames} labels={labels} />);
-    expect(screen.getByRole("region", { name: labels.strip })).toContainElement(screen.getByRole("list"));
+  it("renders the named list as its root, with no landmark of its own (R20: the landing page styles `> div > ul`)", () => {
+    const { container } = render(<FilmStrip frames={frames} labels={labels} />);
+    expect(container.firstElementChild?.tagName).toBe("UL");
+    expect(container.firstElementChild).toHaveAttribute("aria-label", labels.strip);
+    expect(screen.queryByRole("region")).toBeNull();
+  });
+
+  it("hands a frame's click to onClick, so the caller knows which button opened it", async () => {
+    let seen: EventTarget | null = null;
+    render(<FilmStrip frames={[{ ...frames[0], onClick: (e) => (seen = e.currentTarget) }]} labels={labels} />);
+    const button = screen.getByRole("button", { name: "Chợ Đà Lạt buổi sáng" });
+    await userEvent.click(button);
+    expect(seen).toBe(button);
   });
 
   it("shows scans with their alt and blank frames as a named image", () => {

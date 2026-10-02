@@ -14,8 +14,9 @@ export interface FrameGridProps {
    * COL-2: cells become buttons that open frame `index` (of `frames`) in the
    * lightbox. Until Task 9's selection lands, a single click or tap opens on
    * every pointer (Ruling R19). Without it, cells link to each FrameView.
+   * `cell` is the button, for returning focus to it (R21).
    */
-  onOpen?: (index: number) => void;
+  onOpen?: (index: number, cell: HTMLButtonElement) => void;
 }
 
 /** The `RollGrid` board's numbered grid on film (SCAN-4, COL-1): 3 columns on phones, 6 on desktop. */
@@ -71,7 +72,7 @@ export function FrameGrid({ rollId, frames, onOpen }: FrameGridProps) {
         return (
           <li key={f.id}>
             {onOpen ? (
-              <button type="button" className={className} aria-label={label} onClick={() => onOpen(i)}>
+              <button type="button" className={className} aria-label={label} onClick={(e) => onOpen(i, e.currentTarget)}>
                 {body}
               </button>
             ) : (

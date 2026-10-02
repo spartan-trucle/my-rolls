@@ -29,6 +29,12 @@ export function RollViews({ rollId, frames, view, filter, edgeText }: RollViewsP
   const tFilters = useTranslations("filters");
   const wide = useMediaQuery("(min-width: 600px)");
   const [open, setOpen] = useState<number | null>(null);
+  // R21: the cell or strip frame that opened the lightbox; focus goes back there on close.
+  const [opener, setOpener] = useState<HTMLElement | null>(null);
+  const openFrom = (i: number, el: HTMLElement) => {
+    setOpener(el);
+    setOpen(i);
+  };
   const counts = useMemo(() => filterCounts(frames), [frames]);
   const shown = useMemo(() => (view === "grid" ? frames.filter((f) => matchesFilter(f, filter)) : frames), [frames, filter, view]);
   const href = (v: TRollView, f: TFrameFilter) => `/rolls/${rollId}?view=${v}&filter=${f}`;
@@ -39,19 +45,22 @@ export function RollViews({ rollId, frames, view, filter, edgeText }: RollViewsP
       <ViewSwitch surface="roll" current={view} hrefs={{ strip: `/rolls/${rollId}?view=strip`, grid: href("grid", filter) }} />
       {view === "strip" ? (
         <>
-          <FilmStrip
-            className={styles.strip}
-            frameWidth={wide ? 200 : 150}
-            labels={{ strip: t("strip"), keeper: t("keeper"), oops: t("oops") }}
-            edgeText={edgeText}
-            frames={frames.map((f, i) => ({
-              src: f.isBlank ? undefined : f.gridUrl,
-              alt: f.isBlank ? t("blankFrame", { n: f.position }) : t("frame", { n: f.position }),
-              number: f.position,
-              flag: f.isKeeper ? "keeper" : f.isOops ? "oops" : undefined,
-              onClick: () => setOpen(i),
-            }))}
-          />
+          {/* R20: the named region is the roll page's, so FilmStrip's own markup stays as the landing page uses it. */}
+          <section aria-label={t("strip")} className={styles.stripRegion}>
+            <FilmStrip
+              className={styles.strip}
+              frameWidth={wide ? 200 : 150}
+              labels={{ strip: t("stripFrames", { count: frames.length }), keeper: t("keeper"), oops: t("oops") }}
+              edgeText={edgeText}
+              frames={frames.map((f, i) => ({
+                src: f.isBlank ? undefined : f.gridUrl,
+                alt: f.isBlank ? t("blankFrame", { n: f.position }) : t("frame", { n: f.position }),
+                number: f.position,
+                flag: f.isKeeper ? "keeper" : f.isOops ? "oops" : undefined,
+                onClick: (e) => openFrom(i, e.currentTarget),
+              }))}
+            />
+          </section>
           <p className={styles.hint}>
             <span className={styles.touch}>{t("stripHintTouch")}</span>
             <span className={styles.pointer}>{t("stripHintPointer")}</span>
@@ -60,7 +69,7 @@ export function RollViews({ rollId, frames, view, filter, edgeText }: RollViewsP
       ) : (
         <>
           <FilterChips filters={FRAME_FILTERS} current={filter} counts={counts} hrefFor={(f) => href("grid", f)} />
-          {shown.length === 0 ? <p className={styles.empty}>{t("emptyFilter")}</p> : <FrameGrid rollId={rollId} frames={shown} onOpen={setOpen} />}
+          {shown.length === 0 ? <p className={styles.empty}>{t("emptyFilter")}</p> : <FrameGrid rollId={rollId} frames={shown} onOpen={openFrom} />}
         </>
       )}
       {open !== null ? (
@@ -70,6 +79,7 @@ export function RollViews({ rollId, frames, view, filter, edgeText }: RollViewsP
           total={frames.length}
           filterLabel={filtered ? tFilters(filter) : undefined}
           edgeText={edgeText}
+          returnFocusTo={opener}
           onIndexChange={setOpen}
           onClose={() => setOpen(null)}
           detailHref={(f) => `/rolls/${rollId}/frames/${f.id}`}

@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { makeFrame } from "@/features/frames/test-frames";
@@ -6,7 +6,7 @@ import { renderWithIntl as render } from "@/i18n/test-utils";
 import { RollViews } from "./RollViews";
 
 vi.mock("../actions", () => ({ rememberViewAction: vi.fn() }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }) }));
 
 describe("RollViews (COL-1, COL-2)", () => {
   const frames = [
@@ -17,7 +17,9 @@ describe("RollViews (COL-1, COL-2)", () => {
 
   it("Dải phim shows every frame as a film strip; Lưới shows the grid", () => {
     const { rerender } = render(<RollViews rollId="r" frames={frames} view="strip" filter="all" edgeText="GOLD 200 · CUỘN 14" />);
-    expect(screen.getByRole("region", { name: /Dải phim/ })).toBeInTheDocument();
+    // R20: RollViews names the region once; FilmStrip's list says how many frames.
+    expect(screen.getByRole("region", { name: "Dải phim" })).toContainElement(screen.getByRole("list", { name: "3 tấm" }));
+    expect(screen.getAllByRole("region", { name: /Dải phim/ })).toHaveLength(1);
     expect(screen.getByRole("link", { name: /Dải phim/ })).toHaveAttribute("aria-current", "page");
     rerender(<RollViews rollId="r" frames={frames} view="grid" filter="all" edgeText="" />);
     expect(screen.getAllByRole("button", { name: /^Tấm \d/ })).toHaveLength(3);
@@ -59,5 +61,18 @@ describe("RollViews (COL-1, COL-2)", () => {
   it("an empty filter says so instead of an empty grid", () => {
     render(<RollViews rollId="r" frames={frames} view="grid" filter="blank" edgeText="" />);
     expect(screen.getByText("Không có tấm nào ở đây")).toBeInTheDocument();
+  });
+
+  it.each([
+    ["grid", /^Tấm 2/],
+    ["strip", /^Tấm 2/],
+  ] as const)("returns focus to the %s frame that opened it, even when the click didn't focus it (Safari, R21)", async (view, name) => {
+    render(<RollViews rollId="r" frames={frames} view={view} filter="all" edgeText="" />);
+    const cell = screen.getByRole("button", { name });
+    fireEvent.click(cell); // like Safari: the click doesn't focus the button
+    expect(cell).not.toHaveFocus();
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(cell).toHaveFocus();
   });
 });
