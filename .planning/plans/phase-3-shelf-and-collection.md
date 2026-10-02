@@ -167,10 +167,10 @@ Only with Trúc's yes on blocker 6 (CLAUDE.md: never create or sync docs silentl
 
 ### Task D0: Draw the Phase 3 boards (~2.5 h, design)
 
-- [ ] **Step 1:** Re-read the canvas (`canvas.json`, the `RollGrid…` and `LibraryGrid…` boards, `Home…`, `RollFrames…`, `FrameView…`, `MistakePicker…`).
-- [ ] **Step 2:** Draw every board in [Designs](#designs-d0-to-draw) on page "Kệ & bộ sưu tập" with the blocker defaults, using the design system's `bundle.css` components. Use the Task 1 tokens for the three new presets (inline values on the canvas until the design system carries them).
-- [ ] **Step 3:** Add the boards to `wireframes.md`, tick the four Phase 3 rows and the "Tấm ưng tab" and Darkroom rows they cover in `missing-screens.md`.
-- [ ] **Step 4:** Ask Trúc to approve the boards. **Tasks 6–10 wait for this.**
+- [x] **Step 1:** Re-read the canvas (`canvas.json`, the `RollGrid…` and `LibraryGrid…` boards, `Home…`, `RollFrames…`, `FrameView…`, `MistakePicker…`).
+- [x] **Step 2:** Draw every board in [Designs](#designs-d0-to-draw) on page "Kệ & bộ sưu tập" with the blocker defaults, using the design system's `bundle.css` components. Use the Task 1 tokens for the three new presets (inline values on the canvas until the design system carries them).
+- [x] **Step 3:** Add the boards to `wireframes.md`, tick the four Phase 3 rows and the "Tấm ưng tab" and Darkroom rows they cover in `missing-screens.md`.
+- [ ] **Step 4:** Ask Trúc to approve the boards. (Drawn 02.10.2026 on canvas `1790944574-5a0f`, 28 new boards; asked 02.10.2026.) **Tasks 6–10 wait for this.**
 - [ ] **Step 5: Commit** `docs(cuon): index the phase 3 boards`.
 
 ### Task 1: Canister tokens (~0.75 h)

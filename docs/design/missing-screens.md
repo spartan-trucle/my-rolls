@@ -1,6 +1,6 @@
 # Missing screens
 
-> MVP screens with no board on the [design canvas](https://claude.ai/artifact/AXpgMvXFo6HL1vrw9RS6gt) yet. Checked 27.09.2026 against canvas version `1790375803-e51e` (50 boards); Phase 1 and Phase 2 drawn the same day; canvas `1790516511-f125` (118 boards). Re-checked 30.09.2026 against `1790765247-6906`. Re-checked 02.10.2026 against `1790936301-40d9`: the Phase 4 rows are drawn on page "Chia sẻ · MVP".
+> MVP screens with no board on the [design canvas](https://claude.ai/artifact/AXpgMvXFo6HL1vrw9RS6gt) yet. Checked 27.09.2026 against canvas version `1790375803-e51e` (50 boards); Phase 1 and Phase 2 drawn the same day; canvas `1790516511-f125` (118 boards). Re-checked 30.09.2026 against `1790765247-6906`. Re-checked 02.10.2026 against `1790936301-40d9`: the Phase 4 rows are drawn on page "Chia sẻ · MVP". Phase 3 boards drawn 02.10.2026 on page "Kệ & bộ sưu tập" (canvas `1790944574-5a0f`), awaiting Trúc's approval.
 > Every screen needs a phone (390 px) and a desktop (1440 px) design before it is built ([CLAUDE.md](../../CLAUDE.md#conventions)). Tick a row when its boards are on the canvas, and add them to [wireframes.md](wireframes.md).
 
 Back to: [Wireframes](wireframes.md) · [Docs index](../README.md) · [Roadmap](../roadmap.md)
@@ -42,10 +42,10 @@ All nine were drawn on 27.09.2026 (Phase 2 plan task D0), phone and desktop in P
 
 | Done | Screen | Requirement | What exists today |
 |---|---|---|---|
-| [ ] | Canister shelf | [CAN-1](../product/requirements/canister.md) | `Home` shows a `RollCard` list, not canisters |
-| [ ] | Canister editor: colour and label | [CAN-2](../product/requirements/canister.md) | Nothing |
-| [ ] | Owner's roll page in film-strip view, desktop | [COL-1](../product/requirements/collection.md) | Grid view only (`RollGrid`) |
-| [ ] | Filters and lightbox | [COL-2](../product/requirements/collection.md) | Nothing |
+| [x] | Canister shelf | [CAN-1](../product/requirements/canister.md) | `Shelf…`, `ShelfEmpty…` (4 boards each) |
+| [x] | Canister editor: colour and label | [CAN-2](../product/requirements/canister.md) | `CanisterEditor…` (4 boards) |
+| [x] | Owner's roll page in film-strip view, phone and desktop | [COL-1](../product/requirements/collection.md) | `RollStrip…` (4 boards) |
+| [x] | Filters and lightbox | [COL-2](../product/requirements/collection.md) | Filters on `RollGrid…` and `LibraryGrid…`; `Lightbox…` (4 boards); bulk Oops `MistakePickerBulk…` |
 
 ## Phase 4 · Sharing
 
@@ -58,6 +58,6 @@ All nine were drawn on 27.09.2026 (Phase 2 plan task D0), phone and desktop in P
 
 | Done | Gap | Where |
 |---|---|---|
-| [ ] | Darkroom (dark theme) versions | Labs and collection boards exist only in Paper (sharing got Darkroom boards on page "Chia sẻ · MVP" by 02.10.2026; the story cards and `ShareSheet` / `ShareDialogWeb` stay Paper). Sign-in, onboarding, home, profile and all Phase 1 boards have Darkroom boards |
-| [ ] | Empty states: empty bag, empty search, empty "Tấm ưng" tab | Every area. Empty catalogue search is done (`CatalogueEmpty…`) |
-| [ ] | The bottom "Tấm ưng" tab | `LibraryGrid` shows every frame, not only keepers |
+| [ ] | Darkroom (dark theme) versions | Labs boards exist only in Paper (collection got Darkroom boards on page "Kệ & bộ sưu tập" on 02.10.2026) (sharing got Darkroom boards on page "Chia sẻ · MVP" by 02.10.2026; the story cards and `ShareSheet` / `ShareDialogWeb` stay Paper). Sign-in, onboarding, home, profile and all Phase 1 boards have Darkroom boards |
+| [ ] | Empty states: empty bag, empty search, empty "Tấm ưng" tab | Every area. Empty catalogue search (`CatalogueEmpty…`), empty shelf (`ShelfEmpty…`) and empty "Tấm ưng" (`LibraryGridKeepersEmpty…`) are done; the empty bag is not |
+| [x] | The bottom "Tấm ưng" tab | Drawn 02.10.2026: the tab opens the library grid on the Tấm ưng filter (`Shelf…`), empty state `LibraryGridKeepersEmpty…` |
