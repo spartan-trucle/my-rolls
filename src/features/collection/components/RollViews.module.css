@@ -5,6 +5,8 @@
   min-width: 0;
 }
 
+.stripRegion { min-width: 0; }
+
 /* RollStrip(Web): the strip runs edge to edge, out of the page's gutter, square-cornered. */
 .strip {
   margin-inline: calc(-1 * var(--space-4));

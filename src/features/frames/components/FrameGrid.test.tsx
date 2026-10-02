@@ -52,8 +52,9 @@ describe("FrameGrid (RollFrames board)", () => {
       const onOpen = vi.fn();
       render(<FrameGrid rollId="r1" frames={[frame(1), frame(2, { isKeeper: true })]} onOpen={onOpen} />);
       expect(screen.queryByRole("link")).toBeNull();
-      await userEvent.click(screen.getByRole("button", { name: "Tấm 2, tấm ưng" }));
-      expect(onOpen).toHaveBeenLastCalledWith(1);
+      const cell = screen.getByRole("button", { name: "Tấm 2, tấm ưng" });
+      await userEvent.click(cell);
+      expect(onOpen).toHaveBeenLastCalledWith(1, cell);
     });
 
     it("opens with Enter from the keyboard", async () => {
@@ -61,7 +62,7 @@ describe("FrameGrid (RollFrames board)", () => {
       render(<FrameGrid rollId="r1" frames={[frame(1), frame(2)]} onOpen={onOpen} />);
       screen.getByRole("button", { name: "Tấm 1" }).focus();
       await userEvent.keyboard("{Enter}");
-      expect(onOpen).toHaveBeenLastCalledWith(0);
+      expect(onOpen).toHaveBeenLastCalledWith(0, screen.getByRole("button", { name: "Tấm 1" }));
     });
 
     it("keeps the first row eager (the 2 s first-row gate)", () => {

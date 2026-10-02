@@ -11,6 +11,8 @@
   background: color-mix(in srgb, var(--film) 96%, transparent);
   color: var(--lb-text);
 }
+/* Focusable (tabIndex -1) only so a click on the photo keeps focus inside; no ring for that. */
+.lightbox:focus { outline: none; }
 
 /* Phone: × · count · Chi tiết. */
 .bar {
