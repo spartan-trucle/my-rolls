@@ -42,6 +42,7 @@ The inputs and conditions most likely to bite a real user that the requirements 
 - **Missing boards** ([missing-screens.md](../../docs/design/missing-screens.md#phase-3--shelf--collection)): canister shelf, canister editor, owner's roll in film-strip view, filters and lightbox. Plus Darkroom for the four grid boards, and the empty "Tấm ưng" state. Task D0 draws them.
 - **Content:** canister photos matched to catalogue entries are due 23.11.2026. No stock has `canister_photo_key` set today, so photo mode is built with a drawn fallback and lights up when the photos land.
 - **Plan status:** **boards approved 02.10.2026 (Trúc), D19 added. Blockers answered 02.10.2026 (Trúc)**: defaults for 2, 3, 5 and 6, and the `canister_style` column for 4 (after weighing the no-migration option). Execution: subagent-driven.
+- **Progress, 02.10.2026:** built subagent-driven on `feature/phase-3-shelf-and-collection` (local, not pushed): P0, D0 (28 boards, approved by Trúc), Tasks 1–10, each with a task review (Tasks 6–8 after one fix round), then a whole-branch review and one fix wave (5 Important findings, all addressed; re-review clean). `pnpm check` green, 1352 tests. Design system at `0651` (canister presets, uncropped FilmStrip), canvas at `5a0f`. `rememberViewAction` became `trackViewSwitchAction` in the fix wave (ruling R31: the view cookie is written in the browser). **Open:** Trúc's visual check on a preview URL (390/1440 px, Paper and Darkroom; see the list below), Task 11 (exit check on production + roadmap ticks), two product questions (RollForm preview; Kệ tab and the remembered view).
 
 ## Blockers (answered 02.10.2026)
 
@@ -2415,3 +2416,88 @@ With Trúc, on production after the phase's PR merges and deploys.
 | Picker colours in Darkroom | A custom dark hex vanishes on the dark paper | The `line-strong` edge on every canister body (blocker 2) |
 | Design time | D0 takes longer than 2.5 h, delaying the UI tasks | Tasks 2–5 run while the boards are drawn |
 | Cut line | Phase runs late | Cut #2, #3, #4 as the roadmap says; each maps to a part of Task 10, 9 or 7 |
+
+## Rulings made during execution (02.10.2026)
+
+Decisions the controller took on Trúc's behalf while executing, each with what it costs if wrong. R11 is superseded by R31, and R18's region part by R20.
+
+- Ruling R1: `ownedReadyFrames` moves to `src/features/shared/roll-access.ts` (both cores import it from there) — keeps mistakes/core from importing frames/core — cost if wrong: one import path to move.
+- Ruling R2: `hydrateRolls(db, rows, opts?: { publicUrl?: string })`; `stock.canisterPhotoUrl` is null when no publicUrl is given; actions pass `getR2Env().publicUrl`; Task 4's listLibraryCore passes its own publicUrl — keeps old callers/tests unchanged — cost if wrong: photo URLs missing on a screen whose caller forgot the option (visible, falls back to drawn).
+- Ruling R3: Task 3's two updateRollCore cases are written with core.test.ts's real roll/stock/bag helpers, asserting exactly the plan's two expectations — the plan's prose arrange is the spec — cost if wrong: none beyond test shape.
+- Ruling R4: subagent tasks run one at a time; the controller's Task 1 repo edits (design-tokens/, src/styles/tokens.css, docs) are made and committed only between subagent tasks — avoids staging collisions on one checkout — cost if wrong: Task 1 commit lands a few minutes later.
+- Ruling R5: Task 4's last keeper-test assertion becomes `expect(page.groups.some((g) => g.roll.id === b.roll.id)).toBe(false)` — same intent, actually asserts — cost if wrong: none.
+- Task 2: Ruling: commit trailer said "Claude Haiku 4.5"; amended message-only to the required "Claude Opus 5.5" trailer (local, unpushed) — attribution line is set by the session's reminder — cost if wrong: one reword.
+- Ruling R6: toCanisterProps returns the raw safe colour value (slug or hex) derived from inputs, not by slicing var(--stock-…) out of canisterFill — the plan's slice was brittle — cost if wrong: none (same output).
+- Ruling R7: until Task 10, Home's Lưới link renders disabled and ?view=grid still shows the shelf — keeps Task 6 shippable alone — cost if wrong: none.
+- Ruling R8: Home's count line "N CUỘN · N TẤM · N TẤM ƯNG" (board) is added in Task 10 from listLibraryCore's totals (already computed there), for both views — Task 6 keeps "N CUỘN" — cost if wrong: one more query on Home's shelf view.
+- Ruling R9: visual checks at 390/1440 in both themes need a signed-in browser; controller can't sign in (Google). Logged for Trúc's preview-URL check at the end — cost if wrong: layout bugs found later.
+- Ruling R10: photo-look canisters show the roll name as text under the canister (above the stock name) — the plan's Canister code dropped the label band with the photo, so two photo rolls of one stock were indistinguishable; CAN-1 every roll identifiable — cost if wrong: one extra text line under photo canisters.
+- Ruling R11 (⚠️ confirmed as a real gap): ViewSwitch must not fire rememberViewAction in parallel with Link navigation (a cookie-setting server action refreshes the current route and can race the navigation). ViewSwitch prevents default, awaits remember (errors swallowed), then router.push(href); keyboard/middle-click/modifier-click keep native link behaviour — cost if wrong: switch waits one round trip.
+- Ruling R12: CanisterEditor "Đổi tên" links to /rolls/[id]/edit (exists), not the board's PastRoll stand-in — cost if wrong: one href.
+- Ruling R13: picker hex lowercased; invalid picker value keeps previous draft; reset sends { style: "stock" } only — cost if wrong: none.
+- Ruling R14: save disabled while in flight; draft resets to the saved look on each open — cost if wrong: none.
+- Ruling R15: roll page's decorative desktop shelf (ledge, empty slots, "lên kệ rồi" scribble, canisterScribble key) removed; the editor trigger sits in the header as on the approved RollStrip board — boards win on layout — cost if wrong: restore a decorative scribble.
+- Ruling R16: "Theo màu film" is a look radio (board), not a reset button (brief); picker labelled "Chọn màu khác" — boards win on layout; save behaviour per brief + R13 — cost if wrong: none.
+- Ruling R17: Lightbox count reads "Tấm {position}/{total}" and, when opened from a filter other than all, appends " · {filter label} {i}/{n}" (LightboxWeb board: "Tấm 3/36 · Oops 1/3") — board wins on layout — cost if wrong: one string.
+- Ruling R18: D19 (FilmStrip uncropped) lands in Task 8: app FilmStrip.module.css image → object-fit: contain on var(--film) in a 3:2 cell; FilmStrip renders a named region — cost if wrong: CSS revert.
+- Ruling R19: until Task 9, a single click/tap on a grid cell opens the lightbox on every pointer; FrameGrid without onOpen keeps Phase 2 links — cost if wrong: none (Task 9 changes desktop click).
+- Ruling R20 (supersedes R18's region part): FilmStrip keeps its original DOM (no region wrapper); RollViews wraps the strip in its own named region (one accessible name, not doubled). D19 contain stays design-system-wide — landing/sign-in sample strips may letterbox if not 3:2; accepted per Trúc's "never cropped" call — cost if wrong: landing samples show film bars.
+- Ruling R21: Lightbox minor #1 (index past the end → invisible scroll-locked overlay after router.refresh) and #2 (Safari opener focus) are real bugs → fixed in this round.
+- Ruling R22: Task 9 owns the Task 5 double-submit risk: SelectionBar actions and the bulk MistakePicker save are disabled while a bulk call is in flight, and a second K/O/B while busy is ignored — cost if wrong: a fast double press is dropped.
+- Ruling R23: after a successful bulk mark, selection stays, pruned to frames still shown; router.refresh brings new marks — cost if wrong: selection clears more/less than expected.
+- Ruling R24: RollViews takes injectable markFrames/addMistakes/pointer, as the brief's tests assume — cost if wrong: none.
+- Ruling R25: pointer default is !matchMedia("(pointer: coarse)") (server/jsdom → fine/desktop; phones switch after hydration); bulk Oops test uses the board's checkbox + "Lưu · thêm cho N tấm"; failed bulk Oops shows the picker's own error inside the dialog; pruning during render (lint) — all accepted — cost if wrong: a phone's first tap before hydration behaves as desktop.
+- Ruling R26: library lightbox shows each frame's position over its own roll's count (Lightbox total accepts number | (f) => number); detailHref per frame's roll; filterLabel when filter ≠ all — cost if wrong: one prop shape.
+- Ruling R27: "Xem thêm cuộn" appends and dedupes by roll id, disabled while loading, failed load shows a retry message and keeps what's shown — cost if wrong: none.
+- Ruling R28: Tấm ưng tab aria-current only on /?view=grid&filter=keeper; Kệ not current there — cost if wrong: tab highlight.
+- Ruling R29: Task 10 additions accepted for review: count line in Home header (R8), Lightbox filterTotal (library-wide filtered count), LibraryGrid newestRoll for the empty-keepers link, libraryTotalsCore/Action, FrameGrid eager prop, LibraryNavLink in both navs, sm canister at 0.75 in group header, board's "Thêm cuộn" button left out — reviewer judges — cost if wrong: small extras.
+- Ruling R30: fix Important #1, #2, #3, #5 as the reviewer proposes, in one fix wave — they are seams the task reviews couldn't see — cost if wrong: small.
+- Ruling R31 (supersedes R11): the view cookie (cuon_library_view / cuon_roll_view, not sensitive) is written client-side with document.cookie (1 year, SameSite=Lax, path=/), then router.push; view_switched goes through a non-cookie server action, not awaited. Server keeps reading the cookie. Removes the extra render of the page being left — cost if wrong: cookie no longer httpOnly (holds only "strip"/"grid"/"shelf").
+
+## Deferred minor findings (can wait, triaged by the final review)
+
+- Task 2: sticker.ts PROCESS[type] on a plain object returns inherited props for type "constructor"/"toString" — use Object.hasOwn or a Map.
+- Task 2: look.ts resolveCanisterLook passes stockPhotoUrl through unvalidated — UI must only feed catalogue URLs.
+- Task 2: filters.ts filterCounts takes mutable IMarkable[] (readonly would match selection.ts).
+- Task 3: setCanisterCore UPDATE + bumpRollVersion not in one transaction; updatedAt set twice (same pattern as Phase 2 helpers).
+- Task 3: setCanisterCore lacks a runtime typeof color === "string" guard (an array like ["#aabbcc"] passes HEX.test).
+- Task 3: setCanisterAction untested for preset analytics value and for stock/photo sending color undefined.
+- Task 3: rolls/core.ts ~800 lines; IRollEntry.canisterStyle cast from text.
+- Task 4: cursor uses toISOString (ms) vs timestamptz µs — two rolls of one user in the same ms could be skipped across pages.
+- Task 4: no test for cursor paging with filter=keeper, nor equal-createdAt tie-break on id.
+- Task 4: counts re-queried on every page; actions test "async functions" asserts only Function; sql<number> for a bigint.
+- Task 5: addMistakesToFramesCore read-then-insert without onConflictDoNothing — a double-submitted bulk oops can hit the live-row unique index and 500. Task 9's busy guard reduces it; final review should decide on onConflictDoNothing.
+- Task 5: bulk UPDATE filters only by id (no userId/rollId/deletedAt) and ownership check is outside the tx; bumpRollVersion outside tx in both cores.
+- Task 5: bulk actions don't validate mark/on/via/frameIds at runtime (forged mark "x" falls into the blank branch).
+- Task 5: tests miss pending/soft-deleted refusal, keeper off, exactly-500 boundary; over-500 test uses random ids.
+- Task 6: to-canister-props duplicates resolveCanisterLook colour fallback (stock colour vs gold) — two sources of truth.
+- Task 6: --rc-stock written on photo span unused; photoSrc ignored for size sm.
+- Task 6: ledge offset copies Canister font-size across files (Shelf.module.css vs Canister.module.css).
+- Task 6: type switches at 1024px (lg:) while design system switches mobile type at 599px; raw px in .stock/.option.
+- Task 6: metal/wood hex and shadow rgba with no design-system tokens.
+- Task 6: "Cuộn #?" path untested; stale comment roll-card-mapper.ts:14 (home.unnamedRoll).
+- Task 6: empty-state CTA changed /onboarding/first-roll → /rolls/new (+ "Thêm cuộn đã chụp" → /rolls/new?mode=past), per approved ShelfEmpty board.
+- Task 7: Enter doesn't pick a swatch (native radios: arrows + Space) — ruling said Space/Enter.
+- Task 7: photo-style roll whose stock lost its photo → no look radio checked, Lưu re-sends photo.
+- Task 7: no test for roll without stock; X/Esc stay enabled while saving; dialog element always mounted in RollPage header.
+- Task 7: Firefox colour swatch unstyled (only ::-webkit-color-swatch).
+- Task 8: useMediaQuery resubscribes every render; server snapshot false → desktop strip 150→200px jump.
+- Task 8: filter chip accessible name "Tấm ưng5" (no space).
+- Task 8: RollPage phone tab order ≠ visual order (CSS order); full-width header restructure — needs Trúc's eye vs RollStripWeb.
+- Task 8: hard-coded lightbox colours, -120px bleed coupled to AppShell, .views > ol reaching into FrameGrid.
+- Task 8: lightbox oops stamp has no mistake type (IRollFrame lacks it); mouse drag without setPointerCapture; iOS body overflow lock.
+- Task 8: after Chi tiết's router.replace, RollViews' open state isn't cleared; if navigation fails the lightbox stays with closed.current=true (Esc/× inert).
+- Task 9: desktop double-click toggles selection on then off — the bar appearing may shift the grid between clicks at 1024–1280, so dblclick misses; check on preview, reserve bar space or skip toggle when e.detail > 1.
+- Task 9: bulk Oops picker can be closed mid-save; a later failure is silent (no bar error).
+- Task 9: stale bar error returns after deselect-to-zero; shortcut handler ref updated in useEffect (one frame late); no partial-prune-then-K test; Esc-in-input untested; "use client" on FrameGrid.
+- Task 10: LibraryGrid groups/cursor don't re-sync when `initial` changes under the same key (router.refresh → fresh counts over stale groups).
+- Task 10: no test opening a frame in an appended group; extra session lookups on shelf view; empty-keepers loads all rolls to name one; rollName may duplicate shelf naming rule.
+
+## For Trúc's visual check (preview URL, signed in)
+
+- Home: shelf at 390 / 1440 px, Paper and Darkroom; ledge meets the canisters' feet; 6 per ledge from 1024 px with long stock names; empty shelf.
+- Kệ/Lưới switch: no flash; library grid with 7+ rolls and "Xem thêm cuộn"; empty Tấm ưng.
+- Roll page: header + canister editor (phone sheet and desktop dialog; Lưu stays in view on a short window); Dải phim strip (uncropped frames, 150 → 200 px), Lưới with chips; phone tab order.
+- Lightbox: swipe on a real phone (and iOS edge-swipe), ← → and Esc on desktop, focus back to the frame on Safari.
+- Bulk marking: long-press on iPhone and Android (no image callout), desktop double-click opens the lightbox without the grid shifting at 1024–1280 px, K / O / B.
+- Old preview cookie: a browser that used this branch before the fix keeps an HttpOnly view cookie; clear it if the remembered view doesn't update.
