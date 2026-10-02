@@ -491,7 +491,7 @@ type TRollRow = typeof roll.$inferSelect;
  * there's no foreign key (D9), so this is a batch `inArray` fetch per
  * table standing in for a join, same shape as `bag/queries.ts#listBag`.
  */
-async function hydrateRolls<TQueryResult extends PgQueryResultHKT>(
+export async function hydrateRolls<TQueryResult extends PgQueryResultHKT>(
   db: TDb<TQueryResult>,
   rollRows: TRollRow[],
   opts: { publicUrl?: string } = {},
