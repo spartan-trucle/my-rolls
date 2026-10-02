@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { afterEach, describe, expect, it } from "vitest";
 import { frame, mistake, note, roll } from "@/db/schema";
 import { createTestDb } from "@/db/test-db";
+import { raceInTransaction, writesOnlyInTransaction } from "@/test/db-race";
 import { seedRollWithFrames } from "@/test/phase2-fixtures";
 import { deleteFrameCore, listRollFramesCore, moveFrameCore, restoreFrameCore, setFrameMarksCore, setFramesMarksCore } from "./core";
 
@@ -194,6 +195,39 @@ describe("setFramesMarksCore (COL-4, D12)", () => {
     const many = Array.from({ length: 501 }, () => crypto.randomUUID());
     expect(await setFramesMarksCore(db, USER, { rollId: r.id, frameIds: many, mark: "keeper", on: true })).toEqual({ ok: false, error: "not_found" });
     expect(await version(db, r.id)).toBe(1);
+  });
+
+  it("writes the marks and the version bump in its one transaction (D12)", async () => {
+    const { db, frames, roll: r } = await setup(2);
+    const ids = frames.map((f) => f.id);
+    expect(await setFramesMarksCore(writesOnlyInTransaction(db), USER, { rollId: r.id, frameIds: ids, mark: "keeper", on: true })).toEqual({ ok: true });
+    expect((await db.select().from(frame).where(eq(frame.rollId, r.id))).every((f) => f.isKeeper)).toBe(true);
+    expect(await version(db, r.id)).toBe(2);
+  });
+
+  it("a pending or soft-deleted frame id refuses the bulk mark", async () => {
+    const { db, frames, roll: r } = await setup(3);
+    await db.update(frame).set({ status: "pending" }).where(eq(frame.id, frames[1].id));
+    await db.update(frame).set({ deletedAt: new Date() }).where(eq(frame.id, frames[2].id));
+    for (const id of [frames[1].id, frames[2].id]) {
+      expect(await setFramesMarksCore(db, USER, { rollId: r.id, frameIds: [frames[0].id, id], mark: "keeper", on: true })).toEqual({
+        ok: false,
+        error: "not_found",
+      });
+    }
+    expect((await db.select().from(frame).where(eq(frame.rollId, r.id))).some((f) => f.isKeeper)).toBe(false);
+    expect(await version(db, r.id)).toBe(1);
+  });
+
+  it("a frame deleted or set pending after the check isn't marked (the UPDATE re-checks)", async () => {
+    const { db, frames, roll: r } = await setup(3);
+    const racing = raceInTransaction(db, "start", async (tx) => {
+      await tx.update(frame).set({ status: "pending" }).where(eq(frame.id, frames[1].id));
+      await tx.update(frame).set({ deletedAt: new Date() }).where(eq(frame.id, frames[2].id));
+    });
+    await setFramesMarksCore(racing, USER, { rollId: r.id, frameIds: frames.map((f) => f.id), mark: "keeper", on: true });
+    const rows = await db.select().from(frame).where(eq(frame.rollId, r.id)).orderBy(frame.position);
+    expect(rows.map((f) => f.isKeeper)).toEqual([true, false, false]);
   });
 
   it("duplicate ids are harmless", async () => {

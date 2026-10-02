@@ -58,9 +58,22 @@ export async function setFramesMarksCore<TQueryResult extends PgQueryResultHKT>(
         ? { isBlank: true, isKeeper: false }
         : { isBlank: false };
   await db.transaction(async (tx) => {
-    await tx.update(frame).set({ ...set, updatedAt: new Date() }).where(inArray(frame.id, ids));
+    // The ownership check above ran outside the transaction; the UPDATE repeats it, so a frame
+    // deleted or reset to pending in between isn't marked.
+    await tx
+      .update(frame)
+      .set({ ...set, updatedAt: new Date() })
+      .where(
+        and(
+          inArray(frame.id, ids),
+          eq(frame.userId, userId),
+          eq(frame.rollId, input.rollId),
+          isNull(frame.deletedAt),
+          eq(frame.status, "ready"),
+        ),
+      );
+    await bumpRollVersion(tx, input.rollId);
   });
-  await bumpRollVersion(db, input.rollId);
   return { ok: true };
 }
 

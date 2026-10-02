@@ -2,6 +2,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { afterEach, describe, expect, it } from "vitest";
 import { mistake, roll } from "@/db/schema";
 import { createTestDb } from "@/db/test-db";
+import { raceInTransaction, writesOnlyInTransaction } from "@/test/db-race";
 import { seedRollWithFrames } from "@/test/phase2-fixtures";
 import { addMistakesToFramesCore, listRollMistakesCore, setMistakesCore } from "./core";
 
@@ -112,6 +113,25 @@ describe("addMistakesToFramesCore (COL-4 bulk oops, D13)", () => {
     expect(byFrame(frames[0].id)).toEqual(["camera_shake", "light_leak"]);
     expect(byFrame(frames[2].id)).toEqual(["camera_shake", "light_leak"]);
     expect(rows.find((m) => m.frameId === frames[1].id && m.type === "camera_shake")?.note).toBe("run");
+  });
+
+  it("writes the rows and the version bump in its one transaction (D13)", async () => {
+    const { db, frames, roll: r } = await setup(2);
+    const input = { rollId: r.id, frameIds: frames.map((f) => f.id), items: [{ type: "light_leak" as const }] };
+    expect(await addMistakesToFramesCore(writesOnlyInTransaction(db), USER, input)).toEqual({ ok: true });
+    expect(await live(db)).toHaveLength(2);
+    expect((await db.select({ v: roll.version }).from(roll).where(eq(roll.id, r.id)))[0].v).toBe(2);
+  });
+
+  it("a concurrent save adding the same type between the read and the insert doesn't throw", async () => {
+    const { db, frames, roll: r } = await setup(2);
+    const racing = raceInTransaction(db, "afterFirstSelect", async (tx) => {
+      await tx.insert(mistake).values({ userId: USER, rollId: r.id, frameId: frames[0].id, type: "light_leak" });
+    });
+    const input = { rollId: r.id, frameIds: frames.map((f) => f.id), items: [{ type: "light_leak" as const }] };
+    expect(await addMistakesToFramesCore(racing, USER, input)).toEqual({ ok: true });
+    const rows = await live(db);
+    expect(rows.map((m) => m.frameId).sort()).toEqual(frames.map((f) => f.id).sort()); // one light_leak per frame
   });
 
   it("is idempotent: running it twice adds no duplicate rows", async () => {

@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { bagItem, camera, frame, lens, roll, scanSet, stock } from "@/db/schema";
 import { createTestDb } from "@/db/test-db";
 import { toSearchText } from "@/lib/search-text";
+import { writesOnlyInTransaction } from "@/test/db-race";
 import { seedRollWithFrames } from "@/test/phase2-fixtures";
 import {
   createRollCore,
@@ -1328,6 +1329,14 @@ describe("setCanisterCore (CAN-2, D1–D2)", () => {
     });
     expect(await setCanisterCore(db, OWNER, { rollId: r.id, style: "drawn" })).toEqual({ ok: false, error: "invalid_input" });
     expect(await setCanisterCore(db, OWNER, { rollId: r.id, style: "tartan" as never })).toEqual({ ok: false, error: "invalid_input" });
+  });
+
+  it("writes the look and the version bump in one transaction", async () => {
+    const { db } = await freshDb();
+    const { roll: r } = await seedRollWithFrames(db, OWNER, 0);
+    expect(await setCanisterCore(writesOnlyInTransaction(db), OWNER, { rollId: r.id, style: "drawn", color: "cream" })).toEqual({ ok: true });
+    const [row] = await db.select().from(roll).where(eq(roll.id, r.id));
+    expect(row).toMatchObject({ canisterStyle: "drawn", canisterColor: "cream", version: 2 });
   });
 
   it("stock and photo styles keep the stored colour untouched", async () => {
