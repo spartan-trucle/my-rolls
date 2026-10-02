@@ -30,4 +30,24 @@ describe("RollUploadBadge (HomeUploading board)", () => {
     rerender(<RollUploadBadge rollId="r1" frameCount={0} />);
     expect(screen.queryByText(/tấm/)).not.toBeInTheDocument();
   });
+
+  it("shows the waiting slot for a roll with no frames and no upload (Shelf board's Chờ scan)", () => {
+    uploads.batches = [];
+    render(<RollUploadBadge rollId="r1" frameCount={0} waiting={<span>chờ</span>} />);
+    expect(screen.getByText("chờ")).toBeInTheDocument();
+  });
+
+  it("drops the waiting slot once an upload starts", () => {
+    uploads.batches = [{ id: "b", rollId: "r1", startedAt: 0, files: [f("queued", 1)] }];
+    render(<RollUploadBadge rollId="r1" frameCount={0} waiting={<span>chờ</span>} />);
+    expect(screen.queryByText("chờ")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Đang tải 0 trên 1 tấm")).toBeInTheDocument();
+  });
+
+  it("prints the frame count as plain text, not a stamp (Shelf board)", () => {
+    uploads.batches = [];
+    render(<RollUploadBadge rollId="r1" frameCount={12} />);
+    expect(screen.getByText("12 tấm").tagName).toBe("SPAN");
+    expect(screen.getByText("12 tấm").className).not.toMatch(/stamp/);
+  });
 });

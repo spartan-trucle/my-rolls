@@ -1,0 +1,44 @@
+/* The boards' `.vseg` (Shelf, ShelfWeb; RollGrid's switch). */
+.switch {
+  display: inline-flex;
+  border: 1.5px solid var(--ink);
+}
+
+.option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0 16px;
+  font: 600 13px/1 var(--font-sans);
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--paper-raised);
+}
+
+.option:hover {
+  color: var(--ink);
+}
+
+.option[aria-current="page"] {
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.option[aria-disabled="true"] {
+  color: var(--ink-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.option:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+@media (min-width: 1024px) {
+  .option {
+    font-size: 14px;
+  }
+}

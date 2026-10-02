@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { UploadProvider } from "@/features/uploads/client/UploadProvider";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -15,16 +15,16 @@ vi.mock("@/lib/auth", () => ({
 
 vi.mock("better-auth/cookies", () => ({ getSessionCookie }));
 
+const cookieValues = vi.hoisted(() => new Map<string, string>());
 vi.mock("next/headers", () => ({
   headers: vi.fn(async () => new Headers()),
+  cookies: vi.fn(async () => ({ get: (name: string) => (cookieValues.has(name) ? { name, value: cookieValues.get(name) } : undefined) })),
 }));
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
 
 vi.mock("@/features/rolls/actions", () => ({ listRolls }));
-vi.mock("@/features/uploads/components/RollUploadBadge", () => ({
-  RollUploadBadge: ({ rollId, frameCount }: { rollId: string; frameCount: number }) => <span>{`badge:${rollId}:${frameCount}`}</span>,
-}));
+vi.mock("@/features/collection/actions", () => ({ rememberViewAction: vi.fn() }));
 
 // `getTranslations` needs Next's request scope; the real messages through next-intl's own translator stand in.
 vi.mock("next-intl/server", async () => {
@@ -34,7 +34,12 @@ vi.mock("next-intl/server", async () => {
   };
 });
 
-import Home, { generateMetadata } from "./page";
+import Page, { generateMetadata } from "./page";
+
+/** Home with the given `?view=` (or none), as Next passes `searchParams`. */
+function Home(query: Record<string, string> = {}) {
+  return Page({ searchParams: Promise.resolve(query) } as Parameters<typeof Page>[0]);
+}
 
 function renderHome(ui: Awaited<ReturnType<typeof Home>>) {
   // The root layout provides the upload queue in the app (Phase 2 D16).
@@ -78,6 +83,7 @@ describe("Home (/)", () => {
     getSession.mockReset();
     getSessionCookie.mockReset();
     listRolls.mockReset();
+    cookieValues.clear();
   });
 
   it("shows a visitor with no session cookie the landing page, without looking the session up", async () => {
@@ -110,47 +116,42 @@ describe("Home (/)", () => {
     expect(screen.getByText("2 CUỘN")).toBeInTheDocument();
   });
 
-  it("lists rolls newest first, each with its push/pull badge", async () => {
+  it("CAN-1: lists rolls newest first as canisters on the shelf", async () => {
     getSessionCookie.mockReturnValue("a-session-token");
     getSession.mockResolvedValue(signedInSession);
     listRolls.mockResolvedValue([
-      makeRoll({ id: "roll-newest", name: "Đà Lạt, tháng 10", pushPull: "+1" }),
-      makeRoll({ id: "roll-oldest", name: "Chợ Lớn buổi sáng", pushPull: "−⅓" }),
+      makeRoll({ id: "roll-newest", name: "Đà Lạt, tháng 10" }),
+      makeRoll({ id: "roll-oldest", name: "Chợ Lớn buổi sáng" }),
     ]);
 
     renderHome(await Home());
 
     const links = screen.getAllByRole("link", { name: /Đà Lạt|Chợ Lớn/ });
     expect(links[0]).toHaveAttribute("href", "/rolls/roll-newest");
+    expect(links[0]).toHaveAccessibleName("Đà Lạt, tháng 10, Kodak Gold 200");
     expect(links[1]).toHaveAttribute("href", "/rolls/roll-oldest");
-    // RollCard has no push/pull slot of its own (design-system.md): the
-    // mapper folds it into the date it already renders.
-    expect(screen.getByText(/12\.10\.25 · \+1/)).toBeInTheDocument();
-    expect(screen.getByText(/12\.10\.25 · −⅓/)).toBeInTheDocument();
   });
 
-  it("gives each roll card its upload badge with the frame count (Phase 2 HomeUploading)", async () => {
+  it("gives each canister its scan status: the frame count, or Chờ scan before any scans", async () => {
     getSessionCookie.mockReturnValue("a-session-token");
     getSession.mockResolvedValue(signedInSession);
-    listRolls.mockResolvedValue([makeRoll({ id: "roll-1", frameCount: 36 })]);
+    listRolls.mockResolvedValue([makeRoll({ id: "roll-1", frameCount: 36 }), makeRoll({ id: "roll-2", frameCount: 0 })]);
 
     renderHome(await Home());
 
-    expect(screen.getByText("badge:roll-1:36")).toBeInTheDocument();
+    expect(screen.getByText("36 tấm")).toBeInTheDocument();
+    expect(screen.getByText("Chờ scan")).toBeInTheDocument();
   });
 
-  it("shows the empty state with a link to the first-roll onboarding when there are no rolls", async () => {
+  it("shows the ShelfEmpty state when there are no rolls", async () => {
     getSessionCookie.mockReturnValue("a-session-token");
     getSession.mockResolvedValue(signedInSession);
     listRolls.mockResolvedValue([]);
 
     renderHome(await Home());
 
-    expect(screen.getByText("Kệ của bạn còn trống")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Cất cuộn đầu tiên" })).toHaveAttribute(
-      "href",
-      "/onboarding/first-roll",
-    );
+    expect(screen.getByRole("heading", { level: 2, name: "Kệ còn trống" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Lên kệ cuộn đầu tiên" })).toHaveAttribute("href", "/rolls/new");
   });
 
   it("H2: shows the 'Mới nhất trước' sort label beside the Kệ/Lưới toggle", async () => {
@@ -192,16 +193,32 @@ describe("Home (/)", () => {
     expect(screen.getByRole("link", { name: /Cuộn #16/ })).toHaveAttribute("href", "/rolls/roll-16");
   });
 
-  it("disables the Lưới (grid) view segment until Phase 3", async () => {
+  it("shows the Kệ/Lưới switch with Kệ current and Lưới disabled until the grid lands (Ruling R7)", async () => {
     getSessionCookie.mockReturnValue("a-session-token");
     getSession.mockResolvedValue(signedInSession);
     listRolls.mockResolvedValue([]);
 
     renderHome(await Home());
 
-    const gridButton = screen.getByRole("button", { name: "Lưới" });
-    expect(gridButton).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Kệ", pressed: true })).toBeInTheDocument();
+    const views = screen.getByRole("group", { name: "Cách xem" });
+    expect(within(views).getByRole("link", { name: /Kệ/ })).toHaveAttribute("aria-current", "page");
+    expect(within(views).getByRole("link", { name: /Lưới/ })).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it.each([
+    ["the URL", { view: "grid" }, undefined],
+    ["the remembered cookie", {}, "grid"],
+  ])("still shows the shelf when %s asks for the grid (Ruling R7)", async (_, query, cookie) => {
+    getSessionCookie.mockReturnValue("a-session-token");
+    getSession.mockResolvedValue(signedInSession);
+    listRolls.mockResolvedValue([makeRoll({ id: "roll-1", name: "Hội An" })]);
+    if (cookie) cookieValues.set("cuon_library_view", cookie);
+
+    renderHome(await Home(query));
+
+    expect(screen.getByRole("link", { name: /Hội An/ })).toHaveAttribute("href", "/rolls/roll-1");
+    const views = screen.getByRole("group", { name: "Cách xem" });
+    expect(within(views).getByRole("link", { name: /Kệ/ })).toHaveAttribute("aria-current", "page");
   });
 
   it("describes the page for search and link previews", async () => {

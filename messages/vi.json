@@ -93,14 +93,23 @@
   "home": {
     "heading": "Kệ của {name}",
     "countLine": "{count} CUỘN",
-    "sortLabel": "Mới nhất trước",
+    "sortLabel": "Mới nhất trước"
+  },
+  "shelf": {
+    "canisterLink": "{name}, {film}",
     "unnamedRoll": "Cuộn #{number}",
-    "viewLabel": "Kiểu xem",
-    "viewShelf": "Kệ",
-    "viewGrid": "Lưới",
-    "emptyTitle": "Kệ của bạn còn trống",
-    "emptyBody": "Cuộn đầu tiên của bạn sắp có mặt ở đây.",
-    "emptyCta": "Cất cuộn đầu tiên"
+    "waitingForScans": "Chờ scan",
+    "emptyNote": "cuộn đầu tiên đứng đây",
+    "emptyTitle": "Kệ còn trống",
+    "emptyBody": "Ghi cuộn đang chụp, hoặc thêm một cuộn đã chụp kèm scan. Mỗi cuộn là một vỏ cuộn trên kệ này.",
+    "emptyCta": "Lên kệ cuộn đầu tiên",
+    "emptyPast": "Thêm cuộn đã chụp"
+  },
+  "views": {
+    "label": "Cách xem",
+    "shelf": "Kệ",
+    "grid": "Lưới",
+    "strip": "Dải phim"
   },
   "profile": {
     "title": "Hồ sơ",

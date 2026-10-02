@@ -4,7 +4,10 @@ const getSession = vi.hoisted(() => vi.fn());
 const core = vi.hoisted(() => ({ listLibraryCore: vi.fn() }));
 
 vi.mock("@/lib/auth", () => ({ getAuth: () => ({ api: { getSession } }) }));
-vi.mock("next/headers", () => ({ headers: vi.fn().mockResolvedValue({}) }));
+const cookieJar = vi.hoisted(() => ({ set: vi.fn() }));
+const captureServerEvent = vi.hoisted(() => vi.fn());
+vi.mock("next/headers", () => ({ headers: vi.fn().mockResolvedValue({}), cookies: vi.fn(async () => cookieJar) }));
+vi.mock("@/lib/posthog-server", () => ({ captureServerEvent }));
 vi.mock("@/db/client", () => ({ getDb: () => ({}) }));
 vi.mock("@/lib/r2", () => ({ getR2Env: () => ({ R2_PUBLIC_URL: "https://img.example" }) }));
 vi.mock("./core", async (orig) => ({ ...(await orig<typeof import("./core")>()), ...core }));
@@ -37,5 +40,52 @@ describe("collection actions", () => {
       "u1",
       { filter: "all", cursor: "c", publicUrl: "https://img.example" },
     ]);
+  });
+
+  describe("rememberViewAction (plan D7, D17)", () => {
+    const YEAR = 60 * 60 * 24 * 365;
+
+    it("does nothing for a signed-out caller", async () => {
+      getSession.mockResolvedValue(null);
+      await actions.rememberViewAction({ surface: "library", view: "grid" });
+      expect(cookieJar.set).not.toHaveBeenCalled();
+      expect(captureServerEvent).not.toHaveBeenCalled();
+    });
+
+    it("remembers the library view for a year and emits view_switched", async () => {
+      getSession.mockResolvedValue({ user: { id: "u1" } });
+      await actions.rememberViewAction({ surface: "library", view: "grid" });
+      expect(cookieJar.set).toHaveBeenCalledWith("cuon_library_view", "grid", {
+        maxAge: YEAR,
+        sameSite: "lax",
+        path: "/",
+        httpOnly: true,
+      });
+      expect(captureServerEvent).toHaveBeenCalledWith({
+        distinctId: "u1",
+        event: "view_switched",
+        properties: { surface: "library", view: "grid" },
+      });
+    });
+
+    it("remembers the roll view in its own cookie", async () => {
+      getSession.mockResolvedValue({ user: { id: "u1" } });
+      await actions.rememberViewAction({ surface: "roll", view: "grid" });
+      expect(cookieJar.set.mock.calls[0].slice(0, 2)).toEqual(["cuon_roll_view", "grid"]);
+    });
+
+    it("stores the default instead of a forged view", async () => {
+      getSession.mockResolvedValue({ user: { id: "u1" } });
+      await actions.rememberViewAction({ surface: "roll", view: "<script>" });
+      expect(cookieJar.set.mock.calls[0].slice(0, 2)).toEqual(["cuon_roll_view", "strip"]);
+      expect(captureServerEvent.mock.calls[0][0].properties).toEqual({ surface: "roll", view: "strip" });
+    });
+
+    it("treats an unknown surface as the library", async () => {
+      getSession.mockResolvedValue({ user: { id: "u1" } });
+      await actions.rememberViewAction({ surface: "nope" as "library", view: "shelf" });
+      expect(cookieJar.set.mock.calls[0].slice(0, 2)).toEqual(["cuon_library_view", "shelf"]);
+      expect(captureServerEvent.mock.calls[0][0].properties).toEqual({ surface: "library", view: "shelf" });
+    });
   });
 });

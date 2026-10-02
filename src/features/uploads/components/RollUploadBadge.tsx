@@ -1,12 +1,17 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { Stamp } from "@/design-system";
 import { useUploads } from "../client/UploadProvider";
 import { summarizeBatch } from "./format";
 
-/** The roll card's stamp on home: upload progress, then failures, then the frame count (HomeUploading board). */
-export function RollUploadBadge({ rollId, frameCount }: { rollId: string; frameCount: number }) {
+/**
+ * A roll's scan status on the shelf: upload progress, then failures
+ * (HomeUploading board's stamps), then the frame count as plain mono text,
+ * else `waiting` (the `Shelf` board's "Chờ scan").
+ */
+export function RollUploadBadge({ rollId, frameCount, waiting = null }: { rollId: string; frameCount: number; waiting?: ReactNode }) {
   const t = useTranslations("uploads");
   const { batches } = useUploads();
   const batch = [...batches].reverse().find((b) => b.rollId === rollId);
@@ -27,5 +32,6 @@ export function RollUploadBadge({ rollId, frameCount }: { rollId: string; frameC
     );
   }
   const count = Math.max(frameCount, s?.done ?? 0);
-  return count > 0 ? <Stamp tone="ink">{t("badgeFrames", { count })}</Stamp> : null;
+  if (count === 0) return waiting;
+  return <span className="font-mono text-label font-normal uppercase tracking-normal text-ink-muted tabular-nums">{t("badgeFrames", { count })}</span>;
 }
