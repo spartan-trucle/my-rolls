@@ -1,6 +1,6 @@
 # Missing screens
 
-> MVP screens with no board on the [design canvas](https://claude.ai/artifact/AXpgMvXFo6HL1vrw9RS6gt) yet. Checked 27.09.2026 against canvas version `1790375803-e51e` (50 boards); Phase 1 and Phase 2 drawn the same day; canvas `1790516511-f125` (118 boards). Re-checked 30.09.2026 against `1790765247-6906`. Re-checked 02.10.2026 against `1790936301-40d9`: the Phase 4 rows are drawn on page "Chia sẻ · MVP". Phase 3 boards drawn 02.10.2026 on page "Kệ & bộ sưu tập" (canvas `1790944574-5a0f`), awaiting Trúc's approval.
+> MVP screens with no board on the [design canvas](https://claude.ai/artifact/AXpgMvXFo6HL1vrw9RS6gt) yet. Checked 27.09.2026 against canvas version `1790375803-e51e` (50 boards); Phase 1 and Phase 2 drawn the same day; canvas `1790516511-f125` (118 boards). Re-checked 30.09.2026 against `1790765247-6906`. Re-checked 02.10.2026 against `1790936301-40d9`: the Phase 4 rows are drawn on page "Chia sẻ · MVP". Phase 3 boards drawn 02.10.2026 on page "Kệ & bộ sưu tập" (canvas `1790944574-5a0f`) and approved by Trúc the same day.
 > Every screen needs a phone (390 px) and a desktop (1440 px) design before it is built ([CLAUDE.md](../../CLAUDE.md#conventions)). Tick a row when its boards are on the canvas, and add them to [wireframes.md](wireframes.md).
 
 Back to: [Wireframes](wireframes.md) · [Docs index](../README.md) · [Roadmap](../roadmap.md)

@@ -75,7 +75,7 @@ Added by 02.10.2026. Screens have up to four boards (phone and desktop, Paper an
 
 ## Page "Kệ & bộ sưu tập" (shelf and collection, Phase 3)
 
-Drawn 02.10.2026 for the [Phase 3 plan](../../.planning/plans/phase-3-shelf-and-collection.md) (task D0), with its blocker defaults: canister presets including `stock-red`, `stock-orange` and `stock-cream` with a `line-strong` edge on every drawn body, bulk Oops through the mistake picker, and three canister looks (follow the film, drawn, catalogue photo). Four boards per screen (phone and desktop, Paper and Darkroom: `…Dark`, `…Web`, `…WebDark`) unless noted. The existing `RollGrid` and `LibraryGrid` boards moved here from "Bộ sưu tập". **Awaiting Trúc's approval.**
+Drawn 02.10.2026 for the [Phase 3 plan](../../.planning/plans/phase-3-shelf-and-collection.md) (task D0), with its blocker defaults: canister presets including `stock-red`, `stock-orange` and `stock-cream` with a `line-strong` edge on every drawn body, bulk Oops through the mistake picker, and three canister looks (follow the film, drawn, catalogue photo). Four boards per screen (phone and desktop, Paper and Darkroom: `…Dark`, `…Web`, `…WebDark`) unless noted. The existing `RollGrid` and `LibraryGrid` boards moved here from "Bộ sưu tập". **Approved by Trúc on 02.10.2026**, with one change: the film strip shows frames uncropped (design system `FilmStrip`, Phase 3 plan D19).
 
 | Artboards | Size | What it shows | PRD |
 |---|---|---|---|
@@ -89,7 +89,7 @@ Drawn 02.10.2026 for the [Phase 3 plan](../../.planning/plans/phase-3-shelf-and-
 | `LibraryGridKeepersEmpty` · `LibraryGridKeepersEmptyWeb` | 390 × 844 · 1440 × 900 | The library grid with Tấm ưng on and nothing marked: "Chưa có tấm ưng nào" and a hint to mark frames in a roll's Lưới (desktop mentions K). Paper only | [COL-3](../product/requirements/collection.md) |
 | `MistakePickerBulk` · `MistakePickerBulkWeb` | 390 × 844 · 1440 × 900 | Bulk Oops: the mistake picker titled "Oops cho 3 tấm" over the roll grid's selection, without "Tấm này / Cả cuộn", thumbnails of the selected frames, the 13 chips with a note each, "mistakes are added, existing ones stay", "Lưu · thêm cho 3 tấm". Paper only | [COL-4](../product/requirements/collection.md), [NOTE-2](../product/requirements/notes.md) |
 
-What the canvas boards do that the code won't copy as-is: the film strip is drawn from the design system's strip markup so frames stay uncropped (the `FilmStrip` component crops with `cover`), the new canister colours are inline in each board's CSS (the canvas's installed copy of the design system predates `cc6e`), and "Đổi tên" points at the roll form because there's no rename screen.
+What the canvas boards do that the code won't copy as-is: the film strip is drawn from the design system's strip markup so frames stay uncropped (the `FilmStrip` component cropped with `cover` until plan D19), the new canister colours are inline in each board's CSS (the canvas's installed copy of the design system predates `cc6e`), and "Đổi tên" points at the roll form because there's no rename screen.
 
 ## Page "Đăng nhập" (sign-in and sign-up)
 
