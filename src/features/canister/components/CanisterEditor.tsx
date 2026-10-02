@@ -67,6 +67,7 @@ export function CanisterEditor({ roll, save = setCanisterAction }: { roll: IRoll
     setDraft(saved);
     setCustomHex(saved.color?.startsWith("#") && isCanisterColor(saved.color) ? saved.color : DEFAULT_CUSTOM_HEX);
     setError(false);
+    setSaving(false);
     setOpen(true);
   }
 
@@ -95,9 +96,16 @@ export function CanisterEditor({ roll, save = setCanisterAction }: { roll: IRoll
         ? { rollId: roll.id, style: "drawn" as const, color: draft.color }
         : { rollId: roll.id, style: draft.style === "drawn" ? ("stock" as const) : draft.style };
     setSaving(true);
-    const result = await save(input);
-    setSaving(false);
-    if (!result.ok) return setError(true);
+    let saved = false;
+    try {
+      saved = (await save(input)).ok;
+    } catch {
+      // A rejected server action (network drop, DB error, stale action id after a deploy) is a failed save too.
+      saved = false;
+    } finally {
+      setSaving(false);
+    }
+    if (!saved) return setError(true);
     setError(false);
     close();
     router.refresh();
@@ -132,7 +140,7 @@ export function CanisterEditor({ roll, save = setCanisterAction }: { roll: IRoll
               <DialogCloseButton onClose={close} />
             </div>
 
-            <div className={styles.body}>
+            <div className={styles.body} data-testid="canister-editor-body">
               <div className={styles.top}>
                 <div className={styles.previewColumn}>
                   <div

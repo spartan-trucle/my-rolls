@@ -109,6 +109,26 @@ describe("CanisterEditor (CAN-2)", () => {
     expect(screen.getByRole("dialog")).toHaveAttribute("open");
   });
 
+  it("recovers when the save throws: says so, re-enables the buttons and stays open", async () => {
+    const save = vi.fn().mockRejectedValue(new Error("network"));
+    renderWithIntl(<CanisterEditor roll={roll} save={save} />);
+    await openEditor();
+    await userEvent.click(screen.getByRole("radio", { name: "Đỏ" }));
+    await userEvent.click(screen.getByRole("button", { name: "Lưu" }));
+    expect(await screen.findByText("Chưa lưu được, thử lại nhé")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Lưu" })).toBeEnabled();
+    expect(screen.getByText("Huỷ").closest("button")).toBeEnabled();
+    expect(screen.getByRole("dialog")).toHaveAttribute("open");
+  });
+
+  it("keeps the footer outside the scrolling body, so Lưu stays in view", async () => {
+    renderWithIntl(<CanisterEditor roll={roll} save={ok()} />);
+    await openEditor();
+    const body = screen.getByTestId("canister-editor-body");
+    expect(body).toContainElement(screen.getByRole("radio", { name: "Kem" }));
+    expect(body).not.toContainElement(screen.getByRole("button", { name: "Lưu" }));
+  });
+
   it("closes and refreshes the page after a save", async () => {
     refresh.mockClear();
     renderWithIntl(<CanisterEditor roll={roll} save={ok()} />);
