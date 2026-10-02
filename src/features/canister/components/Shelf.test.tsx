@@ -70,6 +70,27 @@ describe("Shelf (CAN-1)", () => {
     expect(screen.getByText("C-41 · 200").closest("[aria-hidden='true']")).not.toBeNull();
   });
 
+  it("prints a photo-look roll's name as text under the canister (Ruling R10)", () => {
+    const photoStock = { id: "s", brand: "Kodak", name: "Gold 200", iso: 200, canisterColor: "gold", canisterPhotoUrl: "https://img/c.webp", type: "color-negative" };
+    render(
+      <Shelf
+        rolls={[
+          makeRollEntry({ id: "a", name: "Hội An", canisterStyle: "photo", stock: photoStock }),
+          makeRollEntry({ id: "b", name: null, number: 4, canisterStyle: "photo", stock: photoStock }),
+        ]}
+      />,
+    );
+    for (const name of ["Hội An", "Cuộn #4"]) {
+      const text = screen.getByText(name);
+      expect(text.closest("[aria-hidden='true']")).toBeNull();
+    }
+  });
+
+  it("keeps a drawn roll's name on its band only", () => {
+    render(<Shelf rolls={[makeRollEntry({ name: "Hội An" })]} />);
+    expect(screen.getByText("Hội An").closest("[aria-hidden='true']")).not.toBeNull();
+  });
+
   it("names a roll with no stock by itself alone", () => {
     render(<Shelf rolls={[makeRollEntry({ name: "Hội An", stock: null })]} />);
     expect(screen.getByRole("link", { name: "Hội An" })).toBeInTheDocument();

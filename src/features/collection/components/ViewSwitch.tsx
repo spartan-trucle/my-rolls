@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import { cx, Icon } from "@/design-system";
 import { rememberViewAction } from "../actions";
 import styles from "./ViewSwitch.module.css";
@@ -47,11 +48,14 @@ export interface ViewSwitchProps {
 
 /**
  * COL-1 / COL-3: the Kệ/Lưới (library) or Dải phim/Lưới (roll) switch,
- * the boards' `.vseg`. Picking a view remembers it (plan D7) without ever
- * holding up the navigation.
+ * the boards' `.vseg`. A plain click saves the view first (plan D7), then
+ * navigates: the save's cookie refreshes the route, so it must land
+ * before the push, not race it (Ruling R11). A failed save still
+ * switches. Modifier and middle clicks keep native link behaviour.
  */
 export function ViewSwitch({ surface, current, hrefs, disabled = [], remember = rememberViewAction, className }: ViewSwitchProps) {
   const t = useTranslations("views");
+  const router = useRouter();
   const views = Object.entries(hrefs) as [TView, string][];
 
   return (
@@ -76,8 +80,12 @@ export function ViewSwitch({ surface, current, hrefs, disabled = [], remember = 
             href={href}
             className={styles.option}
             aria-current={view === current ? "page" : undefined}
-            onClick={() => {
-              remember({ surface, view }).catch(() => {});
+            onClick={async (event: MouseEvent<HTMLAnchorElement>) => {
+              if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+              event.preventDefault();
+              if (view === current) return;
+              await remember({ surface, view }).catch(() => {});
+              router.push(href);
             }}
           >
             {body}

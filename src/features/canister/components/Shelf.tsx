@@ -74,6 +74,8 @@ export function Shelf({ rolls }: { rolls: IRollEntry[] }) {
             >
               <Canister {...canister} className={styles.canister} />
               <span className={styles.text}>
+                {/* R10: a photo has no label band, so the roll's name is printed under it instead. */}
+                {canister.photoSrc ? <span className={styles.name}>{name}</span> : null}
                 {film ? <span className={styles.stock}>{film}</span> : null}
                 <span id={statusId} className={styles.status}>
                   <RollUploadBadge

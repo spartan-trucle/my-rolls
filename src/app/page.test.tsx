@@ -21,7 +21,7 @@ vi.mock("next/headers", () => ({
   cookies: vi.fn(async () => ({ get: (name: string) => (cookieValues.has(name) ? { name, value: cookieValues.get(name) } : undefined) })),
 }));
 
-vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
+vi.mock("next/navigation", () => ({ usePathname: () => "/", useRouter: () => ({ push: vi.fn() }) }));
 
 vi.mock("@/features/rolls/actions", () => ({ listRolls }));
 vi.mock("@/features/collection/actions", () => ({ rememberViewAction: vi.fn() }));
