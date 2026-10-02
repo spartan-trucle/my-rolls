@@ -23,6 +23,8 @@ export interface FrameGridProps {
    * `cell` is the button, for returning focus to it (R21).
    */
   onOpen?: (index: number, cell: HTMLButtonElement) => void;
+  /** How many cells load eagerly: the first row by default; the library passes 0 for every group after its first. */
+  eager?: number;
   /**
    * COL-4 (D11), with `onOpen`: the picked frames' ids. Passing `onToggle`
    * turns selection on: on a fine pointer a click toggles (Shift for a
@@ -44,7 +46,7 @@ interface IPress {
 }
 
 /** The `RollGrid` board's numbered grid on film (SCAN-4, COL-1): 3 columns on phones, 6 on desktop. */
-export function FrameGrid({ rollId, frames, onOpen, selectedIds, pointer = "fine", selecting = false, onToggle, onLongPress }: FrameGridProps) {
+export function FrameGrid({ rollId, frames, onOpen, eager = EAGER, selectedIds, pointer = "fine", selecting = false, onToggle, onLongPress }: FrameGridProps) {
   const t = useTranslations("frames");
   const selectable = onOpen !== undefined && onToggle !== undefined;
   const press = useRef<IPress | null>(null);
@@ -113,7 +115,7 @@ export function FrameGrid({ rollId, frames, onOpen, selectedIds, pointer = "fine
                 alt=""
                 width={f.width ?? undefined}
                 height={f.height ?? undefined}
-                loading={i < EAGER ? "eager" : "lazy"}
+                loading={i < eager ? "eager" : "lazy"}
                 decoding="async"
                 draggable={false}
               />

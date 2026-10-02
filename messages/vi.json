@@ -92,8 +92,22 @@
   },
   "home": {
     "heading": "Kệ của {name}",
-    "countLine": "{count} CUỘN",
     "sortLabel": "Mới nhất trước"
+  },
+  "library": {
+    "countLine": "{rolls} CUỘN · {frames} TẤM · {keepers} TẤM ƯNG",
+    "rollFrames": "{count} TẤM",
+    "openRoll": "Xem cả cuộn ›",
+    "openRollLabel": "Xem cả cuộn {name}",
+    "more": "Xem thêm cuộn",
+    "moreFailed": "Chưa tải được, thử lại nhé.",
+    "empty": "Chưa có scan nào trên kệ",
+    "emptyFilter": "Không có tấm nào ở đây",
+    "emptyKeepers": "Chưa có tấm ưng nào",
+    "emptyKeepersHintTouch": "Vào một cuộn, chọn Lưới, nhấn giữ những tấm bạn thích rồi bấm Tấm ưng. Chúng sẽ hiện ở đây.",
+    "emptyKeepersHintPointer": "Vào một cuộn, chọn Lưới, bấm chọn những tấm bạn thích rồi nhấn K hoặc bấm Tấm ưng. Chúng sẽ hiện ở đây.",
+    "openNewest": "Mở cuộn {name}",
+    "unnamedRoll": "Cuộn #{number}"
   },
   "shelf": {
     "canisterLink": "{name}, {film}",

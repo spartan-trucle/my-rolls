@@ -1,11 +1,16 @@
 import { screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl as render } from "@/i18n/test-utils";
 import { TopNav } from "./TopNav";
 
 const usePathname = vi.hoisted(() => vi.fn());
+const search = vi.hoisted(() => ({ params: new URLSearchParams() }));
 
-vi.mock("next/navigation", () => ({ usePathname }));
+vi.mock("next/navigation", () => ({ usePathname, useSearchParams: () => search.params }));
+
+afterEach(() => {
+  search.params = new URLSearchParams();
+});
 
 describe("TopNav", () => {
   it("marks Kệ current on /", () => {
@@ -21,11 +26,26 @@ describe("TopNav", () => {
     expect(screen.getByRole("link", { name: "Túi" })).toHaveAttribute("aria-current", "page");
   });
 
-  it("renders Tấm ưng disabled, not a link", () => {
+  it("Tấm ưng links to the library's keepers (D15)", () => {
     usePathname.mockReturnValue("/");
     render(<TopNav userInitial="T" />);
-    expect(screen.queryByRole("link", { name: "Tấm ưng" })).not.toBeInTheDocument();
-    expect(screen.getByText("Tấm ưng").closest("[aria-disabled]")).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("link", { name: "Tấm ưng" })).toHaveAttribute("href", "/?view=grid&filter=keeper");
+    expect(screen.getByRole("link", { name: "Tấm ưng" })).not.toHaveAttribute("aria-current");
+  });
+
+  it("marks Tấm ưng current, not Kệ, on the library's keepers (Ruling R28)", () => {
+    usePathname.mockReturnValue("/");
+    search.params = new URLSearchParams("view=grid&filter=keeper");
+    render(<TopNav userInitial="T" />);
+    expect(screen.getByRole("link", { name: "Tấm ưng" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Kệ" })).not.toHaveAttribute("aria-current");
+  });
+
+  it("doesn't mark Tấm ưng current off the home page", () => {
+    usePathname.mockReturnValue("/bag");
+    search.params = new URLSearchParams("view=grid&filter=keeper");
+    render(<TopNav userInitial="T" />);
+    expect(screen.getByRole("link", { name: "Tấm ưng" })).not.toHaveAttribute("aria-current");
   });
 
   it("shows the Cuộn wordmark, a Cuộn mới action, the theme toggle and the avatar", () => {

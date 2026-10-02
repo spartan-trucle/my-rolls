@@ -18,10 +18,16 @@ export interface LightboxProps {
   /** The frames it walks through, already filtered (COL-2). */
   frames: IRollFrame[];
   index: number;
-  /** Total frames on the roll, for "Tấm 14/36". Defaults to `frames.length`. */
-  total?: number;
+  /**
+   * Total frames on the roll, for "Tấm 14/36". Defaults to `frames.length`.
+   * Ruling R26: a function gives each frame its own roll's total, for a list
+   * that crosses rolls (the library grid).
+   */
+  total?: number | ((f: IRollFrame) => number);
   /** Ruling R17: opened from a grid filter other than "all", e.g. "Oops" → "Tấm 3/36 · Oops 1/3". */
   filterLabel?: string;
+  /** How many frames the filter matches when `frames` is only the part loaded so far (the library's pages). Defaults to `frames.length`. */
+  filterTotal?: number;
   /** The strip's edge print, e.g. "GOLD 200 · CUỘN 14"; the frame number is appended. */
   edgeText?: string;
   /** R21: the cell or strip frame that opened it; focus returns there on close. */
@@ -42,7 +48,7 @@ function hasOwnEntry(): boolean {
  * close it. It pushes one history entry on open so Back closes it, and
  * drops that entry itself when closed any other way.
  */
-export function Lightbox({ frames, index, total, filterLabel, edgeText, returnFocusTo, onIndexChange, onClose, detailHref }: LightboxProps) {
+export function Lightbox({ frames, index, total, filterLabel, filterTotal, edgeText, returnFocusTo, onIndexChange, onClose, detailHref }: LightboxProps) {
   const t = useTranslations("lightbox");
   const router = useRouter();
   // R21: the list can shrink while open (a refresh after an upload); show the last frame until the parent catches up.
@@ -154,9 +160,10 @@ export function Lightbox({ frames, index, total, filterLabel, edgeText, returnFo
   if (!frame) return null;
 
   const label = frame.isBlank ? t("blank", { n: frame.position }) : t("frame", { n: frame.position });
+  const rollTotal = typeof total === "function" ? total(frame) : (total ?? frames.length);
   const count = filterLabel
-    ? t("positionFiltered", { n: frame.position, total: total ?? frames.length, filter: filterLabel, i: at + 1, count: frames.length })
-    : t("position", { n: frame.position, total: total ?? frames.length });
+    ? t("positionFiltered", { n: frame.position, total: rollTotal, filter: filterLabel, i: at + 1, count: filterTotal ?? frames.length })
+    : t("position", { n: frame.position, total: rollTotal });
 
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     swipeStart.current = { x: e.clientX, y: e.clientY };

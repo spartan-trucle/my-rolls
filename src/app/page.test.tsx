@@ -1,13 +1,19 @@
 import { render, screen, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { UploadProvider } from "@/features/uploads/client/UploadProvider";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "../../messages/vi.json";
+import type { ILibraryPage } from "@/features/collection/core";
 import type { IRollEntry } from "@/features/rolls/core";
 
 const getSession = vi.hoisted(() => vi.fn());
 const getSessionCookie = vi.hoisted(() => vi.fn());
 const listRolls = vi.hoisted(() => vi.fn());
+const collection = vi.hoisted(() => ({
+  rememberViewAction: vi.fn(),
+  listLibraryAction: vi.fn(),
+  libraryTotalsAction: vi.fn(),
+}));
 
 vi.mock("@/lib/auth", () => ({
   getAuth: vi.fn().mockReturnValue({ api: { getSession } }),
@@ -21,10 +27,14 @@ vi.mock("next/headers", () => ({
   cookies: vi.fn(async () => ({ get: (name: string) => (cookieValues.has(name) ? { name, value: cookieValues.get(name) } : undefined) })),
 }));
 
-vi.mock("next/navigation", () => ({ usePathname: () => "/", useRouter: () => ({ push: vi.fn() }) }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/",
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 vi.mock("@/features/rolls/actions", () => ({ listRolls }));
-vi.mock("@/features/collection/actions", () => ({ rememberViewAction: vi.fn() }));
+vi.mock("@/features/collection/actions", () => collection);
 
 // `getTranslations` needs Next's request scope; the real messages through next-intl's own translator stand in.
 vi.mock("next-intl/server", async () => {
@@ -78,11 +88,35 @@ function makeRoll(overrides: Partial<IRollEntry>): IRollEntry {
   };
 }
 
+const TOTALS = { rolls: 3, frames: 108, keepers: 16 };
+
+function libraryPage(overrides: Partial<ILibraryPage> = {}): ILibraryPage {
+  return {
+    totals: TOTALS,
+    counts: { all: 108, keeper: 16, oops: 7 },
+    groups: [
+      {
+        roll: makeRoll({ id: "roll-9", name: "Sài Gòn đêm" }),
+        frames: [{ id: "f1", position: 1, gridUrl: "https://img/g1.webp", viewUrl: "https://img/v1.webp", width: 3000, height: 2000, isKeeper: true, isBlank: false, isOops: false, noteCount: 0 }],
+      },
+    ],
+    nextCursor: null,
+    ...overrides,
+  };
+}
+
 describe("Home (/)", () => {
+  beforeEach(() => {
+    collection.libraryTotalsAction.mockResolvedValue(TOTALS);
+    collection.listLibraryAction.mockResolvedValue(libraryPage());
+  });
+
   afterEach(() => {
     getSession.mockReset();
     getSessionCookie.mockReset();
     listRolls.mockReset();
+    collection.libraryTotalsAction.mockReset();
+    collection.listLibraryAction.mockReset();
     cookieValues.clear();
   });
 
@@ -105,7 +139,7 @@ describe("Home (/)", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Mọi cuộn phim,mọi cú lỡ tay.");
   });
 
-  it("greets the signed-in user by first name and shows the roll count", async () => {
+  it("greets the signed-in user by first name and shows the library's count line (Ruling R8)", async () => {
     getSessionCookie.mockReturnValue("a-session-token");
     getSession.mockResolvedValue(signedInSession);
     listRolls.mockResolvedValue([makeRoll({ id: "roll-1" }), makeRoll({ id: "roll-2" })]);
@@ -113,7 +147,10 @@ describe("Home (/)", () => {
     renderHome(await Home());
 
     expect(screen.getByRole("heading", { level: 1, name: "Kệ của Trúc" })).toBeInTheDocument();
-    expect(screen.getByText("2 CUỘN")).toBeInTheDocument();
+    expect(screen.getByText("3 CUỘN · 108 TẤM · 16 TẤM ƯNG")).toBeInTheDocument();
+    // The shelf needs only the totals, not a page of frames.
+    expect(collection.libraryTotalsAction).toHaveBeenCalled();
+    expect(collection.listLibraryAction).not.toHaveBeenCalled();
   });
 
   it("CAN-1: lists rolls newest first as canisters on the shelf", async () => {
@@ -193,7 +230,7 @@ describe("Home (/)", () => {
     expect(screen.getByRole("link", { name: /Cuộn #16/ })).toHaveAttribute("href", "/rolls/roll-16");
   });
 
-  it("shows the Kệ/Lưới switch with Kệ current and Lưới disabled until the grid lands (Ruling R7)", async () => {
+  it("shows the Kệ/Lưới switch with Kệ current and Lưới ready", async () => {
     getSessionCookie.mockReturnValue("a-session-token");
     getSession.mockResolvedValue(signedInSession);
     listRolls.mockResolvedValue([]);
@@ -202,13 +239,14 @@ describe("Home (/)", () => {
 
     const views = screen.getByRole("group", { name: "Cách xem" });
     expect(within(views).getByRole("link", { name: /Kệ/ })).toHaveAttribute("aria-current", "page");
-    expect(within(views).getByRole("link", { name: /Lưới/ })).toHaveAttribute("aria-disabled", "true");
+    expect(within(views).getByRole("link", { name: /Lưới/ })).not.toHaveAttribute("aria-disabled");
+    expect(within(views).getByRole("link", { name: /Lưới/ })).toHaveAttribute("href", "/?view=grid");
   });
 
   it.each([
     ["the URL", { view: "grid" }, undefined],
     ["the remembered cookie", {}, "grid"],
-  ])("still shows the shelf when %s asks for the grid (Ruling R7)", async (_, query, cookie) => {
+  ])("shows the library grid when %s asks for it (COL-3)", async (_, query, cookie) => {
     getSessionCookie.mockReturnValue("a-session-token");
     getSession.mockResolvedValue(signedInSession);
     listRolls.mockResolvedValue([makeRoll({ id: "roll-1", name: "Hội An" })]);
@@ -216,9 +254,48 @@ describe("Home (/)", () => {
 
     renderHome(await Home(query));
 
-    expect(screen.getByRole("link", { name: /Hội An/ })).toHaveAttribute("href", "/rolls/roll-1");
+    expect(collection.listLibraryAction).toHaveBeenCalledWith({ filter: "all" });
+    // A grid with frames doesn't need the roll list, nor a second totals call.
+    expect(listRolls).not.toHaveBeenCalled();
+    expect(collection.libraryTotalsAction).not.toHaveBeenCalled();
+    expect(screen.getByRole("heading", { level: 2, name: "Sài Gòn đêm" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Xem cả cuộn/ })).toHaveAttribute("href", "/rolls/roll-9");
+    expect(screen.getByText("3 CUỘN · 108 TẤM · 16 TẤM ƯNG")).toBeInTheDocument();
     const views = screen.getByRole("group", { name: "Cách xem" });
-    expect(within(views).getByRole("link", { name: /Kệ/ })).toHaveAttribute("aria-current", "page");
+    expect(within(views).getByRole("link", { name: /Lưới/ })).toHaveAttribute("aria-current", "page");
+    // The shelf's canisters aren't drawn under the grid.
+    expect(screen.queryByRole("link", { name: /Hội An/ })).toBeNull();
+  });
+
+  it("passes the grid's filter, keeping it on the Lưới link, and never 'blank'", async () => {
+    getSessionCookie.mockReturnValue("a-session-token");
+    getSession.mockResolvedValue(signedInSession);
+    listRolls.mockResolvedValue([]);
+
+    renderHome(await Home({ view: "grid", filter: "keeper" }));
+    expect(collection.listLibraryAction).toHaveBeenLastCalledWith({ filter: "keeper" });
+    const views = screen.getByRole("group", { name: "Cách xem" });
+    expect(within(views).getByRole("link", { name: /Lưới/ })).toHaveAttribute("href", "/?view=grid&filter=keeper");
+  });
+
+  it("falls back to 'all' for a blank or unknown grid filter", async () => {
+    getSessionCookie.mockReturnValue("a-session-token");
+    getSession.mockResolvedValue(signedInSession);
+    listRolls.mockResolvedValue([]);
+
+    renderHome(await Home({ view: "grid", filter: "blank" }));
+    expect(collection.listLibraryAction).toHaveBeenLastCalledWith({ filter: "all" });
+  });
+
+  it("the empty Tấm ưng grid points at the newest roll", async () => {
+    getSessionCookie.mockReturnValue("a-session-token");
+    getSession.mockResolvedValue(signedInSession);
+    listRolls.mockResolvedValue([makeRoll({ id: "roll-new", name: "Đà Lạt, tháng 10" }), makeRoll({ id: "roll-old", name: "Huế" })]);
+    collection.listLibraryAction.mockResolvedValue(libraryPage({ groups: [], counts: { all: 108, keeper: 0, oops: 7 } }));
+
+    renderHome(await Home({ view: "grid", filter: "keeper" }));
+    expect(screen.getByText("Chưa có tấm ưng nào")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Mở cuộn Đà Lạt, tháng 10" })).toHaveAttribute("href", "/rolls/roll-new?view=grid");
   });
 
   it("describes the page for search and link previews", async () => {

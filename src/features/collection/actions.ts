@@ -5,7 +5,7 @@ import { getDb } from "@/db/client";
 import { sessionUserIdForAction } from "@/features/shared/session-user";
 import { captureServerEvent } from "@/lib/posthog-server";
 import { getR2Env } from "@/lib/r2";
-import { listLibraryCore, type ILibraryPage, type TLibraryFilter } from "./core";
+import { libraryTotalsCore, listLibraryCore, type ILibraryPage, type ILibraryTotals, type TLibraryFilter } from "./core";
 import { parseFilter } from "./filters";
 import { LIBRARY_VIEW_COOKIE, ROLL_VIEW_COOKIE, resolveLibraryView, resolveRollView } from "./view-pref";
 
@@ -16,6 +16,13 @@ export async function listLibraryAction(input: { filter: string; cursor?: string
   if (!userId) return EMPTY;
   const filter = parseFilter(input.filter, { allowBlank: false }) as TLibraryFilter;
   return listLibraryCore(getDb(), userId, { filter, cursor: input.cursor, publicUrl: getR2Env().R2_PUBLIC_URL });
+}
+
+/** Ruling R8: the shelf's count line, without loading a page of frames. Zeros with no session. */
+export async function libraryTotalsAction(): Promise<ILibraryTotals> {
+  const userId = await sessionUserIdForAction();
+  if (!userId) return { ...EMPTY.totals };
+  return libraryTotalsCore(getDb(), userId);
 }
 
 const YEAR_IN_SECONDS = 60 * 60 * 24 * 365;

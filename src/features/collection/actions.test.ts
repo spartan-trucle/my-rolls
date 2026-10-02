@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const getSession = vi.hoisted(() => vi.fn());
-const core = vi.hoisted(() => ({ listLibraryCore: vi.fn() }));
+const core = vi.hoisted(() => ({ listLibraryCore: vi.fn(), libraryTotalsCore: vi.fn() }));
 
 vi.mock("@/lib/auth", () => ({ getAuth: () => ({ api: { getSession } }) }));
 const cookieJar = vi.hoisted(() => ({ set: vi.fn() }));
@@ -40,6 +40,21 @@ describe("collection actions", () => {
       "u1",
       { filter: "all", cursor: "c", publicUrl: "https://img.example" },
     ]);
+  });
+
+  describe("libraryTotalsAction (Ruling R8)", () => {
+    it("returns zeros for a signed-out caller", async () => {
+      getSession.mockResolvedValue(null);
+      expect(await actions.libraryTotalsAction()).toEqual({ rolls: 0, frames: 0, keepers: 0 });
+      expect(core.libraryTotalsCore).not.toHaveBeenCalled();
+    });
+
+    it("returns the signed-in user's totals", async () => {
+      getSession.mockResolvedValue({ user: { id: "u1" } });
+      core.libraryTotalsCore.mockResolvedValue({ rolls: 3, frames: 108, keepers: 16 });
+      expect(await actions.libraryTotalsAction()).toEqual({ rolls: 3, frames: 108, keepers: 16 });
+      expect(core.libraryTotalsCore.mock.calls[0][1]).toBe("u1");
+    });
   });
 
   describe("rememberViewAction (plan D7, D17)", () => {

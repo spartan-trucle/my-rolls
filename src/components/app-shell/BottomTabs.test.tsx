@@ -1,11 +1,16 @@
 import { screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithIntl as render } from "@/i18n/test-utils";
 import { BottomTabs } from "./BottomTabs";
 
 const usePathname = vi.hoisted(() => vi.fn());
+const search = vi.hoisted(() => ({ params: new URLSearchParams() }));
 
-vi.mock("next/navigation", () => ({ usePathname }));
+vi.mock("next/navigation", () => ({ usePathname, useSearchParams: () => search.params }));
+
+afterEach(() => {
+  search.params = new URLSearchParams();
+});
 
 describe("BottomTabs", () => {
   it("marks Kệ current on /", () => {
@@ -27,12 +32,27 @@ describe("BottomTabs", () => {
     expect(screen.getByRole("link", { name: /Tôi/ })).toHaveAttribute("aria-current", "page");
   });
 
-  it("renders Tấm ưng disabled, not a link (no screen until Phase 3)", () => {
+  it("Tấm ưng links to the library's keepers (D15)", () => {
     usePathname.mockReturnValue("/");
     render(<BottomTabs userInitial="T" />);
-    expect(screen.queryByRole("link", { name: /Tấm ưng/ })).not.toBeInTheDocument();
-    const disabled = screen.getByText("Tấm ưng").closest("[aria-disabled]");
-    expect(disabled).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("link", { name: /Tấm ưng/ })).toHaveAttribute("href", "/?view=grid&filter=keeper");
+    expect(screen.getByRole("link", { name: /Tấm ưng/ })).not.toHaveAttribute("aria-current");
+  });
+
+  it("marks Tấm ưng current, not Kệ, on the library's keepers (Ruling R28)", () => {
+    usePathname.mockReturnValue("/");
+    search.params = new URLSearchParams("view=grid&filter=keeper");
+    render(<BottomTabs userInitial="T" />);
+    expect(screen.getByRole("link", { name: /Tấm ưng/ })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: /Kệ/ })).not.toHaveAttribute("aria-current");
+  });
+
+  it("keeps Kệ current on the library grid under another filter", () => {
+    usePathname.mockReturnValue("/");
+    search.params = new URLSearchParams("view=grid&filter=oops");
+    render(<BottomTabs userInitial="T" />);
+    expect(screen.getByRole("link", { name: /Kệ/ })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: /Tấm ưng/ })).not.toHaveAttribute("aria-current");
   });
 
   it("links to the bag, new roll and profile routes", () => {

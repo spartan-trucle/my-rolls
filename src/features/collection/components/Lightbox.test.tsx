@@ -38,6 +38,21 @@ describe("Lightbox (COL-2, D10)", () => {
     expect(screen.getByText("Tấm 3/36 · Oops 1/3")).toBeInTheDocument();
   });
 
+  it("takes each frame's own total, for a list across rolls (Ruling R26)", () => {
+    const mixed = [makeFrame({ id: "a", position: 14 }), makeFrame({ id: "b", position: 2 })];
+    const totals: Record<string, number> = { a: 36, b: 24 };
+    render(<Lightbox frames={mixed} index={1} total={(f) => totals[f.id]} onIndexChange={vi.fn()} onClose={vi.fn()} detailHref={() => "/x"} />);
+    expect(screen.getByText("Tấm 2/24")).toBeInTheDocument();
+  });
+
+  it("counts within the filter over filterTotal when the list is only partly loaded", () => {
+    const keepers = [makeFrame({ id: "a", position: 5, isKeeper: true })];
+    render(
+      <Lightbox frames={keepers} index={0} total={() => 36} filterLabel="Tấm ưng" filterTotal={16} onIndexChange={vi.fn()} onClose={vi.fn()} detailHref={() => "/x"} />,
+    );
+    expect(screen.getByText("Tấm 5/36 · Tấm ưng 1/16")).toBeInTheDocument();
+  });
+
   it("→ and ← move; Esc closes", async () => {
     const { onIndexChange, onClose } = setup(1);
     await userEvent.keyboard("{ArrowRight}");
