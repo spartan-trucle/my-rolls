@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { act, fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithIntl as render } from "@/i18n/test-utils";
@@ -71,6 +71,83 @@ describe("FrameGrid (RollFrames board)", () => {
       const imgs = Array.from(container.querySelectorAll("img"));
       expect(imgs[5]).toHaveAttribute("loading", "eager");
       expect(imgs[6]).toHaveAttribute("loading", "lazy");
+    });
+  });
+
+  describe("with selection (COL-4, D11)", () => {
+    const frames = [frame(1), frame(2), frame(3, { isBlank: true })];
+
+    it("draws a selected cell pressed, with the ring and the tick", () => {
+      render(<FrameGrid rollId="r1" frames={frames} onOpen={vi.fn()} selectedIds={new Set(["f2"])} onToggle={vi.fn()} onLongPress={vi.fn()} />);
+      const cell = screen.getByRole("button", { name: /^Tấm 2/ });
+      expect(cell).toHaveAttribute("aria-pressed", "true");
+      expect(cell).toHaveClass("selected");
+      expect(cell.querySelector(".tick")).not.toBeNull();
+      expect(screen.getByRole("button", { name: /^Tấm 1/ })).toHaveAttribute("aria-pressed", "false");
+    });
+
+    it("fine pointer: a click toggles (with Shift for a range); double-click and Enter open", async () => {
+      const onOpen = vi.fn();
+      const onToggle = vi.fn();
+      const user = userEvent.setup();
+      render(<FrameGrid rollId="r1" frames={frames} onOpen={onOpen} selectedIds={new Set()} pointer="fine" onToggle={onToggle} onLongPress={vi.fn()} />);
+      const cell = screen.getByRole("button", { name: /^Tấm 2/ });
+      await user.click(cell);
+      expect(onToggle).toHaveBeenLastCalledWith("f2", { shift: false });
+      await user.keyboard("{Shift>}");
+      await user.click(cell);
+      await user.keyboard("{/Shift}");
+      expect(onToggle).toHaveBeenLastCalledWith("f2", { shift: true });
+      expect(onOpen).not.toHaveBeenCalled();
+      await user.dblClick(cell);
+      expect(onOpen).toHaveBeenLastCalledWith(1, cell);
+      onOpen.mockClear();
+      onToggle.mockClear();
+      cell.focus();
+      await user.keyboard("{Enter}");
+      expect(onOpen).toHaveBeenLastCalledWith(1, cell);
+      expect(onToggle).not.toHaveBeenCalled();
+    });
+
+    it("coarse pointer: a tap opens unless selecting, then it toggles", async () => {
+      const onOpen = vi.fn();
+      const onToggle = vi.fn();
+      const { rerender } = render(
+        <FrameGrid rollId="r1" frames={frames} onOpen={onOpen} selectedIds={new Set()} pointer="coarse" selecting={false} onToggle={onToggle} onLongPress={vi.fn()} />,
+      );
+      await userEvent.click(screen.getByRole("button", { name: /^Tấm 1/ }));
+      expect(onOpen).toHaveBeenCalledTimes(1);
+      expect(onToggle).not.toHaveBeenCalled();
+      rerender(<FrameGrid rollId="r1" frames={frames} onOpen={onOpen} selectedIds={new Set()} pointer="coarse" selecting onToggle={onToggle} onLongPress={vi.fn()} />);
+      await userEvent.click(screen.getByRole("button", { name: /^Tấm 1/ }));
+      expect(onToggle).toHaveBeenLastCalledWith("f1", { shift: false });
+      expect(onOpen).toHaveBeenCalledTimes(1);
+    });
+
+    it("a 500 ms press selects and swallows the click after it; a shorter one doesn't", () => {
+      vi.useFakeTimers();
+      const onOpen = vi.fn();
+      const onLongPress = vi.fn();
+      render(<FrameGrid rollId="r1" frames={frames} onOpen={onOpen} selectedIds={new Set()} pointer="coarse" selecting={false} onToggle={vi.fn()} onLongPress={onLongPress} />);
+      const cell = screen.getByRole("button", { name: /^Tấm 1/ });
+      fireEvent.pointerDown(cell, { pointerType: "touch" });
+      act(() => vi.advanceTimersByTime(499));
+      fireEvent.pointerUp(cell, { pointerType: "touch" });
+      expect(onLongPress).not.toHaveBeenCalled();
+      fireEvent.pointerDown(cell, { pointerType: "touch" });
+      act(() => vi.advanceTimersByTime(500));
+      fireEvent.pointerUp(cell, { pointerType: "touch" });
+      fireEvent.click(cell);
+      expect(onLongPress).toHaveBeenCalledWith("f1");
+      expect(onOpen).not.toHaveBeenCalled();
+      vi.useRealTimers();
+    });
+
+    it("keeps long-press callouts off the cells", () => {
+      const { container } = render(<FrameGrid rollId="r1" frames={frames} onOpen={vi.fn()} selectedIds={new Set()} pointer="coarse" onToggle={vi.fn()} onLongPress={vi.fn()} />);
+      for (const img of Array.from(container.querySelectorAll("img"))) expect(img).toHaveAttribute("draggable", "false");
+      const menu = fireEvent.contextMenu(screen.getByRole("button", { name: /^Tấm 1/ }));
+      expect(menu).toBe(false); // default prevented
     });
   });
 });

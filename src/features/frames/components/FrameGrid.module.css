@@ -26,3 +26,8 @@
 .keeper, .oops { display: grid; place-items: center; width: 20px; height: 20px; border-radius: var(--radius-sm); }
 .keeper { color: var(--on-keeper); background: var(--keeper); }
 .oops { color: var(--on-pin); background: var(--pin); }
+/* COL-4 (D11): a long-press selects, so no text selection, iOS image menu or tap-zoom delay on the cells. */
+.selectable { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+/* RollGrid: the cobalt 3px ring inside the cell, over the scan, and the tick top-left. */
+.selected::after { content: ""; position: absolute; inset: 0; border: 3px solid var(--cobalt); pointer-events: none; }
+.tick { position: absolute; top: 4px; left: 4px; display: grid; place-items: center; width: 20px; height: 20px; color: var(--on-cobalt); background: var(--cobalt); }

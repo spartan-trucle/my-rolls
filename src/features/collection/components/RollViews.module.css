@@ -38,3 +38,25 @@
   .touch { display: none; }
   .pointer { display: inline; }
 }
+
+/* RollGrid: the view switch, and "Chọn" on the right on phones. */
+.switchRow { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.views .start { min-height: 44px; }
+/* A fine pointer selects with a click; "Chọn" is for touch. */
+@media (pointer: fine) { .views .start { display: none; } }
+
+/* RollGridWeb: the chips, and the selection bar beside them. */
+.toolbar { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+@media (min-width: 1024px) {
+  .toolbar { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-6); }
+}
+
+/* COL-4 hints: by how the user points, not by width (a touch tablet is wide). */
+.hintPointer { display: none; }
+@media (pointer: fine) {
+  .hintTouch { display: none; }
+  .hintPointer { display: inline; }
+}
+
+.barSpace { height: 136px; }
+@media (min-width: 1024px) { .barSpace { display: none; } }
