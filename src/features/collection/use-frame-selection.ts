@@ -44,6 +44,15 @@ function isTyping(target: EventTarget | null): boolean {
   return target.isContentEditable || target.closest('[contenteditable]:not([contenteditable="false"])') !== null;
 }
 
+/**
+ * Another modal is up (the canister editor, a Phase 2 form, the picker), or the key came from
+ * inside one: the frames behind it aren't the user's target (Review Focus 3).
+ */
+function behindModal(target: EventTarget | null): boolean {
+  if (document.querySelector('dialog[open], [role="dialog"][aria-modal="true"]')) return true;
+  return target instanceof Element && target.closest('dialog, [role="dialog"]') !== null;
+}
+
 export interface IMarkShortcutHandlers {
   keeper(): void;
   oops(): void;
@@ -52,7 +61,7 @@ export interface IMarkShortcutHandlers {
   selectAll(): void;
 }
 
-/** COL-4 desktop shortcuts K / O / B, Esc, Ctrl/⌘+A (Review Focus 3). Off while typing, and while `enabled` is false. */
+/** COL-4 desktop shortcuts K / O / B, Esc, Ctrl/⌘+A (Review Focus 3). Off while typing, while any modal is open, and while `enabled` is false. */
 export function useMarkShortcuts(enabled: boolean, handlers: IMarkShortcutHandlers) {
   // The latest handlers, without re-adding the listener every render.
   const ref = useRef(handlers);
@@ -63,7 +72,7 @@ export function useMarkShortcuts(enabled: boolean, handlers: IMarkShortcutHandle
   useEffect(() => {
     if (!enabled) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.defaultPrevented || isTyping(e.target) || e.altKey) return;
+      if (e.defaultPrevented || isTyping(e.target) || e.altKey || behindModal(e.target)) return;
       const key = e.key.toLowerCase();
       if (e.ctrlKey || e.metaKey) {
         if (key === "a" && !e.shiftKey) {
