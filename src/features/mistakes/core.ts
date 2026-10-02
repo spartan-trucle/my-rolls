@@ -101,9 +101,10 @@ export async function addMistakesToFramesCore<TQueryResult extends PgQueryResult
         .filter((i) => !have.has(`${frameId}|${i.type}`))
         .map((i) => ({ userId, rollId: input.rollId, frameId, type: i.type, note: i.note?.trim() || null })),
     );
-    if (rows.length > 0) await tx.insert(mistake).values(rows);
+    // A concurrent save can add the same type after the read above; the unique index skips it.
+    if (rows.length > 0) await tx.insert(mistake).values(rows).onConflictDoNothing();
+    await bumpRollVersion(tx, input.rollId);
   });
-  await bumpRollVersion(db, input.rollId);
   return { ok: true };
 }
 

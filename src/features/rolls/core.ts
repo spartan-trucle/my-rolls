@@ -793,14 +793,16 @@ export async function setCanisterCore<TQueryResult extends PgQueryResultHKT>(
   }
   if (!(await ownsRoll(db, userId, input.rollId))) return { ok: false, error: "not_found" };
 
-  await db
-    .update(roll)
-    .set({
-      canisterStyle: input.style,
-      ...(input.style === "drawn" ? { canisterColor: input.color } : {}),
-      updatedAt: new Date(),
-    })
-    .where(and(eq(roll.id, input.rollId), eq(roll.userId, userId)));
-  await bumpRollVersion(db, input.rollId);
+  await db.transaction(async (tx) => {
+    await tx
+      .update(roll)
+      .set({
+        canisterStyle: input.style,
+        ...(input.style === "drawn" ? { canisterColor: input.color } : {}),
+        updatedAt: new Date(),
+      })
+      .where(and(eq(roll.id, input.rollId), eq(roll.userId, userId)));
+    await bumpRollVersion(tx, input.rollId);
+  });
   return { ok: true };
 }
