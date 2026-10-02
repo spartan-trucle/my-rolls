@@ -183,7 +183,7 @@ Only with Trúc's yes on blocker 6 (CLAUDE.md: never create or sync docs silentl
 **Interfaces:**
 - Produces: CSS variables `--stock-red`, `--stock-orange`, `--stock-cream` in both themes, and Tailwind colours `stock-red`, `stock-orange`, `stock-cream`.
 
-- [ ] **Step 1:** In the artifact's `tokens.json`, add after `stock-rose`:
+- [x] **Step 1:** In the artifact's `tokens.json`, add after `stock-rose`:
 
 ```json
 { "name": "stock-red", "value": { "light": "#c23b22", "dark": "#ec7a62" }, "usage": "Canister body, preset only (CAN-2 \"Red\"). Decorative fill." },
@@ -191,11 +191,11 @@ Only with Trúc's yes on blocker 6 (CLAUDE.md: never create or sync docs silentl
 { "name": "stock-cream", "value": { "light": "#e6dcc8", "dark": "#e6dcc8" }, "usage": "Canister body, preset only (CAN-2 \"Cream\"). Needs the canister's line-strong edge to read on paper." }
 ```
 
-  In the README's Colour section, after the canister families line, add: "`stock-red`, `stock-orange` and `stock-cream` are extra canister presets a user can pick; they are not film families." Publish.
-- [ ] **Step 2:** Copy the published `tokens.json` byte for byte into `design-tokens/tokens.json`, then run `pnpm tokens`.
-- [ ] **Step 3:** Run `pnpm vitest run src/design-system/tokens`. Expected: PASS (generated-CSS test up to date; no contrast pair uses these tokens).
-- [ ] **Step 4:** Mirror the README line in `docs/design/design-system.md`, bump its "Last synced". Close Known conflict #8 in `docs/README.md` ("Resolved dd.mm.2026 (Trúc): three canister-only tokens") and the first open issue in `canister.md`.
-- [ ] **Step 5: Commit** `feat(cuon): add canister preset colours to the design tokens`.
+  In the README's Colour section, after the canister families line, add: "`stock-red`, `stock-orange` and `stock-cream` are extra canister presets a user can pick; they are not film families." Publish. (Published 02.10.2026 as design system `1790943528-cc6e`.)
+- [x] **Step 2:** Copy the published `tokens.json` byte for byte into `design-tokens/tokens.json`, then run `pnpm tokens`.
+- [x] **Step 3:** Run `pnpm vitest run src/design-system/tokens`. Expected: PASS (generated-CSS test up to date; no contrast pair uses these tokens).
+- [x] **Step 4:** Mirror the README line in `docs/design/design-system.md`, bump its "Last synced". Close Known conflict #8 in `docs/README.md` ("Resolved dd.mm.2026 (Trúc): three canister-only tokens") and the first open issue in `canister.md`.
+- [x] **Step 5: Commit** `feat(cuon): add canister preset colours to the design tokens`.
 
 ### Task 2: Pure logic (~2 h)
 
