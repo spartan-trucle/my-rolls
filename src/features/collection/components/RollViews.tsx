@@ -97,7 +97,13 @@ export function RollViews({
   };
   const [error, setError] = useState<string | null>(null);
   // The frames the open bulk picker adds to, fixed when it opened, and how it was opened.
-  const [picker, setPicker] = useState<{ frames: IRollFrame[]; via: TVia } | null>(null);
+  const [picker, setPickerState] = useState<{ frames: IRollFrame[]; via: TVia } | null>(null);
+  // Whether the picker is still open when a save settles: it may have been closed mid-save.
+  const pickerOpen = useRef(false);
+  const setPicker = (next: { frames: IRollFrame[]; via: TVia } | null) => {
+    pickerOpen.current = next !== null;
+    setPickerState(next);
+  };
 
   const clearSelection = () => {
     sel.clear();
@@ -139,10 +145,16 @@ export function RollViews({
       if (result.ok) {
         setPicker(null);
         router.refresh();
+      } else if (!pickerOpen.current) {
+        setError(tSel("markFailed")); // closed mid-save: the bar says so instead, and the selection stays
       }
       return result;
+    } catch (err) {
+      if (pickerOpen.current) throw err; // the open picker says so and stays open
+      setError(tSel("markFailed"));
+      return { ok: false };
     } finally {
-      endSave(); // a throw goes on to the picker, which says so and stays open
+      endSave();
     }
   };
 
