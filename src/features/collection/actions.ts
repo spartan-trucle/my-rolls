@@ -1,6 +1,5 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { getDb } from "@/db/client";
 import { sessionUserIdForAction } from "@/features/shared/session-user";
 import { captureServerEvent } from "@/lib/posthog-server";
@@ -15,7 +14,7 @@ import {
   type TLibraryFilter,
 } from "./core";
 import { parseFilter } from "./filters";
-import { LIBRARY_VIEW_COOKIE, ROLL_VIEW_COOKIE, resolveLibraryView, resolveRollView } from "./view-pref";
+import { resolveLibraryView, resolveRollView } from "./view-pref";
 
 const EMPTY: ILibraryPage = { totals: { rolls: 0, frames: 0, keepers: 0 }, counts: { all: 0, keeper: 0, oops: 0 }, groups: [], nextCursor: null };
 
@@ -36,27 +35,18 @@ export async function libraryTotalsAction(): Promise<ILibraryTotals> {
   return libraryTotalsCore(getDb(), userId);
 }
 
-const YEAR_IN_SECONDS = 60 * 60 * 24 * 365;
-
 /**
- * COL-1 / COL-3 "the last view used is remembered", plan D7: a year-long
- * cookie the page reads when its URL has no `view`. Anything but a known
- * view stores the default; anything but `roll` is the library. Emits
- * `view_switched` (D17).
+ * D17 `view_switched`, sent by ViewSwitch without waiting on it. Sets no cookie: a cookie set in a
+ * Server Action makes Next re-render the current route before the switch's push (Ruling R31,
+ * superseding R11), so ViewSwitch writes `viewCookie` itself. Anything but a known view reports
+ * the default; anything but `roll` is the library.
  */
-export async function rememberViewAction(raw: { surface: "roll" | "library"; view: string }): Promise<void> {
+export async function trackViewSwitchAction(raw: { surface: "roll" | "library"; view: string }): Promise<void> {
   const userId = await sessionUserIdForAction();
   if (!userId) return;
   const parsed = viewSwitchInputSchema.safeParse(raw);
   if (!parsed.success) return;
-  const input = parsed.data;
-  const surface = input.surface === "roll" ? "roll" : "library";
-  const view = surface === "roll" ? resolveRollView(input.view, undefined) : resolveLibraryView(input.view, undefined);
-  (await cookies()).set(surface === "roll" ? ROLL_VIEW_COOKIE : LIBRARY_VIEW_COOKIE, view, {
-    maxAge: YEAR_IN_SECONDS,
-    sameSite: "lax",
-    path: "/",
-    httpOnly: true,
-  });
+  const surface = parsed.data.surface === "roll" ? "roll" : "library";
+  const view = surface === "roll" ? resolveRollView(parsed.data.view, undefined) : resolveLibraryView(parsed.data.view, undefined);
   await captureServerEvent({ distinctId: userId, event: "view_switched", properties: { surface, view } });
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveLibraryView, resolveRollView } from "./view-pref";
+import { resolveLibraryView, resolveRollView, viewCookie } from "./view-pref";
 
 describe("resolveRollView (D6, D7)", () => {
   it("the URL wins over the cookie", () => {
@@ -21,5 +21,17 @@ describe("resolveLibraryView", () => {
     expect(resolveLibraryView(undefined, undefined)).toBe("shelf");
     expect(resolveLibraryView(undefined, "grid")).toBe("grid");
     expect(resolveLibraryView("strip", undefined)).toBe("shelf");
+  });
+});
+
+describe("viewCookie (Ruling R31)", () => {
+  it("remembers a view for a year, site-wide, lax", () => {
+    expect(viewCookie("roll", "grid")).toBe("cuon_roll_view=grid; max-age=31536000; path=/; samesite=lax");
+    expect(viewCookie("library", "grid")).toBe("cuon_library_view=grid; max-age=31536000; path=/; samesite=lax");
+  });
+
+  it("stores the default instead of a forged view", () => {
+    expect(viewCookie("roll", "<script>;path=/x")).toBe("cuon_roll_view=strip; max-age=31536000; path=/; samesite=lax");
+    expect(viewCookie("library", "strip")).toBe("cuon_library_view=shelf; max-age=31536000; path=/; samesite=lax");
   });
 });

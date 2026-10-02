@@ -72,42 +72,27 @@ describe("collection actions", () => {
     });
   });
 
-  describe("rememberViewAction (plan D7, D17)", () => {
-    const YEAR = 60 * 60 * 24 * 365;
-
+  describe("trackViewSwitchAction (D17, Ruling R31)", () => {
     it("does nothing for a signed-out caller", async () => {
       getSession.mockResolvedValue(null);
-      await actions.rememberViewAction({ surface: "library", view: "grid" });
-      expect(cookieJar.set).not.toHaveBeenCalled();
+      await actions.trackViewSwitchAction({ surface: "library", view: "grid" });
       expect(captureServerEvent).not.toHaveBeenCalled();
     });
 
-    it("remembers the library view for a year and emits view_switched", async () => {
+    it("emits view_switched and sets no cookie (the client writes it, so the route isn't re-rendered)", async () => {
       getSession.mockResolvedValue({ user: { id: "u1" } });
-      await actions.rememberViewAction({ surface: "library", view: "grid" });
-      expect(cookieJar.set).toHaveBeenCalledWith("cuon_library_view", "grid", {
-        maxAge: YEAR,
-        sameSite: "lax",
-        path: "/",
-        httpOnly: true,
-      });
+      await actions.trackViewSwitchAction({ surface: "library", view: "grid" });
       expect(captureServerEvent).toHaveBeenCalledWith({
         distinctId: "u1",
         event: "view_switched",
         properties: { surface: "library", view: "grid" },
       });
+      expect(cookieJar.set).not.toHaveBeenCalled();
     });
 
-    it("remembers the roll view in its own cookie", async () => {
+    it("reports the default instead of a forged view", async () => {
       getSession.mockResolvedValue({ user: { id: "u1" } });
-      await actions.rememberViewAction({ surface: "roll", view: "grid" });
-      expect(cookieJar.set.mock.calls[0].slice(0, 2)).toEqual(["cuon_roll_view", "grid"]);
-    });
-
-    it("stores the default instead of a forged view", async () => {
-      getSession.mockResolvedValue({ user: { id: "u1" } });
-      await actions.rememberViewAction({ surface: "roll", view: "<script>" });
-      expect(cookieJar.set.mock.calls[0].slice(0, 2)).toEqual(["cuon_roll_view", "strip"]);
+      await actions.trackViewSwitchAction({ surface: "roll", view: "<script>" });
       expect(captureServerEvent.mock.calls[0][0].properties).toEqual({ surface: "roll", view: "strip" });
     });
 
@@ -117,15 +102,13 @@ describe("collection actions", () => {
       ["no input at all", undefined],
     ])("ignores %s", async (_, forged) => {
       getSession.mockResolvedValue({ user: { id: "u1" } });
-      await actions.rememberViewAction(forged as never);
-      expect(cookieJar.set).not.toHaveBeenCalled();
+      await actions.trackViewSwitchAction(forged as never);
       expect(captureServerEvent).not.toHaveBeenCalled();
     });
 
     it("treats an unknown surface as the library", async () => {
       getSession.mockResolvedValue({ user: { id: "u1" } });
-      await actions.rememberViewAction({ surface: "nope" as "library", view: "shelf" });
-      expect(cookieJar.set.mock.calls[0].slice(0, 2)).toEqual(["cuon_library_view", "shelf"]);
+      await actions.trackViewSwitchAction({ surface: "nope" as "library", view: "shelf" });
       expect(captureServerEvent.mock.calls[0][0].properties).toEqual({ surface: "library", view: "shelf" });
     });
   });

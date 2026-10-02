@@ -10,7 +10,7 @@ const getSession = vi.hoisted(() => vi.fn());
 const getSessionCookie = vi.hoisted(() => vi.fn());
 const listRolls = vi.hoisted(() => vi.fn());
 const collection = vi.hoisted(() => ({
-  rememberViewAction: vi.fn(),
+  trackViewSwitchAction: vi.fn(),
   listLibraryAction: vi.fn(),
   libraryTotalsAction: vi.fn(),
 }));
