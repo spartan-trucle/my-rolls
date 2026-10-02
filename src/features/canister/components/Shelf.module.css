@@ -1,0 +1,329 @@
+/* `Shelf` / `ShelfWeb` / `ShelfEmpty*` boards (Phase 3 D0). The wood
+   colours are board values the design system has no token for yet;
+   Darkroom gets its own below. */
+.shelf,
+.empty {
+  --wood: #b98b5d;
+  --wood-lo: #956a41;
+  --wood-edge: #6e4a2b;
+  /* Board phone sizes; the desktop block below swaps them. */
+  --ledge-h: 14px;
+  --ledge-edge: 4px;
+}
+
+.shelf {
+  --shelf-pad-x: 4px;
+  --slot-pad-top: 8px;
+  /* The canister's height: 12.2em at its font-size (Canister.module.css). */
+  --can-h: calc(12.2 * 11px);
+}
+
+[data-theme="dark"] .shelf,
+[data-theme="dark"] .empty {
+  --wood: #6d4c32;
+  --wood-lo: #583c27;
+  --wood-edge: #382616;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .shelf,
+  :root:not([data-theme="light"]) .empty {
+    --wood: #6d4c32;
+    --wood-lo: #583c27;
+    --wood-edge: #382616;
+  }
+}
+
+/* One grid for every roll: 3 columns on the phone, 6 from 1024px. Each
+   row's first item draws that row's ledge across the whole shelf (the
+   list is a size container, so 100cqi is its width), at the canisters'
+   feet, so a short last row still stands on a full ledge. */
+.shelf {
+  position: relative;
+  z-index: 0;
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 8px;
+  row-gap: 28px;
+  margin: 4px 0 0;
+  padding: 0 var(--shelf-pad-x);
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  min-width: 0;
+  padding-top: var(--slot-pad-top);
+}
+
+.item:nth-child(3n + 1)::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: calc(-1 * var(--shelf-pad-x));
+  top: calc(var(--slot-pad-top) + var(--can-h));
+  width: calc(100cqi + 2 * var(--shelf-pad-x));
+  box-sizing: border-box;
+  height: var(--ledge-h);
+  background: linear-gradient(var(--wood), var(--wood-lo));
+  border-bottom: var(--ledge-edge) solid var(--wood-edge);
+  box-shadow: 0 12px 14px -10px rgba(31, 26, 22, 0.5);
+  pointer-events: none;
+}
+
+.slot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.slot:hover {
+  color: var(--ink);
+}
+
+.slot:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+}
+
+.canister {
+  transition: transform 0.15s ease;
+}
+
+.slot:hover .canister {
+  transform: translateY(-3px);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding-top: 26px;
+  text-align: center;
+}
+
+.stock {
+  font: 500 13px/18px var(--font-sans);
+}
+
+.status {
+  display: inline-flex;
+}
+
+@media (min-width: 1024px) {
+  .shelf,
+  .empty {
+    --ledge-h: 16px;
+    --ledge-edge: 5px;
+  }
+
+  .shelf {
+    --shelf-pad-x: 8px;
+    --slot-pad-top: 12px;
+    --can-h: calc(12.2 * 13px);
+
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    column-gap: 24px;
+    row-gap: 40px;
+    margin-top: 0;
+  }
+
+  .item:nth-child(3n + 1)::before {
+    content: none;
+  }
+
+  .item:nth-child(6n + 1)::before {
+    content: "";
+  }
+
+  .text {
+    padding-top: 32px;
+  }
+
+  .stock {
+    font-size: 15px;
+    line-height: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canister {
+    transition: none;
+  }
+}
+
+/* ShelfEmpty (phone) / ShelfEmptyWeb. */
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.emptyStage {
+  display: flex;
+  flex-direction: column;
+  margin-top: 28px;
+}
+
+.emptyRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 0 16px;
+}
+
+/* The board's `.ghost`: the canister's 6.6em × 12.2em, dashed. */
+.ghost {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 6.6em;
+  height: 12.2em;
+  font-size: 11px;
+  color: var(--ink-muted);
+  border: 1.5px dashed var(--line-strong);
+}
+
+.emptyNote {
+  padding-bottom: 36px;
+}
+
+.ledgeBar {
+  height: var(--ledge-h);
+  box-sizing: content-box;
+  background: linear-gradient(var(--wood), var(--wood-lo));
+  border-bottom: var(--ledge-edge) solid var(--wood-edge);
+  box-shadow: 0 12px 14px -10px rgba(31, 26, 22, 0.5);
+}
+
+.emptyCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.emptyText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.emptyTitle {
+  margin: 0;
+  font: 600 var(--text-title-mobile) / var(--text-title-mobile--line-height) var(--font-display);
+}
+
+.emptyBody {
+  margin: 0;
+  font-size: var(--text-body-mobile);
+  line-height: var(--text-body-mobile--line-height);
+  color: var(--ink-muted);
+}
+
+.emptyActions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Two classes, so it beats the design-system button's own `font` and padding whatever order the CSS loads in. */
+.emptyActions .emptyCta {
+  width: 100%;
+  min-height: 48px;
+  font-size: 14px;
+}
+
+.emptyPast {
+  display: inline-flex;
+  align-self: center;
+  align-items: center;
+  min-height: 44px;
+  font: 600 13px/18px var(--font-sans);
+  color: var(--cobalt);
+}
+
+.emptyPast:hover {
+  color: var(--cobalt-deep);
+}
+
+.emptyPast:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+@media (min-width: 1024px) {
+  .empty {
+    gap: 40px;
+  }
+
+  .emptyStage {
+    margin-top: 0;
+  }
+
+  .emptyRow {
+    gap: 16px;
+    padding: 0 24px;
+  }
+
+  .ghost {
+    font-size: 13px;
+  }
+
+  .emptyNote {
+    padding-bottom: 48px;
+  }
+
+  .emptyNote .note {
+    font-size: var(--text-note);
+    line-height: var(--text-note--line-height);
+  }
+
+  .emptyCopy {
+    gap: 12px;
+    max-width: 560px;
+  }
+
+  .emptyText {
+    gap: 12px;
+    margin-top: 0;
+  }
+
+  .emptyTitle {
+    font: 500 32px/38px var(--font-display);
+  }
+
+  .emptyBody {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  .emptyActions {
+    flex-direction: row;
+    align-items: center;
+    gap: 24px;
+    margin-top: 12px;
+  }
+
+  .emptyActions .emptyCta {
+    width: auto;
+    padding: 0 28px;
+    font-size: 15px;
+  }
+
+  .emptyPast {
+    align-self: auto;
+    font-size: 14px;
+    line-height: 20px;
+  }
+}
