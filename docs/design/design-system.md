@@ -1,7 +1,7 @@
 # Design system
 
 > **Mirror — the artifact is the source of truth:** [Design system](https://claude.ai/artifact/HtsG9sZeNGx19PSvPjW65a) (namespace `RollCall`)
-> Last synced: 02.10.2026 · artifact version `1790936300-7c53` · by Claude for Trúc · no change to the mirrored content since `4ce8`: `project/tokens.json` is byte-identical to the app's `design-tokens/tokens.json`, and `project/README.md` matches this mirror; the versions in between (`28be`, `7c53`) changed only the Design System type's own files. Earlier: `bd24` (30.09.2026, Trúc) added the phone type styles `display-mobile`, `title-mobile`, `body-mobile` and `body-sm-mobile` (now also in the app, Phase 2 T0), and `4ce8` (30.09.2026) set `cobalt` for `UploadDrop`'s drag-over (Known conflict #7) and dropped TIFF from its hint.
+> Last synced: 02.10.2026 · artifact version `1790943528-cc6e` · by Claude for Trúc · `cc6e` (02.10.2026, Claude for Trúc, Phase 3 Task 1): canister presets `stock-red`, `stock-orange` and `stock-cream` in `tokens.json` (mirrored in [Colour](#colour); copied into the app's `design-tokens/tokens.json`), and a README line that they are presets, not film families, with a `line-strong` edge on every drawn canister body (Known conflict #8). Before that, `28be` and `7c53` changed only the Design System type's own files; `bd24` (30.09.2026, Trúc) added the phone type styles `display-mobile`, `title-mobile`, `body-mobile` and `body-sm-mobile`, and `4ce8` (30.09.2026) set `cobalt` for `UploadDrop`'s drag-over (Known conflict #7) and dropped TIFF from its hint.
 > Before editing, re-read the artifact. Make changes in the artifact and copy them here in the same session (see [CLAUDE.md](../../CLAUDE.md#sync-rules)).
 >
 > **Naming:** the design system still calls the product **Roll Call**. The product name is **Cuộn** (see [Known conflicts](../README.md#known-conflicts-between-sources)). Token and component names stay as they are.
@@ -76,11 +76,15 @@ Two themes: **Paper** (light, default) and **Darkroom** (dark, with a soft dusty
 | `stock-blue` | `#3b5f8c` | `#8fb0dc` | Canister: slide / reversal |
 | `stock-mono` | `#4a4541` | `#b8b0a6` | Canister: black and white |
 | `stock-rose` | `#a63e62` | `#e892ad` | Canister: cine, redscale, expired mystery rolls |
+| `stock-red` | `#c23b22` | `#ec7a62` | Canister preset only (CAN-2 "Red"); not a film family |
+| `stock-orange` | `#e07a2e` | `#f2a565` | Canister preset only (CAN-2 "Orange"); not a film family |
+| `stock-cream` | `#e6dcc8` | `#e6dcc8` | Canister preset only (CAN-2 "Cream"); needs the canister's `line-strong` edge on paper |
 
 Rules:
 
 - Status always has a shape as well as a colour: the `keeper` sparkle icon, the `oops` "!!!" icon (with an accessible label), or the word itself. Never colour alone.
 - `stock-*` are generic colour families. Never draw a manufacturer's logo, box art or trade dress. Put the stock name as text next to the canister.
+- `stock-red`, `stock-orange` and `stock-cream` are extra canister presets a user can pick for their own roll; they are not film families. Every drawn canister body has a 1px `line-strong` edge, so a light body (cream, or a custom colour from the picker) still reads on paper.
 
 ## Type
 

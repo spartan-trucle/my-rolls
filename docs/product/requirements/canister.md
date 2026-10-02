@@ -26,7 +26,7 @@ This is what sets Cuộn apart from Filmer and Frames. Instead of paying for the
 | Charcoal | `#4a4541` |
 | Cream | `#e6dcc8` |
 
-Gold, Green, Blue, Rose and Charcoal match the design system's `stock-gold`, `stock-green`, `stock-blue`, `stock-rose` and `stock-mono` (Paper theme). Red, Orange and Cream are canister-only presets with no token yet.
+Gold, Green, Blue, Rose and Charcoal match the design system's `stock-gold`, `stock-green`, `stock-blue`, `stock-rose` and `stock-mono` (Paper theme). Red, Orange and Cream are canister-only presets: `stock-red`, `stock-orange` and `stock-cream` (added 02.10.2026, Known conflict #8).
 
 Film-type sticker examples: `C-41 · 200`, `E-6 · 100`, `B&W · 400`, `ECN-2 · 500`.
 
@@ -54,5 +54,5 @@ The free colour picker is cut #4 if Phase 3 runs late: keep the 8 presets and sa
 
 ## Open issues
 
-- Add tokens for the Red, Orange and Cream presets to the design system, or map the presets onto the existing `stock-*` families only.
+- ~~Add tokens for the Red, Orange and Cream presets.~~ Resolved 02.10.2026: `stock-red`, `stock-orange`, `stock-cream` in the design system (Known conflict #8).
 - PRD Q5: brand logos in canister photos (keep as reference photos; drawn canisters stay unbranded).
