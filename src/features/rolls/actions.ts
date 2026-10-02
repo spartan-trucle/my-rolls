@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { getDb } from "@/db/client";
 import {
@@ -8,14 +9,19 @@ import {
   getRollCore,
   listRollsCore,
   peekNextRollNumberCore,
+  setCanisterCore,
   updateRollCore,
   updateRollInputSchema,
   type IRollEntry,
   type TCreateRollResult,
+  type TSetCanisterResult,
   type TUpdateRollResult,
 } from "@/features/rolls/core";
+import type { TCanisterStyle } from "@/features/canister/look";
+import { sessionUserIdForAction } from "@/features/shared/session-user";
 import { getAuth } from "@/lib/auth";
 import { captureServerEvent } from "@/lib/posthog-server";
+import { getR2Env } from "@/lib/r2";
 
 /**
  * File-level `"use server"`: every export here must be an async function
@@ -96,7 +102,7 @@ export async function listRolls(): Promise<IRollEntry[]> {
   const userId = await requireUserId();
   if (!userId) return [];
 
-  return listRollsCore(getDb(), userId);
+  return listRollsCore(getDb(), userId, { publicUrl: getR2Env().R2_PUBLIC_URL });
 }
 
 /** D15: a single roll's data for `/rolls/[id]`, or `null` when it doesn't exist or isn't the caller's own. */
@@ -104,7 +110,7 @@ export async function getRoll(rollId: string): Promise<IRollEntry | null> {
   const userId = await requireUserId();
   if (!userId) return null;
 
-  return getRollCore(getDb(), userId, rollId);
+  return getRollCore(getDb(), userId, rollId, { publicUrl: getR2Env().R2_PUBLIC_URL });
 }
 
 /** N1: the "Cuộn #N" the form's header/name hint would use if saved right now — `null` when signed out. */
@@ -128,4 +134,28 @@ export async function updateRoll(input: unknown): Promise<TUpdateRollResult> {
   if (!parsed.success) return { ok: false, error: "validation" };
 
   return updateRollCore(getDb(), userId, parsed.data);
+}
+
+/** CAN-2: saves how a roll's canister looks; `drawn` carries a preset or `#rrggbb`. */
+export async function setCanisterAction(input: {
+  rollId: string;
+  style: TCanisterStyle;
+  color?: string;
+}): Promise<TSetCanisterResult> {
+  const userId = await sessionUserIdForAction();
+  if (!userId) return { ok: false, error: "not_found" };
+  const result = await setCanisterCore(getDb(), userId, input);
+  if (result.ok) {
+    await captureServerEvent({
+      distinctId: userId,
+      event: "canister_customised",
+      properties: {
+        style: input.style,
+        color: input.style === "drawn" ? (input.color?.startsWith("#") ? "custom" : input.color) : undefined,
+      },
+    });
+    revalidatePath(`/rolls/${input.rollId}`);
+    revalidatePath("/");
+  }
+  return result;
 }

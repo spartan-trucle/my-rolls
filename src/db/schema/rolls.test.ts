@@ -25,6 +25,12 @@ describe("rolls schema", () => {
     expect(columns.name.notNull).toBe(false);
   });
 
+  it("carries canister_style, default stock (Phase 3 D2)", () => {
+    const columns = getTableColumns(roll);
+    expect(columns.canisterStyle.notNull).toBe(true);
+    expect(columns.canisterStyle.default).toBe("stock");
+  });
+
   it("points at the owner's bag item for the camera, not the catalogue model (D2)", () => {
     const columns = getTableColumns(roll);
 

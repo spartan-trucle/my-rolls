@@ -3,7 +3,15 @@ import { and, eq } from "drizzle-orm";
 import { bagItem, camera, frame, lens, roll, scanSet, stock } from "@/db/schema";
 import { createTestDb } from "@/db/test-db";
 import { toSearchText } from "@/lib/search-text";
-import { createRollCore, getRollCore, listRollsCore, peekNextRollNumberCore, updateRollCore } from "./core";
+import { seedRollWithFrames } from "@/test/phase2-fixtures";
+import {
+  createRollCore,
+  getRollCore,
+  listRollsCore,
+  peekNextRollNumberCore,
+  setCanisterCore,
+  updateRollCore,
+} from "./core";
 
 const OWNER = "user-1";
 const OTHER_USER = "user-2";
@@ -1282,5 +1290,151 @@ describe("frameCount on a roll entry (Phase 2 B5, HomeUploading)", () => {
     const [entry] = await listRollsCore(db, OWNER);
     expect(entry.frameCount).toBe(2);
     expect((await getRollCore(db, OWNER, r.id))?.frameCount).toBe(2);
+  });
+});
+
+describe("setCanisterCore (CAN-2, D1–D2)", () => {
+  let cleanup: (() => Promise<void>) | undefined;
+
+  afterEach(async () => {
+    await cleanup?.();
+    cleanup = undefined;
+  });
+
+  async function freshDb() {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    return { db };
+  }
+
+  it("saves a preset or a hex as a drawn canister and bumps roll.version", async () => {
+    const { db } = await freshDb();
+    const { roll: r } = await seedRollWithFrames(db, OWNER, 0);
+    expect(await setCanisterCore(db, OWNER, { rollId: r.id, style: "drawn", color: "cream" })).toEqual({ ok: true });
+    let [row] = await db.select().from(roll).where(eq(roll.id, r.id));
+    expect(row).toMatchObject({ canisterStyle: "drawn", canisterColor: "cream", version: 2 });
+
+    await setCanisterCore(db, OWNER, { rollId: r.id, style: "drawn", color: "#a1b2c3" });
+    [row] = await db.select().from(roll).where(eq(roll.id, r.id));
+    expect(row.canisterColor).toBe("#a1b2c3");
+  });
+
+  it("rejects an unsafe colour and a drawn style with no colour (Review Focus 4)", async () => {
+    const { db } = await freshDb();
+    const { roll: r } = await seedRollWithFrames(db, OWNER, 0);
+    expect(await setCanisterCore(db, OWNER, { rollId: r.id, style: "drawn", color: "red;background:url(x)" })).toEqual({
+      ok: false,
+      error: "invalid_input",
+    });
+    expect(await setCanisterCore(db, OWNER, { rollId: r.id, style: "drawn" })).toEqual({ ok: false, error: "invalid_input" });
+    expect(await setCanisterCore(db, OWNER, { rollId: r.id, style: "tartan" as never })).toEqual({ ok: false, error: "invalid_input" });
+  });
+
+  it("stock and photo styles keep the stored colour untouched", async () => {
+    const { db } = await freshDb();
+    const { roll: r } = await seedRollWithFrames(db, OWNER, 0, { canisterColor: "green" });
+    await setCanisterCore(db, OWNER, { rollId: r.id, style: "photo" });
+    const [row] = await db.select().from(roll).where(eq(roll.id, r.id));
+    expect(row).toMatchObject({ canisterStyle: "photo", canisterColor: "green" });
+  });
+
+  it("refuses another user's roll", async () => {
+    const { db } = await freshDb();
+    const { roll: r } = await seedRollWithFrames(db, OWNER, 0);
+    expect(await setCanisterCore(db, OTHER_USER, { rollId: r.id, style: "stock" })).toEqual({ ok: false, error: "not_found" });
+  });
+});
+
+describe("updateRollCore — canister colour on a stock change (Phase 3 blocker 4)", () => {
+  let cleanup: (() => Promise<void>) | undefined;
+
+  afterEach(async () => {
+    await cleanup?.();
+    cleanup = undefined;
+  });
+
+  async function setup() {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+    const [stockB] = await db
+      .insert(stock)
+      .values({ brand: "Ilford", name: "HP5", iso: 400, canisterColor: "mono", searchText: toSearchText("Ilford HP5") })
+      .returning();
+    const created = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+    if (!created.ok) throw new Error("setup failed");
+    return { db, stockB, cameraBagItemRow, rollId: created.rollId };
+  }
+
+  it("a stock change keeps a custom drawn colour", async () => {
+    const { db, stockB, cameraBagItemRow, rollId } = await setup();
+    await setCanisterCore(db, OWNER, { rollId, style: "drawn", color: "#a1b2c3" });
+
+    const result = await updateRollCore(
+      db,
+      OWNER,
+      { rollId, expectedVersion: 2, stockId: stockB.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+    expect(result).toEqual({ ok: true });
+
+    const [row] = await db.select().from(roll).where(eq(roll.id, rollId));
+    expect(row).toMatchObject({ canisterStyle: "drawn", canisterColor: "#a1b2c3" });
+  });
+
+  it("a stock change still copies the new stock's colour for a stock-style roll", async () => {
+    const { db, stockB, cameraBagItemRow, rollId } = await setup();
+
+    const result = await updateRollCore(
+      db,
+      OWNER,
+      { rollId, expectedVersion: 1, stockId: stockB.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+    expect(result).toEqual({ ok: true });
+
+    const [row] = await db.select().from(roll).where(eq(roll.id, rollId));
+    expect(row).toMatchObject({ canisterStyle: "stock", canisterColor: "mono" });
+  });
+});
+
+describe("canisterPhotoUrl on a roll entry (D18)", () => {
+  let cleanup: (() => Promise<void>) | undefined;
+
+  afterEach(async () => {
+    await cleanup?.();
+    cleanup = undefined;
+  });
+
+  it("builds the url from publicUrl and the stock's photo key, else null", async () => {
+    const { db, client } = await createTestDb();
+    cleanup = () => client.close();
+    const { stockRow, cameraBagItemRow } = await seedBasics(db);
+    const created = await createRollCore(
+      db,
+      OWNER,
+      { mode: "new", stockId: stockRow.id, cameraBagItemId: cameraBagItemRow.id },
+      NOW,
+    );
+    if (!created.ok) throw new Error("setup failed");
+
+    const without = await getRollCore(db, OWNER, created.rollId);
+    expect(without?.stock?.canisterPhotoUrl).toBeNull();
+    expect(without?.canisterStyle).toBe("stock");
+
+    const withUrlNoKey = await getRollCore(db, OWNER, created.rollId, { publicUrl: "https://img.example/" });
+    expect(withUrlNoKey?.stock?.canisterPhotoUrl).toBeNull();
+
+    await db.update(stock).set({ canisterPhotoKey: "canisters/portra.webp" }).where(eq(stock.id, stockRow.id));
+    const withKey = await getRollCore(db, OWNER, created.rollId, { publicUrl: "https://img.example//" });
+    expect(withKey?.stock?.canisterPhotoUrl).toBe("https://img.example/canisters/portra.webp");
+    const listed = await listRollsCore(db, OWNER, { publicUrl: "https://img.example" });
+    expect(listed[0].stock?.canisterPhotoUrl).toBe("https://img.example/canisters/portra.webp");
+    expect((await getRollCore(db, OWNER, created.rollId))?.stock?.canisterPhotoUrl).toBeNull();
   });
 });

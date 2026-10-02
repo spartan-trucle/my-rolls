@@ -1,0 +1,1 @@
+ALTER TABLE "roll" ADD COLUMN "canister_style" text DEFAULT 'stock' NOT NULL;

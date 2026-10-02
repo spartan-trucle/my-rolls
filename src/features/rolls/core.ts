@@ -4,7 +4,9 @@ import { z } from "zod";
 import { and, count, desc, eq, inArray, isNull, or } from "drizzle-orm";
 import type { PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { bagItem, camera, frame, lens, roll, stock } from "@/db/schema";
+import { CANISTER_STYLES, isCanisterColor, type TCanisterStyle } from "@/features/canister/look";
 import type { TDb } from "@/features/shared/db";
+import { bumpRollVersion, ownsRoll } from "@/features/shared/roll-access";
 import { isFutureVnDay, isFutureVnMonth, vnMonthEnd, vnMonthStart } from "@/features/rolls/date-utils";
 import { formatPushPull, pushPullStops } from "@/features/rolls/push-pull";
 
@@ -412,6 +414,8 @@ export interface IRollStockSummary {
   name: string;
   iso: number | null;
   canisterColor: string | null;
+  /** D18: public URL of the stock's canister photo, or `null` (no photo, or the caller passed no `publicUrl`). Optional for old fixtures. */
+  canisterPhotoUrl?: string | null;
   /** Natural-key slug (`stock.type`, e.g. `"color-negative"`) — the caller maps it through `stockTypeLabelKey` before showing it (never the raw slug). */
   type: string | null;
 }
@@ -441,6 +445,8 @@ export interface IRollEntry {
   number?: number | null;
   name: string | null;
   canisterColor: string | null;
+  /** Phase 3 D2: how the canister is drawn. Optional for old fixtures; `hydrateRolls` always sets it. */
+  canisterStyle?: TCanisterStyle;
   boxIso: number | null;
   shotIso: number | null;
   exposures: number | null;
@@ -488,7 +494,9 @@ type TRollRow = typeof roll.$inferSelect;
 async function hydrateRolls<TQueryResult extends PgQueryResultHKT>(
   db: TDb<TQueryResult>,
   rollRows: TRollRow[],
+  opts: { publicUrl?: string } = {},
 ): Promise<IRollEntry[]> {
+  const publicBase = opts.publicUrl?.replace(/\/+$/, "");
   const stockIds = Array.from(new Set(rollRows.map((row) => row.stockId)));
   const cameraBagItemIds = Array.from(new Set(rollRows.map((row) => row.cameraBagItemId)));
   const lensIds = Array.from(
@@ -539,6 +547,7 @@ async function hydrateRolls<TQueryResult extends PgQueryResultHKT>(
       lensId: row.lensId,
       name: row.name,
       canisterColor: row.canisterColor,
+      canisterStyle: row.canisterStyle as TCanisterStyle,
       boxIso: row.boxIso,
       shotIso: row.shotIso,
       exposures: row.exposures,
@@ -559,6 +568,7 @@ async function hydrateRolls<TQueryResult extends PgQueryResultHKT>(
             name: stockRow.name,
             iso: stockRow.iso,
             canisterColor: stockRow.canisterColor,
+            canisterPhotoUrl: publicBase && stockRow.canisterPhotoKey ? `${publicBase}/${stockRow.canisterPhotoKey}` : null,
             type: stockRow.type,
           }
         : null,
@@ -572,6 +582,7 @@ async function hydrateRolls<TQueryResult extends PgQueryResultHKT>(
 export async function listRollsCore<TQueryResult extends PgQueryResultHKT>(
   db: TDb<TQueryResult>,
   userId: string,
+  opts: { publicUrl?: string } = {},
 ): Promise<IRollEntry[]> {
   const rollRows = await db
     .select()
@@ -579,7 +590,7 @@ export async function listRollsCore<TQueryResult extends PgQueryResultHKT>(
     .where(and(eq(roll.userId, userId), isNull(roll.deletedAt)))
     .orderBy(desc(roll.createdAt));
 
-  return hydrateRolls(db, rollRows);
+  return hydrateRolls(db, rollRows, opts);
 }
 
 /** D15: a single roll page's data — `null` when `rollId` doesn't exist, isn't `userId`'s own, or is soft-deleted. */
@@ -587,6 +598,7 @@ export async function getRollCore<TQueryResult extends PgQueryResultHKT>(
   db: TDb<TQueryResult>,
   userId: string,
   rollId: string,
+  opts: { publicUrl?: string } = {},
 ): Promise<IRollEntry | null> {
   const rollRows = await db
     .select()
@@ -597,7 +609,7 @@ export async function getRollCore<TQueryResult extends PgQueryResultHKT>(
   const rollRow = rollRows[0];
   if (!rollRow) return null;
 
-  const [entry] = await hydrateRolls(db, [rollRow]);
+  const [entry] = await hydrateRolls(db, [rollRow], opts);
   return entry;
 }
 
@@ -720,7 +732,7 @@ export async function updateRollCore<TQueryResult extends PgQueryResultHKT>(
   }
 
   const existingRows = await db
-    .select({ id: roll.id, version: roll.version })
+    .select({ id: roll.id, version: roll.version, canisterStyle: roll.canisterStyle })
     .from(roll)
     .where(and(eq(roll.id, input.rollId), eq(roll.userId, userId), isNull(roll.deletedAt)))
     .limit(1);
@@ -735,7 +747,8 @@ export async function updateRollCore<TQueryResult extends PgQueryResultHKT>(
       cameraBagItemId: input.cameraBagItemId,
       lensId: input.lensId ?? null,
       name: input.name ?? null,
-      canisterColor: finalStockRow.canisterColor ?? null,
+      // A colour the user drew themselves survives a stock change (Phase 3 blocker 4).
+      ...(existing.canisterStyle === "drawn" ? {} : { canisterColor: finalStockRow.canisterColor ?? null }),
       boxIso: isoAndFormat.boxIso,
       shotIso: input.shotIso ?? null,
       exposures: input.exposures ?? null,
@@ -756,5 +769,31 @@ export async function updateRollCore<TQueryResult extends PgQueryResultHKT>(
     return { ok: false, error: "stale_version" };
   }
 
+  return { ok: true };
+}
+
+export type TSetCanisterResult = { ok: true } | { ok: false; error: "not_found" | "invalid_input" };
+
+/** CAN-2, plan D1–D2. Only `drawn` writes a colour; `stock` and `photo` leave the stored copy alone. */
+export async function setCanisterCore<TQueryResult extends PgQueryResultHKT>(
+  db: TDb<TQueryResult>,
+  userId: string,
+  input: { rollId: string; style: TCanisterStyle; color?: string },
+): Promise<TSetCanisterResult> {
+  if (!(CANISTER_STYLES as readonly string[]).includes(input.style)) return { ok: false, error: "invalid_input" };
+  if (input.style === "drawn" && (input.color === undefined || !isCanisterColor(input.color))) {
+    return { ok: false, error: "invalid_input" };
+  }
+  if (!(await ownsRoll(db, userId, input.rollId))) return { ok: false, error: "not_found" };
+
+  await db
+    .update(roll)
+    .set({
+      canisterStyle: input.style,
+      ...(input.style === "drawn" ? { canisterColor: input.color } : {}),
+      updatedAt: new Date(),
+    })
+    .where(and(eq(roll.id, input.rollId), eq(roll.userId, userId)));
+  await bumpRollVersion(db, input.rollId);
   return { ok: true };
 }

@@ -50,6 +50,9 @@ export const roll = pgTable(
     number: integer("number"),
     name: text("name"),
     canisterColor: text("canister_color"),
+    // Phase 3 D2: stock (follow the stock's colour) | drawn (canister_color) | photo
+    // (the stock's canister photo). Plain text, like stock.type.
+    canisterStyle: text("canister_style").notNull().default("stock"),
     boxIso: integer("box_iso"),
     shotIso: integer("shot_iso"),
     exposures: integer("exposures"),
