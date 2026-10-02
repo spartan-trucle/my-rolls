@@ -1,6 +1,6 @@
 # Missing screens
 
-> MVP screens with no board on the [design canvas](https://claude.ai/artifact/AXpgMvXFo6HL1vrw9RS6gt) yet. Checked 27.09.2026 against canvas version `1790375803-e51e` (50 boards); Phase 1 and Phase 2 drawn the same day; canvas `1790516511-f125` (118 boards). Re-checked 30.09.2026 against `1790765247-6906`.
+> MVP screens with no board on the [design canvas](https://claude.ai/artifact/AXpgMvXFo6HL1vrw9RS6gt) yet. Checked 27.09.2026 against canvas version `1790375803-e51e` (50 boards); Phase 1 and Phase 2 drawn the same day; canvas `1790516511-f125` (118 boards). Re-checked 30.09.2026 against `1790765247-6906`. Re-checked 02.10.2026 against `1790936301-40d9`: the Phase 4 rows are drawn on page "Chia sẻ · MVP".
 > Every screen needs a phone (390 px) and a desktop (1440 px) design before it is built ([CLAUDE.md](../../CLAUDE.md#conventions)). Tick a row when its boards are on the canvas, and add them to [wireframes.md](wireframes.md).
 
 Back to: [Wireframes](wireframes.md) · [Docs index](../README.md) · [Roadmap](../roadmap.md)
@@ -51,13 +51,13 @@ All nine were drawn on 27.09.2026 (Phase 2 plan task D0), phone and desktop in P
 
 | Done | Screen | Requirement |
 |---|---|---|
-| [ ] | Link preview image, 1200 × 630. Only the story cards are drawn | [SHARE-3](../product/requirements/sharing.md) |
-| [ ] | What a friend sees when a share link is revoked | [SHARE-1](../product/requirements/sharing.md) |
+| [x] | Link preview image, 1200 × 630. Drawn by 02.10.2026: `LinkPreview`, `LinkPreviewNoScans`, `LinkPreviewChat` | [SHARE-3](../product/requirements/sharing.md) |
+| [x] | What a friend sees when a share link is revoked. Drawn by 02.10.2026: `SharedRevoked…` (4 boards) | [SHARE-1](../product/requirements/sharing.md) |
 
 ## Across phases
 
 | Done | Gap | Where |
 |---|---|---|
-| [ ] | Darkroom (dark theme) versions | Sharing, labs and collection boards exist only in Paper. Sign-in, onboarding, home, profile and all Phase 1 boards have Darkroom boards |
+| [ ] | Darkroom (dark theme) versions | Labs and collection boards exist only in Paper (sharing got Darkroom boards on page "Chia sẻ · MVP" by 02.10.2026; the story cards and `ShareSheet` / `ShareDialogWeb` stay Paper). Sign-in, onboarding, home, profile and all Phase 1 boards have Darkroom boards |
 | [ ] | Empty states: empty bag, empty search, empty "Tấm ưng" tab | Every area. Empty catalogue search is done (`CatalogueEmpty…`) |
 | [ ] | The bottom "Tấm ưng" tab | `LibraryGrid` shows every frame, not only keepers |
