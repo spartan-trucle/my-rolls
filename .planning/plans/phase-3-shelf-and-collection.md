@@ -43,6 +43,7 @@ The inputs and conditions most likely to bite a real user that the requirements 
 - **Content:** canister photos matched to catalogue entries are due 23.11.2026. No stock has `canister_photo_key` set today, so photo mode is built with a drawn fallback and lights up when the photos land.
 - **Plan status:** **boards approved 02.10.2026 (Trúc), D19 added. Blockers answered 02.10.2026 (Trúc)**: defaults for 2, 3, 5 and 6, and the `canister_style` column for 4 (after weighing the no-migration option). Execution: subagent-driven.
 - **Progress, 02.10.2026:** built subagent-driven on `feature/phase-3-shelf-and-collection` (local, not pushed): P0, D0 (28 boards, approved by Trúc), Tasks 1–10, each with a task review (Tasks 6–8 after one fix round), then a whole-branch review and one fix wave (5 Important findings, all addressed; re-review clean). `pnpm check` green, 1352 tests. Design system at `0651` (canister presets, uncropped FilmStrip), canvas at `5a0f`. `rememberViewAction` became `trackViewSwitchAction` in the fix wave (ruling R31: the view cookie is written in the browser). **Open:** Trúc's visual check on a preview URL (390/1440 px, Paper and Darkroom; see the list below), Task 11 (exit check on production + roadmap ticks), two product questions (RollForm preview; Kệ tab and the remembered view).
+- **Progress, 02.10.2026 (merged):** [PR #24](https://github.com/spartan-trucle/my-rolls/pull/24) rebase-merged (`ccb2fc5`) and deployed to production. Trúc approved the screens (UI polish to follow in a later design + code pass) and confirmed the exit check on production: the shelf shows every roll, and 36 frames were marked in under a minute on desktop. Ticked in the roadmap (artifact rev 39, mirror synced): CAN-1, CAN-2, COL-1–4 and the Phase 3 exit. **Still open:** the two product questions (RollForm preview; Kệ tab and the remembered view) and the deferred minor findings below.
 
 ## Blockers (answered 02.10.2026)
 
@@ -2399,10 +2400,10 @@ Expected: PASS.
 
 With Trúc, on production after the phase's PR merges and deploys.
 
-- [ ] **Step 1: Shelf.** Count live rolls in the database for Trúc's account (`select count(*) from roll where user_id = … and deleted_at is null`). The shelf on `/` must show the same number of canisters, rolls without scans included.
-- [ ] **Step 2: Marking.** On desktop, on a fresh 36-frame roll in Lưới with a stopwatch: mark 8 tấm ưng, 3 oops (one mistake type each) and 1 tấm trắng, using any mix of click, Shift-click and K / O / B. Pass: under 60 s from the first click to the last save. Record the time and how it was done in the Phase 3 PR.
-- [ ] **Step 3:** Run `/progress`: re-read the roadmap artifact first, then tick CAN-1, CAN-2, COL-1, COL-2, COL-3, COL-4 and the exit in the artifact and `docs/roadmap.md`, and bump "Last synced". Only tick the exit if steps 1 and 2 both pass.
-- [ ] **Step 4:** Update this plan's Status with the results. **Commit** `docs(cuon): tick phase 3 in the roadmap`.
+- [x] **Step 1: Shelf.** Count live rolls in the database for Trúc's account (`select count(*) from roll where user_id = … and deleted_at is null`). The shelf on `/` must show the same number of canisters, rolls without scans included.
+- [x] **Step 2: Marking.** On desktop, on a fresh 36-frame roll in Lưới with a stopwatch: mark 8 tấm ưng, 3 oops (one mistake type each) and 1 tấm trắng, using any mix of click, Shift-click and K / O / B. Pass: under 60 s from the first click to the last save. Record the time and how it was done in the Phase 3 PR.
+- [x] **Step 3:** Run `/progress`: re-read the roadmap artifact first, then tick CAN-1, CAN-2, COL-1, COL-2, COL-3, COL-4 and the exit in the artifact and `docs/roadmap.md`, and bump "Last synced". Only tick the exit if steps 1 and 2 both pass.
+- [x] **Step 4:** Update this plan's Status with the results. **Commit** `docs(cuon): tick phase 3 in the roadmap`.
 
 ---
 

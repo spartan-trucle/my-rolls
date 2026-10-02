@@ -1,7 +1,7 @@
 # Cuộn roadmap
 
 > **Mirror — the artifact is the source of truth:** [Cuộn roadmap](https://claude.ai/artifact/Lsq7MWHNCVanpBWQ2D4XTo)
-> Last synced: 02.10.2026 · doc revision 38 · by Claude for Trúc (revisions 16–23 by Trúc: waitlist page in Phase 1, landing page in Phase 5, 139 h build + 21 h buffer; revision 24 ticks "Repo, Next.js + Tailwind mapped to design tokens", landed in PR #1; revisions 25–26 remove the Phase 1 waitlist page at Trúc's request: sign-up stays open through the landing page; revision 27 ticks `next-intl`, Neon + Drizzle, Vercel `sin1` and PostHog, landed in PRs #3 and #5; revision 28 ticks R2 buckets (`pnpm r2:smoke` passes) and Google sign-in (phone check), both confirmed by Trúc; revision 29 ticks both spikes, passed on production, see docs/spikes/; revision 30 ticks the Phase 0 exit: phone sign-in on a preview URL and the story PNG both confirmed by Trúc; revisions 31–33 move BAG-2 (film pocket counts, with the bag canister strip) and BAG-3 (camera card) into Phase 1 and raise the P0 count to 28, at Trúc's request; the PRD artifact raised both to P0 in version 6; revision 34 ticks CAT-1, CAT-2, BAG-1, BAG-2, BAG-3, ROLL-1 and ROLL-2, landed in PR #20 and deployed to production, confirmed by Trúc; LAB-1 waits for the labs seed, LAB-2 and the exit stay open; revisions 35–37 settle decision 2 at Trúc's call: the MVP takes JPEG, PNG and WebP up to 10 MB with browser-made copies, TIFF and server-made copies move to v1.1a, SCAN-1 and SCAN-3 edited in PRD artifact version 8; revision 38 ticks SCAN-1, SCAN-2, SCAN-4, LAB-3, NOTE-1 and NOTE-2, landed in PR #22 (`4eb126c`) and deployed to production, with uploads confirmed on production by Trúc, plus Phase 1's LAB-2, mounted in the scan-set form by the same PR; SCAN-3 waits for `CRON_SECRET` in Vercel, M1 for the dogfood).
+> Last synced: 02.10.2026 · doc revision 39 · by Claude for Trúc (revisions 16–23 by Trúc: waitlist page in Phase 1, landing page in Phase 5, 139 h build + 21 h buffer; revision 24 ticks "Repo, Next.js + Tailwind mapped to design tokens", landed in PR #1; revisions 25–26 remove the Phase 1 waitlist page at Trúc's request: sign-up stays open through the landing page; revision 27 ticks `next-intl`, Neon + Drizzle, Vercel `sin1` and PostHog, landed in PRs #3 and #5; revision 28 ticks R2 buckets (`pnpm r2:smoke` passes) and Google sign-in (phone check), both confirmed by Trúc; revision 29 ticks both spikes, passed on production, see docs/spikes/; revision 30 ticks the Phase 0 exit: phone sign-in on a preview URL and the story PNG both confirmed by Trúc; revisions 31–33 move BAG-2 (film pocket counts, with the bag canister strip) and BAG-3 (camera card) into Phase 1 and raise the P0 count to 28, at Trúc's request; the PRD artifact raised both to P0 in version 6; revision 34 ticks CAT-1, CAT-2, BAG-1, BAG-2, BAG-3, ROLL-1 and ROLL-2, landed in PR #20 and deployed to production, confirmed by Trúc; LAB-1 waits for the labs seed, LAB-2 and the exit stay open; revisions 35–37 settle decision 2 at Trúc's call: the MVP takes JPEG, PNG and WebP up to 10 MB with browser-made copies, TIFF and server-made copies move to v1.1a, SCAN-1 and SCAN-3 edited in PRD artifact version 8; revision 38 ticks SCAN-1, SCAN-2, SCAN-4, LAB-3, NOTE-1 and NOTE-2, landed in PR #22 (`4eb126c`) and deployed to production, with uploads confirmed on production by Trúc, plus Phase 1's LAB-2, mounted in the scan-set form by the same PR; SCAN-3 waits for `CRON_SECRET` in Vercel, M1 for the dogfood; revision 39 ticks CAN-1, CAN-2, COL-1, COL-2, COL-3, COL-4 and the Phase 3 exit, landed in PR #24 (`ccb2fc5`) and deployed to production; the exit check (shelf shows every roll, 36 frames marked in under a minute on desktop) confirmed on production by Trúc).
 > Before editing, re-read the artifact. Make changes in the artifact and copy them here in the same session (see [CLAUDE.md](../CLAUDE.md#sync-rules)).
 
 Related: [PRD overview](product/prd.md) · [Requirements index](product/requirements/README.md) · [ADR-001](architecture/adr-001-tech-stack.md) · [Design system](design/design-system.md)
@@ -58,13 +58,13 @@ Tick items as they land; a phase is done when its last item (the exit check) is 
 
 ### Phase 3 · Shelf & collection (23 Nov – 13 Dec)
 
-- [ ] Canister shelf ([CAN-1](product/requirements/canister.md))
-- [ ] Drawn canister ([CAN-2](product/requirements/canister.md))
-- [ ] Film strip / grid switch ([COL-1](product/requirements/collection.md))
-- [ ] Filters + lightbox ([COL-2](product/requirements/collection.md))
-- [ ] Library grid ([COL-3](product/requirements/collection.md))
-- [ ] Bulk marking ([COL-4](product/requirements/collection.md))
-- [ ] Exit: the shelf shows every roll; marking 36 frames takes under a minute on desktop
+- [x] Canister shelf ([CAN-1](product/requirements/canister.md))
+- [x] Drawn canister ([CAN-2](product/requirements/canister.md))
+- [x] Film strip / grid switch ([COL-1](product/requirements/collection.md))
+- [x] Filters + lightbox ([COL-2](product/requirements/collection.md))
+- [x] Library grid ([COL-3](product/requirements/collection.md))
+- [x] Bulk marking ([COL-4](product/requirements/collection.md))
+- [x] Exit: the shelf shows every roll; marking 36 frames takes under a minute on desktop
 
 ### Phase 4 · Sharing (14 Dec – 3 Jan)
 
